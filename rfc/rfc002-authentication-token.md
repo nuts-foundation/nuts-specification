@@ -28,7 +28,7 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 This document describes the concept of a token which can be used to authenticate a user. The token is a result of an authentication process. Several identification methods can be used, as long as the method of use is capable of creating a digital signature which can be verified by all network participants.
 
-The token proves the relationship between the user and the service provider. This RFC is a specification for §6.5 from the Nuts Start Architecture \[NSA\].
+The token proves the relationship between the user and the service provider. This RFC is a specification for [§6.5](rfc001-nuts-start-architecture.md#6-5-user-identity-and-user) from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
 The token is the result of signing a login contract. The login contract is a different way of authentication than normally used. Normally a user discloses something only that user knows and the service provider compares this with the information it knows. The login contract is more of a mandate given by the user to the service provider allowing it to do digital requests on behalf of the user. The mandate is signed by the user by means of a digital signature. The digital signature is created with a private key where the public key has been validated by a trusted third party. This is extremely important for the network. Whereas normal disclosure is only of value between the user and service provider, by adding a signature, the resulting token can be used for requests over the network by the service provider.
 
@@ -98,7 +98,9 @@ A login contract should be able to support multiple languages.
 
 Todo:
 
-Describe contract shown to user Describe created products Describe individual means
+* Describe contract shown to user 
+* Describe created products 
+* Describe individual means
 
 ## 5. Login contract
 
