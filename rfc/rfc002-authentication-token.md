@@ -165,7 +165,7 @@ The first 3 identify the user but are possibly not unique, therefore the email a
 
 When the service provider is using the open-source IRMA Go server the following request must be sent to the correct endpoint:
 
-```javascript
+```yaml
 {
 "@context": "https://irma.app/ld/request/signature/v2",
 "Message": "THE LOGIN CONTRACT"
@@ -193,7 +193,7 @@ The message field must have the full login contract as specified in chapter 6. T
 
 Below is the result of an IRMA signature request
 
-```groovy
+```yaml
 {
 "@context": "https://irma.app/ld/signature/v2",
 "signature": [
