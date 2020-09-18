@@ -28,15 +28,15 @@ This document describes the general principles of all related Nuts architecture.
 
 ## 2. Terminology
 
-* Actor: The care organization that, in the context of a specific subject, wants to access medical data of a subject available at a custodian.
-* Custodian: The care organization that, in the context of a specific subject, is responsible for storing the medical data.
-* Digital signature: a cryptographic signature like RFC5280 or RFC7515. Specifically not the digital version of the wet signature.
-* Legal Base: grounds for medical data exchange given by the subject conforming to national and international legislation. By default no medical data may be exchanged.
-* Node: a piece of software implementing the Nuts specification.
-* Service provider: an organisation providing software services which support care organisations in their daily work.
-* Subject: The subject of the medical data, usually the patient.
+* **Actor**: The care organization that, in the context of a specific subject, wants to access medical data of a subject available at a custodian.
+* **Custodian**: The care organization that, in the context of a specific subject, is responsible for storing the medical data.
+* **Digital signature**: a cryptographic signature like RFC5280 or RFC7515. Specifically not the digital version of the wet signature.
+* **Legal Base**: grounds for medical data exchange given by the subject conforming to national and international legislation. By default no medical data may be exchanged.
+* **Node**: a piece of software implementing the Nuts specification.
+* **Service provider**: an organisation providing software services which support care organisations in their daily work.
+* **Subject**: The subject of the medical data, usually the patient.
 
-## 2. Manifest
+## 3. Manifest
 
 The start architecture is a translation of the Nuts manifest to a high level architecture. Each paragraph will refer to the different manifest entries when applicable. References will be denoted between square brackets, they’ll start with a capital M followed by the number corresponding to the numbers below. The text is translated from Dutch, check [https://nuts.nl](https://nuts.nl) for the original.
 
