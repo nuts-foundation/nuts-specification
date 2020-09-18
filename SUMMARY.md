@@ -6,7 +6,7 @@
 
 * [RFC001 Nuts Start Architecture](rfc/rfc001-nuts-start-architecture.md)
 * [RFC002 Authentication token](rfc/rfc002-authentication-token.md)
-* [RFC003 OAuth2 Token Authorization](rfc/rfc003-oauth2-token-authorization.md)
+* [RFC003 OAuth2 Authorization](rfc/rfc003-oauth2-authorization.md)
 
 ## templates
 

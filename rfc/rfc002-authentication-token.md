@@ -265,5 +265,5 @@ Below is the result of an IRMA signature request
 
 The response is quite lengthy and contains tons of information. Luckily the IRMA Go library has functionality to check the signature using information of the well-known IRMA schemes. This will give you information about the validity, the used attributes, the value of the disclosed attributes and at which point in time the signature was created.
 
-The response is used as part of the authorization token in the [OAuth flow](rfc003-oauth2-token-authorization.md).
+The response is used as part of the authorization token in the [OAuth flow](rfc003-oauth2-authorization.md).
 
