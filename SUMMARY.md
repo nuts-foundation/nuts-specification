@@ -1,4 +1,5 @@
 # Table of contents
 
-* [Initial page](README.md)
+* [Welcome](README.md)
+* [RFC001](rfc001.md)
 
