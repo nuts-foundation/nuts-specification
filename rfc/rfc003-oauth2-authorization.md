@@ -12,7 +12,8 @@
 
 ### Abstract
 
-OAuth is widely accepted, but unfortunately almost all OAuth flows require tokens to be transfered in advance and do not support zero-knowledge-proofs. This RFC describes how a custom JWT can be used as bearer token for authorization at the authorization server. Different parts of the JWT then identify the vendor, care organisation and user.
+This RFC describes authorizing users and or systems in the Nuts network using the [OAuth 2.0 framework](https://oauth.net/2/).
+OAuth 2.0 is a widely accepted authorization framwork well known from e.g. "sign-in with Google". The framework is highly customizable and accepts many *Grant types*. The most used OAuth grant types require clients to be registred up front with the authorization server, tokens to be transfered in advance and do not support zero-knowledge-proofs. In order to use OAuth in a the Nuts network we must choose and configure the appropriate grant type. This RFC describes how to identify a system or a user with a custom JWT and than retrieve an access token which than can be used as bearer token for authorization at the resource server.
 
 ### Status of document
 
@@ -26,7 +27,7 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 1.  Introduction
 
-In this document we will provide a way of protecting RESTful APIs with use of an OAuth2 access token. Contrary to a regular OAuth flow where a user is forwarded to an authentication server, the access token is obtained by providing a JWT which contains the system or user identity. This document describes the method of obtaining the token using a OAuth2 flow and describes usage of the token during an API request.
+In this document we will provide a way of protecting RESTful APIs with use of an OAuth 2.0 access token. Contrary to a regular OAuth flow where a user is forwarded to an authentication server, the access token is obtained by providing a JWT which contains the system or user identity. This document describes the method of obtaining the token using a OAuth2 flow and describes usage of the token during an API request.
 
 ## 2. Terminology
 
