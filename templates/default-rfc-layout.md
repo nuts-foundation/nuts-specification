@@ -26,7 +26,9 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 1.  Introduction
 
-## 2. Chapter
+## 2. Terminology
 
-### 2.1. Paragraph
+## 3. Chapter
+
+### 3.1. Paragraph
 

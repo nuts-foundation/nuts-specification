@@ -4,15 +4,15 @@
 | :--- | :--- |
 | Nuts foundation | W.M. Slakhorst |
 | Request for Comments: 002 | Nedap |
-|   | S. van der Vegt |
-|   | Nedap |
-|   | September 2020 |
+|  | S. van der Vegt |
+|  | Nedap |
+|  | September 2020 |
 
 ## Authentication token
 
 ### Abstract
 
-todo 
+todo
 
 ### Status of document
 
@@ -28,7 +28,7 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 This document describes the concept of a token which can be used to authenticate a user. The token is a result of an authentication process. Several identification methods can be used, as long as the method of use is capable of creating a digital signature which can be verified by all network participants.
 
-The token proves the relationship between the user and the service provider. This RFC is a specification for §6.5 from the Nuts Start Architecture [NSA].
+The token proves the relationship between the user and the service provider. This RFC is a specification for §6.5 from the Nuts Start Architecture \[NSA\].
 
 The token is the result of signing a login contract. The login contract is a different way of authentication than normally used. Normally a user discloses something only that user knows and the service provider compares this with the information it knows. The login contract is more of a mandate given by the user to the service provider allowing it to do digital requests on behalf of the user. The mandate is signed by the user by means of a digital signature. The digital signature is created with a private key where the public key has been validated by a trusted third party. This is extremely important for the network. Whereas normal disclosure is only of value between the user and service provider, by adding a signature, the resulting token can be used for requests over the network by the service provider.
 
@@ -37,93 +37,109 @@ The token is the result of signing a login contract. The login contract is a dif
 todo
 
 ## 3. Involved parties
+
 ### 3.1. User
+
 The user will be a care professional or patient. The user has a need to process data across care providers. It is the party that needs to be authenticated and authorized. It either is the subject and therefore automatically has certain rights to process data or it is a care professional which also has a relation with a care organisation.
 
 ### 3.2. Issuer
+
 The issuer is the trusted third party. Trusting the correct Issuers is a manual configuration task for the service provider. Since trust within Nuts has to be cryptographically proved, this can only be in the form of configuring trusted certificates or public keys. A distributed network of service providers will only work if each party trusts the same set of issuers. To further improve the security and robustness of the network, each proof of a relation between the real world and virtual domain needs to be rooted to a different trusted third party.
 
 ### 3.3. Service provider
+
 The service provider is the party that offers software services that provides the user with access to the virtual domain. The service provider is responsible for implementing all the specifications in software.
 
 ### 3.4. Verifier
+
 The verifier is a service provider that, in the context of this RFC, verifies a token. It could also be the party that holds the desired data for the user. It is responsible for authentication and presumably also the authorization.
 
 ## 4. Requirements
+
 ### 4.1. Human readable
+
 The login contract must be human readable so the user can make a conscious decision about what it’s agreeing to.
 
 ### 4.2. Machine readable
+
 The login contract must also be machine readable. This means that the variation in different contracts must be limited. A fixed set of contracts provides an easy fix.
 
 ### 4.3. Single party verification
+
 A verifier must be able to verify the token without contacting external services. Contacting an external service would give that service too much information about care professionals, care organisations and service providers.
 
 ### 4.4. User identification
+
 The token must hold the correct attributes on the user identity for the specific scope the token is to be used for.
 
 ### 4.5. Cryptographically signed
+
 The token holds a digital signature binding the identity attributes to the login contract. This also makes the token tamper proof.
 
 ### 4.6. Time limited
+
 The token is only valid during a limited time. This period of validity must be visible in the login contact so the user is aware of the validity period.
 
 ### 4.7. Organisation limited
+
 A token is limited to a single care organisation. The name of the care organisation must therefore be displayed in the login contract.
 
 ### 4.8. Non-transferable
-A token can only be used by service providers that provide service for the same care organisation stated in the login contract. 
+
+A token can only be used by service providers that provide service for the same care organisation stated in the login contract.
 
 ### 4.9. Versionable
+
 A login contract must state a version number. This will allow service providers to update versions independently.
 
 ### 4.10. I18n
+
 A login contract should be able to support multiple languages.
 
 Todo:
 
-Describe contract shown to user
-Describe created products
-Describe individual means
+Describe contract shown to user Describe created products Describe individual means
 
 ## 5. Login contract
+
 A mandate usually consists of two parties: the party giving the mandate and the party receiving the mandate. It’s limited in time and limited in scope. The scope for the login contract consists of the care organisation the user works for and a custom scope which could limit the use of the contract for data retrieval, single-sign-on or something else.
 
 The following template is to be used to create a token for a care professional. A Dutch version is also available.
 
-```
+```text
 EN:PractitionerLogin:v2 Undersigned gives permission to {{service_provider}} to make requests to the Nuts network on behalf of {{care_organisation}} and itself. This permission is valid from {{valid_from}} until {{valid_to}}.
 ```
 
 Various placeholders are placed between double curly-braces:
 
-* service_provider: as defined in this document.
-* care_organisation: the care organisation the user works for.
-* valid_from: a specific ISO formatted date time value. The token is not valid before this moment.
-* valid_to: a specific ISO formatted date time value. The token is not valid after this moment.
+* service\_provider: as defined in this document.
+* care\_organisation: the care organisation the user works for.
+* valid\_from: a specific ISO formatted date time value. The token is not valid before this moment.
+* valid\_to: a specific ISO formatted date time value. The token is not valid after this moment.
 
 A complete example presented to the user would look like:
 
-```
+```text
 EN:PractitionerLogin:v2 Undersigned gives permission to Nuts foundation to make requests to the Nuts network on behalf of We Care B.V. and itself. This permission is valid from Monday, 2 January 2006 15:04:05 until Monday, 2 January 2006 16:04:05.
 ```
 
 ### 5.1. Constraints
-The time layout used is constructed as: `Monday, 2 January 2006 15:04:05`
-The name of the service provider must match the CN field in the certificate that has been registered for this service provider. [CSR]
-The name of the care organisation must match the name within the proof that has been published by the service provider. [COIVR]
-The signature must be made by cryptographic means which can be connected to the user.
+
+The time layout used is constructed as: `Monday, 2 January 2006 15:04:05` The name of the service provider must match the CN field in the certificate that has been registered for this service provider. \[CSR\] The name of the care organisation must match the name within the proof that has been published by the service provider. \[COIVR\] The signature must be made by cryptographic means which can be connected to the user.
 
 ## 6. Supported means
+
 Future means will be added when available.
+
 ### 6.1. IRMA
-IRMA, which stands for “I reveal my attributes” is the name of an app that implements the idemix cryptographic protocol suite [IAPP]. It provides strong authentication as well as privacy-preserving features such as anonymity, the ability to transact without revealing the identity of the transactor, and unlinkability, the ability of a single identity to send multiple transactions without revealing that the transactions were sent by the same identity. More information can be found on the website of the Privacy by Design foundation [IEXP].
+
+IRMA, which stands for “I reveal my attributes” is the name of an app that implements the idemix cryptographic protocol suite \[IAPP\]. It provides strong authentication as well as privacy-preserving features such as anonymity, the ability to transact without revealing the identity of the transactor, and unlinkability, the ability of a single identity to send multiple transactions without revealing that the transactions were sent by the same identity. More information can be found on the website of the Privacy by Design foundation \[IEXP\].
 
 IRMA works by having the service provider show a challenge which can be cryptographically proven by a user, using it’s mobile. There are three types of challenges IRMA supports:
 
-- Loading attributes
-- Disclosing attributes
-- Signing
+* Loading attributes
+* Disclosing attributes
+* Signing
 
 The loading of attributes is required to get the right attributes in the user’s mobile phone. These attributes can later be disclosed to a service provider or can be used to sign data. IRMA supports both desktop and mobile flows. If the user is browsing a website on a desktop, the challenging service provider will show a QR-code to the user. The IRMA app is capable of scanning this QR-code which connects the service provider session to the IRMA app. When browsing a website on the same mobile device, it’s possible to use the IRMA app directly without showing a QR code.
 
@@ -132,7 +148,8 @@ Supported attributes are listed in a so-called scheme. The contents are maintain
 Although the IRMA protocol is open, the best way to support IRMA as service provider is to use the available open-source IRMA Go server. The server implementation has been validated and since it contains a lot of complex cryptographical math, it’s better to not build your own implementation.
 
 #### 6.1.1. Attribute selection
-Since the goal is to identify the user, the selection of attributes used to sign the login contract is crucial. The combination of attributes must be globally unique and must have been obtained at a high level. The list below shows the selection of attributes required together with their issuer. A complete list of supported attributes can be found on the IRMA website [ATTR].
+
+Since the goal is to identify the user, the selection of attributes used to sign the login contract is crucial. The combination of attributes must be globally unique and must have been obtained at a high level. The list below shows the selection of attributes required together with their issuer. A complete list of supported attributes can be found on the IRMA website \[ATTR\].
 
 * `pbdf.gemeente.personalData.initials`
 * `pbdf.gemeente.personalData.familyname`
@@ -143,32 +160,14 @@ Since the goal is to identify the user, the selection of attributes used to sign
 The first 3 identify the user but are possibly not unique, therefore the email attribute is added to make the set of attributes unique. The digidlevel is added to assure the attributes were obtained using the correct security level.
 
 #### 6.1.2. Challenge
+
 When the service provider is using the open-source IRMA Go server the following request must be sent to the correct endpoint:
 
-```http request
-POST /session
+\`\`\`http request POST /session
 
-{
-"@context": "https://irma.app/ld/request/signature/v2",
-“Message”: “THE LOGIN CONTRACT”
-"disclose": [
-  [
-    [ 
-      "pbdf.gemeente.personalData.initials", 
-      "pbdf.gemeente.personalData.familyname", 
-      "pbdf.gemeente.personalData.dateofbirth", 
-      "pbdf.gemeente.personalData.digidlevel"
-    ]
-  ],
-  [
-    [
-      "pbdf.sidn-pbdf.email.email"
-    ]
-  ]
-]
-}
-```
+{ "@context": "[https://irma.app/ld/request/signature/v2](https://irma.app/ld/request/signature/v2)", “Message”: “THE LOGIN CONTRACT” "disclose": \[ \[ \[ "pbdf.gemeente.personalData.initials", "pbdf.gemeente.personalData.familyname", "pbdf.gemeente.personalData.dateofbirth", "pbdf.gemeente.personalData.digidlevel" \] \], \[ \[ "pbdf.sidn-pbdf.email.email" \] \] \] }
 
+```text
 The message field must have the full login contract as specified in chapter 6. The server will respond with some data that has to be converted into a QR code or a link that will activate the IRMA app on mobile. The response also contains a token that can be used for polling an endpoint for status changes. Interactions on the mobile phone will trigger certain status changes. When the operation is successful the result can be fetched from an endpoint, see the next paragraph. The IRMA javascript library can help in this process.
 
 #### 6.1.3. Response
@@ -246,4 +245,5 @@ Below is the result of an IRMA signature request
 
 The response is quite lengthy and contains tons of information. Luckily the IRMA Go library has functionality to check the signature using information of the well-known IRMA schemes. This will give you information about the validity, the used attributes, the value of the disclosed attributes and at which point in time the signature was created.
 
-The response is used as part of the authorization token in the OAuth flow [OTAR].
+The response is used as part of the authorization token in the OAuth flow \[OTAR\].
+
