@@ -1,2 +1,2 @@
-# Welcome
+# Initial page
 
