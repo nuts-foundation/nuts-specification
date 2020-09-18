@@ -135,7 +135,7 @@ Future means will be added when available.
 
 ### 6.1. IRMA
 
-IRMA, which stands for “I reveal my attributes” is the name of an app that implements the idemix cryptographic protocol suite \[IAPP\]. It provides strong authentication as well as privacy-preserving features such as anonymity, the ability to transact without revealing the identity of the transactor, and unlinkability, the ability of a single identity to send multiple transactions without revealing that the transactions were sent by the same identity. More information can be found on the website of the Privacy by Design foundation \[IEXP\].
+[IRMA](https://irma.app), which stands for “I reveal my attributes” is the name of an app that implements the idemix cryptographic protocol suite. It provides strong authentication as well as privacy-preserving features such as anonymity, the ability to transact without revealing the identity of the transactor, and unlinkability, the ability of a single identity to send multiple transactions without revealing that the transactions were sent by the same identity. More information can be found on the website of the [Privacy by Design foundation](https://privacybydesign.foundation/irma-explanation/).
 
 IRMA works by having the service provider show a challenge which can be cryptographically proven by a user, using it’s mobile. There are three types of challenges IRMA supports:
 
@@ -151,7 +151,7 @@ Although the IRMA protocol is open, the best way to support IRMA as service prov
 
 #### 6.1.1. Attribute selection
 
-Since the goal is to identify the user, the selection of attributes used to sign the login contract is crucial. The combination of attributes must be globally unique and must have been obtained at a high level. The list below shows the selection of attributes required together with their issuer. A complete list of supported attributes can be found on the IRMA website \[ATTR\].
+Since the goal is to identify the user, the selection of attributes used to sign the login contract is crucial. The combination of attributes must be globally unique and must have been obtained at a high level. The list below shows the selection of attributes required together with their issuer. A complete list of supported attributes can be found on the [IRMA website](https://privacybydesign.foundation/attribute-index/en/).
 
 * `pbdf.gemeente.personalData.initials`
 * `pbdf.gemeente.personalData.familyname`
@@ -165,10 +165,10 @@ The first 3 identify the user but are possibly not unique, therefore the email a
 
 When the service provider is using the open-source IRMA Go server the following request must be sent to the correct endpoint:
 
-```json
+```javascript
 {
 "@context": "https://irma.app/ld/request/signature/v2",
-“Message”: “THE LOGIN CONTRACT”
+"Message": "THE LOGIN CONTRACT"
 "disclose": [
   [
     [ 
@@ -190,9 +190,10 @@ When the service provider is using the open-source IRMA Go server the following 
 The message field must have the full login contract as specified in chapter 6. The server will respond with some data that has to be converted into a QR code or a link that will activate the IRMA app on mobile. The response also contains a token that can be used for polling an endpoint for status changes. Interactions on the mobile phone will trigger certain status changes. When the operation is successful the result can be fetched from an endpoint, see the next paragraph. The IRMA javascript library can help in this process.
 
 #### 6.1.3. Response
+
 Below is the result of an IRMA signature request
 
-```json
+```groovy
 {
 "@context": "https://irma.app/ld/signature/v2",
 "signature": [
@@ -264,5 +265,5 @@ Below is the result of an IRMA signature request
 
 The response is quite lengthy and contains tons of information. Luckily the IRMA Go library has functionality to check the signature using information of the well-known IRMA schemes. This will give you information about the validity, the used attributes, the value of the disclosed attributes and at which point in time the signature was created.
 
-The response is used as part of the authorization token in the OAuth flow \[OTAR\].
+The response is used as part of the authorization token in the [OAuth flow](rfc003-oauth2-token-authorization.md).
 
