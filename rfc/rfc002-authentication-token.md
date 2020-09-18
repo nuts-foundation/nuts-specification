@@ -165,11 +165,28 @@ The first 3 identify the user but are possibly not unique, therefore the email a
 
 When the service provider is using the open-source IRMA Go server the following request must be sent to the correct endpoint:
 
-\`\`\`http request POST /session
+```json
+{
+"@context": "https://irma.app/ld/request/signature/v2",
+“Message”: “THE LOGIN CONTRACT”
+"disclose": [
+  [
+    [ 
+      "pbdf.gemeente.personalData.initials", 
+      "pbdf.gemeente.personalData.familyname", 
+      "pbdf.gemeente.personalData.dateofbirth", 
+      "pbdf.gemeente.personalData.digidlevel"
+    ]
+  ],
+  [
+    [
+      "pbdf.sidn-pbdf.email.email"
+    ]
+  ]
+]
+}
+```
 
-{ "@context": "[https://irma.app/ld/request/signature/v2](https://irma.app/ld/request/signature/v2)", “Message”: “THE LOGIN CONTRACT” "disclose": \[ \[ \[ "pbdf.gemeente.personalData.initials", "pbdf.gemeente.personalData.familyname", "pbdf.gemeente.personalData.dateofbirth", "pbdf.gemeente.personalData.digidlevel" \] \], \[ \[ "pbdf.sidn-pbdf.email.email" \] \] \] }
-
-```text
 The message field must have the full login contract as specified in chapter 6. The server will respond with some data that has to be converted into a QR code or a link that will activate the IRMA app on mobile. The response also contains a token that can be used for polling an endpoint for status changes. Interactions on the mobile phone will trigger certain status changes. When the operation is successful the result can be fetched from an endpoint, see the next paragraph. The IRMA javascript library can help in this process.
 
 #### 6.1.3. Response
