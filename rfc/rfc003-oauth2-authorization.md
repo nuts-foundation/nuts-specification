@@ -31,17 +31,17 @@ In this document we will provide a way of protecting RESTful APIs with use of an
 ## 2. Terminology
 
 * **Client application**: The application that requires access.
-* **Resource server**: The application (a protected resource) that requires authorized access to its API’s.
+* **Resource server**: The application \(a protected resource\) that requires authorized access to its API’s.
 * **JWT bearer token**: JWT encoded bearer token contains the user’s identity, subject and custodian and is signed by the acting party. This token is used to obtain an OAuth 2 access token.
 * **Access token**: An OAuth 2 access token, provided by an authorization Server. This token is handed to the client so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
-* **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian, token validity and scope. This mechanism is called token introspection which is described by [RFC7662](%20https://tools.ietf.org/html/rfc7662).
+* **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian, token validity and scope. This mechanism is called token introspection which is described by [RFC7662](https://github.com/nuts-foundation/nuts-specification/tree/3cd18cbbfd5c0b23728a0897ce4dac3fedd6dd9c/html/rfc7662/README.md).
 * **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**, **subject** and scope of the request like, in this case, an SSO. A context can be retrieved by performing token inspection.
 
 Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
 ## 3. OAuth flow
 
-The mechanism of retrieving an access token using a JWT is based on the [JSON Web Token \(JWT\) Profile for OAuth 2.0 Client Authentication and Authorization Grants](%20https://tools.ietf.org/html/rfc7523).
+The mechanism of retrieving an access token using a JWT is based on the [JSON Web Token \(JWT\) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://github.com/nuts-foundation/nuts-specification/tree/3cd18cbbfd5c0b23728a0897ce4dac3fedd6dd9c/html/rfc7523/README.md).
 
 ![](../.gitbook/assets/nuts-oauth-authorization-flow.png)
 
@@ -75,14 +75,14 @@ At this point there’s no need to use a client certificate for the TLS connecti
 
 * **typ**: MUST be `JWT`
 * **alg**: one of `RS256`, `RS384`, `RS512`, `ES256`, `ES384` or `ES512`
-* **x5c**: contains both the signing certificate and the vendor CA. The first certificate MUST be the signing certificate. \([RFC7515](%20https://tools.ietf.org/html/rfc7515)\)
+* **x5c**: contains both the signing certificate and the vendor CA. The first certificate MUST be the signing certificate. \([RFC7515](https://github.com/nuts-foundation/nuts-specification/tree/3cd18cbbfd5c0b23728a0897ce4dac3fedd6dd9c/html/rfc7515/README.md)\)
 
 #### 4.2.2. Payload
 
 * **iss**: The issuer in the JWT is always the actor, thus the care organization doing the request.
 * **sub**: The subject contains the urn of the custodian. The custodian information could be used to find the relevant consent \(together with actor and subject\).
 * **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional
-* **aud**: As per [RFC7523](%20https://tools.ietf.org/html/rfc7523), the aud MUST be the token endpoint. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
+* **aud**: As per [RFC7523](https://github.com/nuts-foundation/nuts-specification/tree/3cd18cbbfd5c0b23728a0897ce4dac3fedd6dd9c/html/rfc7523/README.md), the aud MUST be the token endpoint. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
 * **usi**: User identity signature. The signed login contract according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
 * **exp**: Expiration, SHOULD be set relatively short since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
@@ -116,7 +116,7 @@ At this point there’s no need to use a client certificate for the TLS connecti
 
 #### 4.2.4. Posting the JWT
 
-The signed JWT MUST be sent to the registered authorization server oauth endpoint using the HTTP POST method. The `urn:ietf:params:oauth:grant-type:jwt-bearer` grant\_type MUST be used. This profile is described in [RFC7523](%20https://tools.ietf.org/html/rfc7523). The JWT MUST be present in the assertion field. Below is a full HTTP example.
+The signed JWT MUST be sent to the registered authorization server oauth endpoint using the HTTP POST method. The `urn:ietf:params:oauth:grant-type:jwt-bearer` grant\_type MUST be used. This profile is described in [RFC7523](https://github.com/nuts-foundation/nuts-specification/tree/3cd18cbbfd5c0b23728a0897ce4dac3fedd6dd9c/html/rfc7523/README.md). The JWT MUST be present in the assertion field. Below is a full HTTP example.
 
 ```text
 POST /token.oauth2 HTTP/1.1

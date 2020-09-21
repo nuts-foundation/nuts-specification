@@ -44,7 +44,7 @@ The user will be a care professional or patient. The user has a need to process 
 
 ### 3.2. Issuer
 
-The issuer is the trusted third party. Trusting the correct Issuers is a manual configuration task for the service provider. Since trust within Nuts has to be cryptographically proved, this can only be in the form of configuring trusted certificates or public keys. A distributed network of service providers will only work if each party trusts the same set of issuers. To further improve the security and robustness of the network, each proof of a relation between the real world and virtual domain needs to be rooted to a different trusted third party.
+The issuer is the trusted third party. Trusting the correct Issuers is a manual configuration task for the service provider. Since trust within Nuts has to be cryptographically proven, this can only be in the form of configuring trusted certificates or public keys. A distributed network of service providers will only work if each party trusts the same set of issuers. To further improve the security and robustness of the network, each proof of a relation between the real world and virtual domain needs to be rooted to a different trusted third party.
 
 ### 3.3. Service provider
 
@@ -95,12 +95,6 @@ A login contract must state a version number. This will allow service providers 
 ### 4.10. I18n
 
 A login contract should be able to support multiple languages.
-
-Todo:
-
-* Describe contract shown to user 
-* Describe created products 
-* Describe individual means
 
 ## 5. Login contract
 

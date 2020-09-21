@@ -34,7 +34,7 @@ This document describes the general principles of all related Nuts architecture.
 * **Legal Base**: Grounds for medical data exchange given by the subject conforming to national and international legislation. By default no medical data may be exchanged.
 * **Node**: A piece of software implementing the Nuts specification.
 * **Service provider**: An organisation providing software services which support care organisations in their daily work.
-* **Subject**: The subject of the medical data, usually the patient.
+* **Subject**: The subject of the medical data, usually the patient, client or civilian.
 
 ## 3. Manifest
 
@@ -78,7 +78,7 @@ A strong identity is the base for authentication, authorization and auditing. An
 
 ### 4.1. Authentication
 
-Medical data is regarded as one of the most sensitive types of data. It therefore requires the highest possible level of security. In the case of an identity this is translated as a “strong identity”. This means that any attributes of this identity will have to be verified by a trusted 3rd party \[M7\]. If the identity is to be exchanged, this also means that a digital signature has to be present alongside the attributes \[M8\]. When an identity has a digital signature from a trusted party, it can be used for authentication in the context of medical information exchange. For authentication purposes it’s not required that the identity has any specific attributes. A curated list of trusted 3rd parties should be published for each participant to trust.
+Medical data is regarded as one of the most sensitive types of data. It therefore requires the highest possible level of security. In the case of an identity this is translated as a _strong identity_. This means that any attributes of this identity will have to be verified by a trusted 3rd party \[M7\]. If the identity is to be exchanged, this also means that a digital signature has to be present alongside the attributes \[M8\]. When an identity has a digital signature from a trusted party, it can be used for authentication in the context of medical information exchange. For authentication purposes it’s not required that the identity has any specific attributes. A curated list of trusted 3rd parties should be published for each participant to trust.
 
 ### 4.2. Authorization
 
@@ -122,7 +122,7 @@ Service providers are the gatekeepers for care organisations for the virtual dom
 
 ### 6.2. Request & Care organisation
 
-In order to do authorization, the request must contain information about the custodian, actor and subject. The identity of the requesting party must be verifiable by means of a digital signature. The requesting party usually is the actor and may consist of a combination of organisation and/or user identity. The relationship between the requesting service provider and the requesting party must also be verifiable.
+In order to do authorization, a request for data must contain information about the custodian, actor and subject. The identity of the requesting party must be verifiable by means of a digital signature. The requesting party usually is the actor and may consist of a combination of organisation and/or user identity. The relationship between the requesting service provider and the requesting party must also be verifiable.
 
 ### 6.3. Service provider & Care Organisation
 
