@@ -121,7 +121,7 @@ EN:PractitionerLogin:v2 Undersigned gives permission to Nuts foundation to make 
 
 ### 5.1. Constraints
 
-The time layout used is constructed as: `Monday, 2 January 2006 15:04:05` The name of the service provider must match the CN field in the certificate that has been registered for this service provider. \[CSR\] The name of the care organisation must match the name within the proof that has been published by the service provider. \[COIVR\] The signature must be made by cryptographic means which can be connected to the user.
+The time layout used is constructed as: `Monday, 2 January 2006 15:04:05` The name of the service provider must match the name that has been registered for this service provider. The name of the care organisation must match the name within the proof that has been published by the service provider. The signature must be made by cryptographic means which can be connected to the user.
 
 ## 6. Supported means
 
@@ -153,7 +153,7 @@ Since the goal is to identify the user, the selection of attributes used to sign
 * `pbdf.gemeente.personalData.digidlevel`
 * `pbdf.sidn-pbdf.email.email`
 
-The first 3 identify the user but are possibly not unique, therefore the email attribute is added to make the set of attributes unique. The digidlevel is added to assure the attributes were obtained using the correct security level.
+The first 3 identify the user but are possibly not unique, therefore the email attribute is added to make the set of attributes unique. The _digidlevel_ is added to assure the attributes were obtained using the correct security level.
 
 #### 6.1.2. Challenge
 
@@ -181,7 +181,7 @@ When the service provider is using the open-source IRMA Go server the following 
 }
 ```
 
-The message field must have the full login contract as specified in chapter 6. The server will respond with some data that has to be converted into a QR code or a link that will activate the IRMA app on mobile. The response also contains a token that can be used for polling an endpoint for status changes. Interactions on the mobile phone will trigger certain status changes. When the operation is successful the result can be fetched from an endpoint, see the next paragraph. The IRMA javascript library can help in this process.
+The message field must have the full login contract as specified in chapter 6. The server will respond with some data that has to be converted into a QR code or a link that will activate the IRMA app on mobile. The response also contains a token that can be used for polling an endpoint for status changes. Interactions on the mobile phone will trigger certain status changes. When the operation is successful the result can be fetched from an endpoint, see the next paragraph. The [IRMA javascript library](https://irma.app/docs/irmajs/) can help in this process.
 
 #### 6.1.3. Response
 
