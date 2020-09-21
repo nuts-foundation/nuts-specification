@@ -149,23 +149,27 @@ The first step is to validate the JWT, the **x5c** field in the JWT header holds
 
 The actor from the **iss** field must be known to the authorization server, a vendor must have registered it using a signing certificate signed by the same vendor CA as in the **x5c** field. The registered vendor CA MUST match the root of the **x5c** header field. It MAY be the case that the vendor CA has been renewed, in that case a previous valid certificate from the same vendor MAY have been used to register the actor. It that case the vendor CA MUST have been valid at the time the signing certificate had been signed.
 
-**5.2.1.3. JWT validity**
+**5.2.1.3. JTI check**
+
+The **jti** field contains a unique value used to prevent replay attacks using the JWT. The authorization server MUST check if this value hasn't been used before. It MAY limit the storage of these values to the validity time span of the JWT.
+
+**5.2.1.4. JWT validity**
 
 The JWT **iat** and **exp** fields MUST be validated. The timestamp of validation MUST lie between these values. The exp field MAY not be more than 5 seconds after the **iat** field.
 
-**5.2.1.4. Login contract validation**
+**5.2.1.5. Login contract validation**
 
 The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md).
 
-**5.2.1.5. Employee proof validation**
+**5.2.1.6. Employee proof validation**
 
 Future work
 
-**5.2.1.6. Endpoint validation**
+**5.2.1.7. Endpoint validation**
 
 The **aud** field MUST match the registered endpoint from which the authorization server is responding. This prevents the use of the JWT at any other endpoint.
 
-**5.2.1.7. Validate legal base**
+**5.2.1.8. Validate legal base**
 
 The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base SHOULD be present at the authorization server/resource server side for this triple. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check can be skipped.
 
