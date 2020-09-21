@@ -84,8 +84,7 @@ At this point there’s no need to use a client certificate for the TLS connecti
 * **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional
 * **aud**: As per [RFC7523](%20https://tools.ietf.org/html/rfc7523), the aud MUST be the token endpoint. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
 * **usi**: User identity signature. The signed login contract according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
-* **osi**: Ops signature, optional signature coming from a hardware token, indicating the user belongs to the issuer organization. Can be linked to the Nuts registry. This mechanism is used to establish an employer relationship without actually placing personal information into the registry. Optional TODO
-* **con**: Base64 encoded JSON representing key-value pairs for additional context for the requested access token. Such as task flow selection.
+* **osi**: Ops signature, optional, reserved for future use.
 * **exp**: Expiration, SHOULD be set relatively short since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
 * **iat**: Issued at. NumericDate value of the time at which the JWT was issued.
 * **jti**: Unique identifier, secure random number to prevent replay attacks. The authorization server MUST check this.
@@ -109,7 +108,6 @@ At this point there’s no need to use a client certificate for the TLS connecti
   "aud": "https://as.example.com/token.oauth2",
   "usi": {...Base64 encoded login contract...},
   "osi": {...hardware token sig...},
-  "con": {...additional context...},
   "exp": 1578915481,
   "iat": 1578910481,
   "jti": {unique-identifier}
@@ -145,19 +143,19 @@ The authorization server endpoint needs to be registered for each vendor/care or
 
 **5.2.1.1. JWT signature validation**
 
-The first step is to validate the JWT, the iss field in the JWT payload identifies the sending care organisation and can be used to find the matching public key from the registry. Multiple keys could be valid at any point in time. If the organisation matching the iss field can’t be found or if no key is available, an invalid\_signature error is returned.
+The first step is to validate the JWT, the **x5c** field in the JWT header holds the public key and chain that is used to sign the JWT. If the signature is invalid, an invalid\_signature error is returned.
 
 **5.2.1.2. Issuer validation**
 
-The actor from the iss field must be known to the authorization server, a vendor must have registered it using a signing certificate signed by the same vendor CA as in the x5c field. It MAY be the case that the vendor CA has been renewed, in that case a previous valid certificate from the same vendor MAY have been used to register the actor.
+The actor from the **iss** field must be known to the authorization server, a vendor must have registered it using a signing certificate signed by the same vendor CA as in the **x5c** field. The registered vendor CA MUST match the root of the **x5c** header field. It MAY be the case that the vendor CA has been renewed, in that case a previous valid certificate from the same vendor MAY have been used to register the actor. It that case the vendor CA MUST have been valid at the time the signing certificate had been signed.
 
 **5.2.1.3. JWT validity**
 
-The JWT iat and exp fields MUST be validated. The timestamp of validation MUST lie between these values. The exp field MAY not be more than 5 seconds after the iat field.
+The JWT **iat** and **exp** fields MUST be validated. The timestamp of validation MUST lie between these values. The exp field MAY not be more than 5 seconds after the **iat** field.
 
 **5.2.1.4. Login contract validation**
 
-The usi field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md).
+The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md).
 
 **5.2.1.5. Employee proof validation**
 
@@ -165,15 +163,11 @@ Future work
 
 **5.2.1.6. Endpoint validation**
 
-The aud field MUST match the registered endpoint from which the authorization server is responding. This prevents the use of the JWT at any other endpoint.
+The **aud** field MUST match the registered endpoint from which the authorization server is responding. This prevents the use of the JWT at any other endpoint.
 
 **5.2.1.7. Validate legal base**
 
-The iss fields contains the identifier of the actor, the sub field contains the identifier of the custodian and the sid field contains the identifier for the subject. A known legal base SHOULD be present at the authorization server/resource server side for this triple. If a particular resource may be accessed for the given triple is not yet known and MUST be checked when accessing the resource. If no sid field is present, this check can be skipped.
-
-**5.2.1.8. Additional validations**
-
-It might be possible due to the addition of the con field that additional validations can take place. The contents of the con field can only be derived from the contents of the registered legal base.
+The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base SHOULD be present at the authorization server/resource server side for this triple. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check can be skipped.
 
 #### 5.2.2. Error responses
 
@@ -192,19 +186,19 @@ Errors are returned as described in [https://tools.ietf.org/html/rfc6749\#sectio
 
 ### 5.3. Access token
 
-There’s no limitation of the type of access token that is issued by the authorization server. A random number MUST at least be 256 bits of length and base64 encoded. The authorization server MUST make sure it’s unique and not reused for a different context. The authorization server SHOULD store the context associated with the token so the resource server can request it. The authorization server MAY also issue a signed JWT as access token with the context in the token. In that case the resource server MUST have access to the corresponding public key. In the case of a signed JWT, the JWT MUST contain the jti, exp and iat fields. The jti value MUST not be reused. The exp field MUST not be more than 60 seconds after the jti field.
+There’s no limitation of the type of access token that is issued by the authorization server. A random number MUST at least be 256 bits of length and base64 encoded. The authorization server MUST make sure it’s unique and not reused for a different context. The authorization server SHOULD store the context associated with the token so the resource server can request it. The authorization server MAY also issue a signed JWT as access token with the context in the token. In that case the resource server MUST have access to the corresponding public key. In the case of a signed JWT, the JWT MUST contain the **jti**, **exp** and **iat** fields. The **jti** value MUST not be reused. The **exp** field MUST not be more than 60 seconds after the **iat** field.
 
 The access token MUST be marked to only work for the specific vendor. So when the client application requests resources, the access token together with the TLS client certificate can be matched against the known vendor. This prevents hijacking the resulting access token.
 
 ### 5.4. Rate limiting
 
-The access token is used in several flows including automated flows. This can cause considerable strain on the authorization server. A client application SHOULD therefore reuse tokens whenever possible. Whenever an authorization server is under heavy load, it MAY return the 429 Too many requests status code. It then must also add the Retry-After header with the number of seconds the client application MUST wait. The resource server MAY also return this status code if a client application is requesting tokens when previous tokens are still valid. Given the fact that the client may be running in a clustered environment, it MUST not request more than 10 overlapping tokens. A token overlaps if the iss, sub, sid and usi fields are the same or when only the iss and sub fields are the same in the case when a token is used in automated responses.
+The access token is used in several flows including automated flows. This can cause considerable strain on the authorization server. A client application SHOULD therefore reuse tokens whenever possible. Whenever an authorization server is under heavy load, it MAY return the `429 Too many requests` status code. It then must also add the `Retry-After` header with the number of seconds the client application MUST wait. The resource server MAY also return this status code if a client application is requesting tokens when previous tokens are still valid. Given the fact that the client may be running in a clustered environment, it MUST not request more than 10 overlapping tokens. A token overlaps if the **iss**, **sub**, **sid** and **usi** fields are the same or when only the **iss** and **sub** fields are the same in the case when a token is used without subject context.
 
 ## 6. Resource server
 
 ### 6.1. Access token
 
-The access token must be present in the Authorization header as bearer token:
+The access token MUST be present in the Authorization header as bearer token:
 
 ```text
 GET  /fhir/Patient/1 HTTP/1.1
@@ -214,7 +208,7 @@ GET  /fhir/Patient/1 HTTP/1.1
      J9l-ZhwP[...omitted for brevity...]
 ```
 
-A token can be used multiple times unless the returned error code prevents it. A token MUST NOT be used when it has been expired.
+A token MAY be used multiple times unless the returned error code prevents it. A token MUST NOT be used when it has been expired.
 
 ### 6.2. Error codes
 
