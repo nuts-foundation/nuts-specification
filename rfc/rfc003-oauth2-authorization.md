@@ -12,8 +12,7 @@
 
 ### Abstract
 
-This RFC describes authorizing users and or systems in the Nuts network using the [OAuth 2.0 framework](https://oauth.net/2/).
-OAuth 2.0 is a widely accepted authorization framwork well known from e.g. "sign-in with Google". The framework is highly customizable and accepts many *Grant types*. The most used OAuth grant types require clients to be registred up front with the authorization server, tokens to be transfered in advance and do not support zero-knowledge-proofs. In order to use OAuth in a the Nuts network we must choose and configure the appropriate grant type. This RFC describes how to identify a system or a user with a custom JWT and than retrieve an access token which than can be used as bearer token for authorization at the resource server.
+This RFC describes authorizing users and or systems in the Nuts network using the [OAuth 2.0 framework](https://oauth.net/2/). OAuth 2.0 is a widely accepted authorization framwork well known from e.g. "sign-in with Google". The framework is highly customizable and accepts many _Grant types_. The most used OAuth grant types require clients to be registred up front with the authorization server, tokens to be transfered in advance and do not support zero-knowledge-proofs. In order to use OAuth in a the Nuts network we must choose and configure the appropriate grant type. This RFC describes how to identify a system or a user with a custom JWT and than retrieve an access token which than can be used as bearer token for authorization at the resource server.
 
 ### Status of document
 
@@ -144,7 +143,7 @@ The authorization server endpoint needs to be registered for each vendor/care or
 
 **5.2.1.1. JWT signature validation**
 
-The first step is to validate the JWT, the **x5c** field in the JWT header holds the public key and chain that is used to sign the JWT. If the signature is invalid, an invalid\_signature error is returned.
+The first step is to validate the JWT, the **x5c** field in the JWT header holds the public key and chain that is used to sign the JWT. If the signature is invalid, an **invalid\_signature** error is returned.
 
 **5.2.1.2. Issuer validation**
 
