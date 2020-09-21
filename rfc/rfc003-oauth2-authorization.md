@@ -31,9 +31,7 @@ In this document we will provide a way of protecting RESTful APIs with use of an
 ## 2. Terminology
 
 * **Client Application**: The application that requires access.
-
-  Resource server: The application \(a protected resource\) that requires authorized access to its API’s.
-
+* **Resource server**: The application (a protected resource) that requires authorized access to its API’s.
 * **JWT Bearer Token**: JWT encoded Bearer token contains the user’s identity, subject and custodian and is signed by the acting party. This token is used to obtain an OAuth 2 access token.
 * **Access Token**: An OAuth 2 Access Token, provided by an Authorization Server. This token is handed to the client so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
 * **Authorization server**: The Authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian, token validity and scope. This mechanism is called token introspection which is described by [RFC7662](%20https://tools.ietf.org/html/rfc7662).
