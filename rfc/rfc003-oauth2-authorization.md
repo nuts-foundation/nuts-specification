@@ -36,12 +36,13 @@ In this document we will provide a way of protecting RESTful APIs with use of an
 * **Access token**: An OAuth 2 access token, provided by an authorization Server. This token is handed to the client so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
 * **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian, token validity and scope. This mechanism is called token introspection which is described by [RFC7662](https://tools.ietf.org/html/rfc7662).
 * **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**, **subject** and scope of the request like, in this case, an SSO. A context can be retrieved by performing token inspection.
+* **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document.
 
 Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
 ## 3. OAuth flow
 
-The mechanism of retrieving an access token using a JWT is based on the [JSON Web Token \(JWT\) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://github.com/nuts-foundation/nuts-specification/tree/3cd18cbbfd5c0b23728a0897ce4dac3fedd6dd9c/html/rfc7523/README.md).
+The mechanism of retrieving an access token using a JWT bearer token is based on the JSON Web Token \(JWT\) Profile for OAuth 2.0 Client Authentication and Authorization Grants [\[RFC7523\]](https://tools.ietf.org/html/rfc7523).
 
 ![](../.gitbook/assets/nuts-oauth-authorization-flow.png)
 
@@ -55,11 +56,11 @@ Part of the Nuts security framework involves the user identity. Data can only be
 
 The client application MUST obtain an access token before accessing data. This SHOULD be done right before accessing the data. An access token is only valid for seconds \(determined by the authorization server\). The client application SHOULD refresh the access token only when more data is to be requested.
 
-In order to obtain the access token, the client application MUST construct a signed JWT and send it to the registered authorization server token endpoint. The authorization server MUST validate the JWT and optionally validate if a legal base is present for the given custodian, subject and actor combination. If all is well, the authorization server SHOULD return an access token. There are no restrictions on the returned access token.
+In order to obtain the access token, the client application MUST construct a signed JWT and send it to the registered authorization server token endpoint. The authorization server MUST validate the JWT and optionally validate if a legal base is present for the given custodian, subject and actor combination. If all is well, the authorization server SHOULD return an access token.
 
 ### 3.3. Use access token
 
-When requesting data, the client application MUST add the access token to the Authorization header as a Bearer token. The resource server MUST validate the access token with the authorization server. The resource server and authorization server together MUST decide if an access token is valid for the requested resource.
+When requesting data, the client application MUST add the access token to the Authorization header as a Bearer token as stated in [RFC7523](https://tools.ietf.org/html/rfc7523). The resource server MUST validate the access token with the authorization server. The resource server and authorization server together MUST decide if an access token is valid for the requested resource.
 
 ## 4. Client application
 
@@ -67,7 +68,7 @@ When requesting data, the client application MUST add the access token to the Au
 
 In common OAuth2 flows a client application must be registered by an authorization server with a client id and client secret. In a network of trust with many OAuth servers, this approach is difficult because it would mean every node needs to exchange secrets with every other node. Instead, the JWT signing public key needs to be approved by the client applications vendor. A client application needs to generate a key pair. The vendor should sign a certificate for the client application with its vendor CA certificate. The vendor CA certificate MUST be known by both client application and authorization server. The resulting certificate and the vendor CA MUST be added to the x5c header field. The certificate MUST not be valid for longer than 4 days.
 
-At this point there’s no need to use a client certificate for the TLS connection.
+At this point there’s no need to use a client certificate for the TLS connection. A client certificate is used to make the client identity know to the server. The client certificate would be signed by the vendor CA which is the same CA that signs the vendor signing key. So both the JWT and the client certificate will have the same security origin.
 
 ### 4.2. Constructing the JWT
 
@@ -75,17 +76,17 @@ At this point there’s no need to use a client certificate for the TLS connecti
 
 * **typ**: MUST be `JWT`
 * **alg**: one of `RS256`, `RS384`, `RS512`, `ES256`, `ES384` or `ES512`
-* **x5c**: contains both the signing certificate and the vendor CA. The first certificate MUST be the signing certificate. \([RFC7515](https://github.com/nuts-foundation/nuts-specification/tree/3cd18cbbfd5c0b23728a0897ce4dac3fedd6dd9c/html/rfc7515/README.md)\)
+* **x5c**: contains both the signing certificate and the vendor CA. The first certificate MUST be the signing certificate. \([RFC7515](https://tools.ietf.org/html/rfc7515)\)
 
 #### 4.2.2. Payload
 
 * **iss**: The issuer in the JWT is always the actor, thus the care organization doing the request.
 * **sub**: The subject contains the urn of the custodian. The custodian information could be used to find the relevant consent \(together with actor and subject\).
 * **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional
-* **aud**: As per [RFC7523](https://github.com/nuts-foundation/nuts-specification/tree/3cd18cbbfd5c0b23728a0897ce4dac3fedd6dd9c/html/rfc7523/README.md), the aud MUST be the token endpoint. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
+* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the token endpoint. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
 * **usi**: User identity signature. The signed login contract according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
-* **exp**: Expiration, SHOULD be set relatively short since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
+* **exp**: Expiration, MUST NOT be later than 5 seconds after issueing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
 * **iat**: Issued at. NumericDate value of the time at which the JWT was issued.
 * **jti**: Unique identifier, secure random number to prevent replay attacks. The authorization server MUST check this.
 
@@ -116,7 +117,7 @@ At this point there’s no need to use a client certificate for the TLS connecti
 
 #### 4.2.4. Posting the JWT
 
-The signed JWT MUST be sent to the registered authorization server oauth endpoint using the HTTP POST method. The `urn:ietf:params:oauth:grant-type:jwt-bearer` grant\_type MUST be used. This profile is described in [RFC7523](https://github.com/nuts-foundation/nuts-specification/tree/3cd18cbbfd5c0b23728a0897ce4dac3fedd6dd9c/html/rfc7523/README.md). The JWT MUST be present in the assertion field. Below is a full HTTP example.
+The signed JWT MUST be sent to the registered authorization server oauth endpoint using the HTTP POST method. The `urn:ietf:params:oauth:grant-type:jwt-bearer` grant\_type MUST be used. This profile is described in [RFC7523](https://tools.ietf.org/html/rfc7523). The JWT MUST be present in the assertion field. Below is a full HTTP example.
 
 ```text
 POST /token.oauth2 HTTP/1.1
@@ -129,7 +130,35 @@ POST /token.oauth2 HTTP/1.1
      J9l-ZhwP[...omitted for brevity...]
 ```
 
-The request MUST be sent to the authorization server via a TLS connection. If all is well, the resulting access token MUST be present as bearer token in the authorization header.
+The client application MAY also send a JSON body. The authorization server MUST accept this as well.
+
+```text
+POST /token.oauth2 HTTP/1.1
+     Host: as.example.com
+     Content-Type: application/json
+     
+     {
+          "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+          "assertion": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
+               eyJpc3Mi[...omitted for brevity...].
+               J9l-ZhwP[...omitted for brevity...]"
+     }
+```
+
+The request MUST be sent to the authorization server via a TLS connection. If all is well, the result MUST be a [RFC6749](https://tools.ietf.org/html/rfc6749) response with a JSON body. It MUST contain the access\_token, token\_type and expires\_in fields.
+
+```text
+HTTP/1.1 200 OK
+    Content-Type: application/json;charset=UTF-8
+    Cache-Control: no-store
+    Pragma: no-cache
+    
+    {
+        "access_token":"2YotnFZFEjr1zCsicMWpAA",
+        "token_type":"bearer",
+        "expires_in":60     
+    }
+```
 
 ## 5. Authorization server
 
@@ -140,6 +169,8 @@ The authorization server endpoint needs to be registered for each vendor/care or
 ### 5.2. Validation
 
 #### 5.2.1. Validation steps
+
+The following steps MUST all succeed. The order of execution is not relevant although the JWT signature validation SHOULD be done first.
 
 **5.2.1.1. JWT signature validation**
 
@@ -161,17 +192,13 @@ The JWT **iat** and **exp** fields MUST be validated. The timestamp of validatio
 
 The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md).
 
-**5.2.1.6. Employee proof validation**
+**5.2.1.6. Endpoint validation**
 
-Future work
+The **aud** field MUST match the registered endpoint from which the authorization server is listening. This prevents the use of the JWT at any other endpoint. The endpoint reference is used for this. \([RFC7523](https://tools.ietf.org/html/rfc7523#section-3)\)
 
-**5.2.1.7. Endpoint validation**
+**5.2.1.7. Validate legal base**
 
-The **aud** field MUST match the registered endpoint from which the authorization server is responding. This prevents the use of the JWT at any other endpoint.
-
-**5.2.1.8. Validate legal base**
-
-The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base SHOULD be present at the authorization server/resource server side for this triple. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check can be skipped.
+The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base MAY be present at the authorization server/resource server side for this triple. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check can be skipped.
 
 #### 5.2.2. Error responses
 
@@ -190,9 +217,12 @@ Errors are returned as described in [https://tools.ietf.org/html/rfc6749\#sectio
 
 ### 5.3. Access token
 
-There’s no limitation of the type of access token that is issued by the authorization server. A random number MUST at least be 256 bits of length and base64 encoded. The authorization server MUST make sure it’s unique and not reused for a different context. The authorization server SHOULD store the context associated with the token so the resource server can request it. The authorization server MAY also issue a signed JWT as access token with the context in the token. In that case the resource server MUST have access to the corresponding public key. In the case of a signed JWT, the JWT MUST contain the **jti**, **exp** and **iat** fields. The **jti** value MUST not be reused. The **exp** field MUST not be more than 60 seconds after the **iat** field.
+There’s no limitation of the type of access token that is issued by the authorization server. The following points do however apply to all forms of access token.
 
-The access token MUST be marked to only work for the specific vendor. So when the client application requests resources, the access token together with the TLS client certificate can be matched against the known vendor. This prevents hijacking the resulting access token.
+* Any random number MUST at least be 256 bits of length and base64 encoded. The authorization server MUST make sure it’s unique and not reused for a different context. 
+* The authorization server MUST store the context associated with the token so the resource server can request it. 
+* Tokens MUST NOT be valid for more than 60 seconds.
+* The access token MUST be marked to only work for the specific vendor. So when the client application requests resources, the access token together with the TLS client certificate can be matched against the known vendor. This prevents hijacking the resulting access token.
 
 ### 5.4. Rate limiting
 
