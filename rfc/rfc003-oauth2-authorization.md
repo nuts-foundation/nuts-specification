@@ -83,7 +83,7 @@ At this point there’s no need to use a client certificate for the TLS connecti
 * **iss**: The issuer in the JWT is always the actor, thus the care organization doing the request.
 * **sub**: The subject contains the urn of the custodian. The custodian information could be used to find the relevant consent \(together with actor and subject\).
 * **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional
-* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the token endpoint. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
+* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the token endpoint reference. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
 * **usi**: User identity signature. The signed login contract according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
 * **exp**: Expiration, MUST NOT be later than 5 seconds after issueing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
@@ -106,7 +106,7 @@ At this point there’s no need to use a client certificate for the TLS connecti
   "iss": "urn:oid:2.16.840.1.113883.2.4.6.1:48000000",
   "sub": "urn:oid:2.16.840.1.113883.2.4.6.1:12481248",
   "sid": "urn:oid:2.16.840.1.113883.2.4.6.3:9999990",
-  "aud": "https://as.example.com/token.oauth2",
+  "aud": "8agAwIBAgICAwEwDQYJKoZIh",
   "usi": {...Base64 encoded login contract...},
   "osi": {...hardware token sig...},
   "exp": 1578915481,
@@ -244,7 +244,15 @@ GET  /fhir/Patient/1 HTTP/1.1
 
 A token MAY be used multiple times unless the returned error code prevents it. A token MUST NOT be used when it has been expired.
 
-### 6.2. Error codes
+### 6.2. Authorization
+
+The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
+
+1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
+2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. a access token has been requested with the _usi_ field. The resource server MUST also check if a known legal base is present for the combination of custodian, actor, subject and resource.
+3. **The actor and custodian are the same.** It may be the case that a care organisation is using multiple service providers. In that case each service provider acts on behalf of the care organisation. Therefore it's not needed to provide user context. It's up to the service providers to to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organisation. To match the actor and custodian, the resource server MUST check if the proof in the registry that has been provided by the care organisation is the same. See RFC00X for the details. In short: A care organisation can only be published if it signs a challenge from the service provider.
+
+### 6.3. Error codes
 
 Different protocols return different types of error messages. The format will most likely also differ. This means that error messages have to be specified per use-case. If an error message supports a text-based error code, then it should support the illegal\_access\_token code. If a client receives this error code then it MUST NOT reuse the access token.
 
