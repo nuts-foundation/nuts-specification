@@ -100,10 +100,16 @@ A login contract should be able to support multiple languages.
 
 A mandate usually consists of two parties: the party giving the mandate and the party receiving the mandate. It’s limited in time and limited in scope. The scope for the login contract consists of the care organisation the user works for and a custom scope which could limit the use of the contract for data retrieval, single-sign-on or something else.
 
-The following template is to be used to create a token for a care professional. A Dutch version is also available.
+The following template is to be used to create a token for a care professional:
 
 ```text
 EN:PractitionerLogin:v2 Undersigned gives permission to {{service_provider}} to make requests to the Nuts network on behalf of {{care_organisation}} and itself. This permission is valid from {{valid_from}} until {{valid_to}}.
+```
+
+Or the Dutch version:
+
+```text
+NL:BehandelaarLogin:v2 Ondergetekende geeft toestemming aan {{acting_party}} om namens {{legal_entity}} en ondergetekende het Nuts netwerk te bevragen. Deze toestemming is geldig van {{valid_from}} tot {{valid_to}}.
 ```
 
 Various placeholders are placed between double curly-braces:
