@@ -182,7 +182,7 @@ The actor from the **iss** field must be known to the authorization server, a ve
 
 **5.2.1.3. JTI check**
 
-The **jti** field contains a unique value used to prevent replay attacks using the JWT. The authorization server MUST check if this value hasn't been used before. It MAY limit the storage of these values to the validity time span of the JWT.
+The **jti** field contains a unique value used to prevent replay attacks using the JWT. The authorization server MUST check if this value hasn't been used before. It MAY limit the storage of these values to the validity time span of the JWT. \[DEBATE: if a jti is used for the 2nd time the previous issued token MUST be invalidated as well. Also, this is quite annoying to do when clustering \(requires sync across all servers\)\]
 
 **5.2.1.4. JWT validity**
 
