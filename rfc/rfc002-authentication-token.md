@@ -129,11 +129,32 @@ EN:PractitionerLogin:v2 Undersigned gives permission to Nuts foundation to make 
 
 The time layout used is constructed as: `Monday, 2 January 2006 15:04:05` The name of the service provider must match the name that has been registered for this service provider. The name of the care organisation must match the name within the proof that has been published by the service provider. The signature must be made by cryptographic means which can be connected to the user.
 
-## 6. Supported means
+## 6. Authentication Token Container
+
+The Authentication Token MUST be signed by the user. See section 7 for more detail on supported means. In order to support several signing means, the signed token MUST be encapsulated by a Authentication Token Container.
+
+The container MUST be formatted as a JSON object with the following members.
+
+The "type" uniquely identifies the means used for creating the token. The value MUST be a lower case string without spaces. The means identifier gives the validator a hint about the contents of the token.
+
+The "token" member MUST contain the base64 encoded _Authentication Token_. The contents of the token can be anything and must be specified by the means.
+
+Other members than the ones specified here SHOULD NOT be used and MUST be ignored.
+
+Example of a Authentication Token Container:
+
+```yaml
+{
+  "type": "irma",
+  "token": "ewoiQGNvbnRleHQiOiAiaHR...FJJd05QN1N1dlAwSi9NL05WNTFWWnZxQ3lPKzdlRHdKOD0iCiAgfQp9Cn0=0"
+}
+```
+
+## 7. Supported means
 
 Future means will be added when available.
 
-### 6.1. IRMA
+### 7.1. IRMA
 
 [IRMA](https://irma.app), which stands for “I reveal my attributes” is the name of an app that implements the idemix cryptographic protocol suite. It provides strong authentication as well as privacy-preserving features such as anonymity, the ability to transact without revealing the identity of the transactor, and unlinkability, the ability of a single identity to send multiple transactions without revealing that the transactions were sent by the same identity. More information can be found on the website of the [Privacy by Design foundation](https://privacybydesign.foundation/irma-explanation/).
 
@@ -149,7 +170,7 @@ Supported attributes are listed in a so-called scheme. The contents are maintain
 
 Although the IRMA protocol is open, the best way to support IRMA as service provider is to use the available open-source IRMA Go server. The server implementation has been validated and since it contains a lot of complex cryptographical math, it’s better to not build your own implementation.
 
-#### 6.1.1. Attribute selection
+#### 7.1.1. Attribute selection
 
 Since the goal is to identify the user, the selection of attributes used to sign the login contract is crucial. The combination of attributes must be globally unique and must have been obtained at a high level. The list below shows the selection of attributes required together with their issuer. A complete list of supported attributes can be found on the [IRMA website](https://privacybydesign.foundation/attribute-index/en/).
 
@@ -161,7 +182,7 @@ Since the goal is to identify the user, the selection of attributes used to sign
 
 The first 3 identify the user but are possibly not unique, therefore the email attribute is added to make the set of attributes unique. The _digidlevel_ is added to assure the attributes were obtained using the correct security level.
 
-#### 6.1.2. Challenge
+#### 7.1.2. Challenge
 
 When the service provider is using the open-source IRMA Go server the following request must be sent to the correct endpoint:
 
@@ -189,9 +210,9 @@ When the service provider is using the open-source IRMA Go server the following 
 
 The message field must have the full login contract as specified in chapter 6. The server will respond with some data that has to be converted into a QR code or a link that will activate the IRMA app on mobile. The response also contains a token that can be used for polling an endpoint for status changes. Interactions on the mobile phone will trigger certain status changes. When the operation is successful the result can be fetched from an endpoint, see the next paragraph. The [IRMA javascript library](https://irma.app/docs/irmajs/) can help in this process.
 
-#### 6.1.3. Response
+#### 7.1.3. Response
 
-Below is the result of an IRMA signature request
+Below is the response of a successful IRMA signature challenge
 
 ```yaml
 {
@@ -266,4 +287,10 @@ Below is the result of an IRMA signature request
 The response is quite lengthy and contains tons of information. Luckily the IRMA Go library has functionality to check the signature using information of the well-known IRMA schemes. This will give you information about the validity, the used attributes, the value of the disclosed attributes and at which point in time the signature was created.
 
 The response is used as part of the authorization token in the [OAuth flow](rfc003-oauth2-authorization.md).
+
+#### 7.1.4 Container usages
+
+To use the IRMA _Authentication Token_ in a Authentication_Token Container_, the "type" member of the Authentication_Token Container_ MUST set to the value `irma`
+
+The "token" value MUST be the base64 encoded JSON response.
 
