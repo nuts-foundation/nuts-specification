@@ -117,7 +117,7 @@ At this point there’s no need to use a client certificate for the TLS connecti
 
 #### 4.2.4. Posting the JWT
 
-The signed JWT MUST be sent to the registered authorization server oauth endpoint using the HTTP POST method. The `urn:ietf:params:oauth:grant-type:jwt-bearer` grant\_type MUST be used. This profile is described in [RFC7523](https://tools.ietf.org/html/rfc7523). The JWT MUST be present in the assertion field. Below is a full HTTP example.
+The signed JWT MUST be sent to the registered authorization server oauth endpoint using the HTTP POST method. The `urn:ietf:params:oauth:grant-type:jwt-bearer` _grant\_type_ MUST be used. This profile is described in [RFC7523](https://tools.ietf.org/html/rfc7523). The JWT MUST be present in the assertion field. The scope MUST be according to §4.2.5. Below is a full HTTP example.
 
 ```text
 POST /token.oauth2 HTTP/1.1
@@ -125,6 +125,7 @@ POST /token.oauth2 HTTP/1.1
      Content-Type: application/x-www-form-urlencoded
 
      grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
+     &scope=urn%3Aoid%3A1.3.6.1.4.1.54851.1%3AMEDICAL
      &assertion=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
      eyJpc3Mi[...omitted for brevity...].
      J9l-ZhwP[...omitted for brevity...]
@@ -139,13 +140,14 @@ POST /token.oauth2 HTTP/1.1
      
      {
           "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+          "scope": ["urn:oid:1.3.6.1.4.1.54851.1:MEDICAL"],
           "assertion": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
                eyJpc3Mi[...omitted for brevity...].
                J9l-ZhwP[...omitted for brevity...]"
      }
 ```
 
-The request MUST be sent to the authorization server via a TLS connection. If all is well, the result MUST be a [RFC6749](https://tools.ietf.org/html/rfc6749) response with a JSON body. It MUST contain the access\_token, token\_type and expires\_in fields.
+The request MUST be sent to the authorization server via a TLS connection. If all is well, the result MUST be a [RFC6749](https://tools.ietf.org/html/rfc6749) response with a JSON body. It MUST contain the access\_token, token\_type and expires\_in fields. The scope MUST be present if it differs from the requested scope.
 
 ```text
 HTTP/1.1 200 OK
@@ -158,6 +160,48 @@ HTTP/1.1 200 OK
         "token_type":"bearer",
         "expires_in":60     
     }
+```
+
+#### 4.2.5 Scope
+
+The scope argument as defined in RFC6749 MUST be present when accessing subject specific resources. It MAY be present for other types of resources. The available scopes are defined by individual use-cases. For subject specific resources, the scopes are defined in the consent records. These scopes MAY be use-case wide or URL specific. A use-case wide scope MUST be defined as a URN string without spaces.
+
+```text
+urn:oid:1.3.6.1.4.1.54851.1:MEDICAL
+```
+
+As example:
+
+```text
+POST /token.oauth2 HTTP/1.1
+     Host: as.example.com
+     Content-Type: application/x-www-form-urlencoded
+
+     grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
+     &scope=urn%3Aoid%3A1.3.6.1.4.1.54851.1%3AMEDICAL
+     &assertion=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
+     eyJpc3Mi[...omitted for brevity...].
+     J9l-ZhwP[...omitted for brevity...]
+```
+
+URL specific scopes MUST be represented by a relative path:
+
+```text
+/etransfer/composition/5f5e8eac-aee3-4ffe-9891-c149a31d50d7
+```
+
+If a specific scope contains an identifier, this identifier MUST be unique, e.g. a version 4 UUID or 256 bits secure random number.
+
+```text
+POST /token.oauth2 HTTP/1.1
+     Host: as.example.com
+     Content-Type: application/x-www-form-urlencoded
+
+     grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
+     &scope=%2Fetransfer%2Fcomposition%2F5f5e8eac-aee3-4ffe-9891-c149a31d50d7
+     &assertion=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
+     eyJpc3Mi[...omitted for brevity...].
+     J9l-ZhwP[...omitted for brevity...]
 ```
 
 ## 5. Authorization server
@@ -198,7 +242,7 @@ The **aud** field MUST match the registered endpoint from which the authorizatio
 
 **5.2.1.7. Validate legal base**
 
-The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base MAY be present at the authorization server/resource server side for this triple. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check can be skipped.
+The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base MAY be present at the authorization server/resource server side for this triple. The requested scopes MAY be present in a legal base. Any scope requests that do not follow a legal base MUST NOT be put in the response. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check MUST be skipped.
 
 #### 5.2.2. Error responses
 
@@ -214,6 +258,8 @@ Errors are returned as described in [https://tools.ietf.org/html/rfc6749\#sectio
        "error":"invalid_request"
      }
 ```
+
+If a scope request is too large, an _invalid\_scope_ error MUST be returned. The authorization server SHOULD determine the limit based on the size of the returned access token.
 
 ### 5.3. Access token
 
@@ -249,8 +295,10 @@ A token MAY be used multiple times unless the returned error code prevents it. A
 The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
 
 1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
-2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. a access token has been requested with the _usi_ field. The resource server MUST also check if a known legal base is present for the combination of custodian, actor, subject and resource.
+2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify if a known legal base is present for the combination of custodian, actor, subject, scope and resource.
 3. **The actor and custodian are the same.** It may be the case that a care organisation is using multiple service providers. In that case each service provider acts on behalf of the care organisation. Therefore it's not needed to provide user context. It's up to the service providers to to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organisation. To match the actor and custodian, the resource server MUST check if the proof in the registry that has been provided by the care organisation is the same. See RFC00X for the details. In short: A care organisation can only be published if it signs a challenge from the service provider.
+
+For all cases the resource server MUST check if the given scope of the access token covers the requested resource. Specific bolts define the scopes.
 
 ### 6.3. Error codes
 
