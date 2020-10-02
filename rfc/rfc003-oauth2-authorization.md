@@ -292,7 +292,7 @@ A token MAY be used multiple times unless the returned error code prevents it. A
 
 ### 6.2. Authorization
 
-The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
+The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The resource server MUST also check if the client certificate used for the TLS connections is from the same party that requested the access token. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
 
 1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
 2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify if a known legal base is present for the combination of custodian, actor, subject, scope and resource.
