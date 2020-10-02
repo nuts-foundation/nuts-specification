@@ -1,23 +1,39 @@
 digraph D {
-  root=RFC001;
-  overlap=false;
+    graph [fontname = "courier"];
+    node [fontname = "courier",shape=box];
+    edge [fontname = "courier"];
+    root = RFC001;
+    overlap = false;
 
-  RFC001 [label="RFC001\nNuts Start Architecture",href="rfc001-nuts-start-architecture"];
-  RFC002 [label="RFC002\nAuthentication token",href="rfc002-authentication-token"];
-  RFC003 [label="RFC003\nOAuth2 Authorization",href="rfc003-oauth2-authorization"];
-  RFC004 [label="RFC004\nDistributed Document Format\n(Planned)",href="rfc004-distributed-document-format"];
-  RFC005 [label="RFC005\nDistributed Document Network using gRPC\n(Planned)",href="rfc005-distributed-document-network-grpc"];
-  RFC006 [label="RFC006\nDistributed Registry\n(Planned)",href="rfc006-distributed-registry"];
+    // Internal RFCs
+    subgraph cluster_internal {
+        RFC001 [label = "RFC001\nNuts Start Architecture",href = "rfc001-nuts-start-architecture"];
+        RFC002 [label = "RFC002\nAuthentication token",href = "rfc002-authentication-token"];
+        RFC003 [label = "RFC003\nOAuth2 Authorization",href = "rfc003-oauth2-authorization"];
+        RFC004 [label = "RFC004\nDistributed Document Format\n(Planned)",href = "rfc004-distributed-document-format"];
+        RFC005 [label = "RFC005\nDistributed Document Network using gRPC\n(Planned)",href = "rfc005-distributed-document-network-grpc"];
+        RFC006 [label = "RFC006\nDistributed Registry\n(Planned)",href = "rfc006-distributed-registry"];
+    }
 
-  RFC002 -> RFC001 [label="refers to"]
+    // External RFCs
+    subgraph cluster_external {
+        RFC7662_EXT [label = "RFC7662\nOAuth 2.0 Token Introspection", fillcolor=azure2, style=filled, href = "https://tools.ietf.org/html/rfc7662"]
+        RFC7523_EXT [label = "RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants", fillcolor=azure2, style=filled, href = "https://tools.ietf.org/html/rfc7523"]
+        RFC7515_EXT [label = "RFC7515\nJSON Web Signature (JWS)", fillcolor=azure2, style=filled, href = "https://tools.ietf.org/html/rfc7515"]
+    }
 
-  RFC003 -> RFC001 [label="refers to"]
-  RFC003 -> RFC002 [label="token spec-ed by"]
+    RFC002 -> RFC001 [xlabel = "refers to"]
 
-  RFC004 -> RFC001 [label="refers to"]
+    RFC003 -> RFC001 [xlabel = "refers to"]
+    RFC003 -> RFC002 [xlabel = "token spec-ed by"]
+    RFC003 -> RFC7662_EXT [label = ""]
+    RFC003 -> RFC7523_EXT [label = ""]
+    RFC003 -> RFC7515_EXT [label = ""]
 
-  RFC005 -> RFC004 [label="document format spec-ed by"]
+    RFC004 -> RFC001 [xlabel = "refers to"]
 
-  RFC006 -> RFC004 [label="document format spec-ed by"]
-  RFC006 -> RFC005 [label="transport spec-ed by"]
+    RFC005 -> RFC004 [xlabel = "document format spec-ed by"]
+
+    RFC006 -> RFC004 [xlabel = "document format spec-ed by"]
+    RFC006 -> RFC005 [xlabel = "transport spec-ed by"]
 }
