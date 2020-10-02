@@ -1,7 +1,7 @@
 digraph D {
-    graph [fontname = "courier"];
-    node [fontname = "courier",shape=box];
-    edge [fontname = "courier"];
+    graph [fontname = "helvetica"];
+    node [fontname = "helvetica",shape=box];
+    edge [fontname = "helvetica"];
     root = RFC001;
     overlap = false;
 
@@ -22,18 +22,18 @@ digraph D {
         RFC7515_EXT [label = "RFC7515\nJSON Web Signature (JWS)", fillcolor=azure2, style=filled, href = "https://tools.ietf.org/html/rfc7515"]
     }
 
-    RFC002 -> RFC001 [xlabel = "refers to"]
+    RFC002 -> RFC001
 
-    RFC003 -> RFC001 [xlabel = "refers to"]
-    RFC003 -> RFC002 [xlabel = "token spec-ed by"]
-    RFC003 -> RFC7662_EXT [label = ""]
-    RFC003 -> RFC7523_EXT [label = ""]
-    RFC003 -> RFC7515_EXT [label = ""]
+    RFC003 -> RFC001
+    RFC003 -> RFC002
+    RFC003 -> RFC7662_EXT
+    RFC003 -> RFC7523_EXT
+    RFC003 -> RFC7515_EXT
 
-    RFC004 -> RFC001 [xlabel = "refers to"]
+    RFC004 -> RFC001
 
-    RFC005 -> RFC004 [xlabel = "document format spec-ed by"]
+    RFC005 -> RFC004
 
-    RFC006 -> RFC004 [xlabel = "document format spec-ed by"]
-    RFC006 -> RFC005 [xlabel = "transport spec-ed by"]
+    RFC006 -> RFC004
+    RFC006 -> RFC005
 }
