@@ -1,0 +1,23 @@
+digraph D {
+  root=RFC001;
+  overlap=false;
+
+  RFC001 [label="RFC001\nNuts Start Architecture",href="rfc001-nuts-start-architecture"];
+  RFC002 [label="RFC002\nAuthentication token",href="rfc002-authentication-token"];
+  RFC003 [label="RFC003\nOAuth2 Authorization",href="rfc003-oauth2-authorization"];
+  RFC004 [label="RFC004\nDistributed Document Format\n(Planned)",href="rfc004-distributed-document-format"];
+  RFC005 [label="RFC005\nDistributed Document Network using gRPC\n(Planned)",href="rfc005-distributed-document-network-grpc"];
+  RFC006 [label="RFC006\nDistributed Registry\n(Planned)",href="rfc006-distributed-registry"];
+
+  RFC002 -> RFC001 [label="refers to"]
+
+  RFC003 -> RFC001 [label="refers to"]
+  RFC003 -> RFC002 [label="token spec-ed by"]
+
+  RFC004 -> RFC001 [label="refers to"]
+
+  RFC005 -> RFC004 [label="document format spec-ed by"]
+
+  RFC006 -> RFC004 [label="document format spec-ed by"]
+  RFC006 -> RFC005 [label="transport spec-ed by"]
+}
