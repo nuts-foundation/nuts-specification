@@ -76,7 +76,7 @@ At this point there’s no need to use a client certificate for the TLS connecti
 
 * **typ**: MUST be `JWT`
 * **alg**: one of `RS256`, `RS384`, `RS512`, `ES256`, `ES384` or `ES512`
-* **x5c**: contains both the signing certificate and the vendor CA. The first certificate MUST be the signing certificate. \([RFC7515](https://tools.ietf.org/html/rfc7515)\)
+* **x5c**: MUST contain the signing certificate. \([RFC7515](https://tools.ietf.org/html/rfc7515)\)
 
 #### 4.2.2. Payload
 
@@ -96,8 +96,7 @@ At this point there’s no need to use a client certificate for the TLS connecti
 {
   "alg": "RS256",
   "typ": "JWT",
-  "X5c": ["MIIE3jCCA8agAwIBAgICAwEwDQYJKoZIh...abbrevated...0aBsXBTWVU+4=",
- "MIIE+zCCBGSgAwIBAgICAQ0wDQYJKoZIh...abbrevated...9saWNkr09VZw="]
+  "X5c": ["MIIE+zCCBGSgAwIBAgICAQ0wDQYJKoZIh...abbrevated...9saWNkr09VZw="]
 }
 ```
 
@@ -222,7 +221,7 @@ The first step is to validate the JWT, the **x5c** field in the JWT header holds
 
 **5.2.1.2. Issuer validation**
 
-The actor from the **iss** field must be known to the authorization server, a vendor must have registered it using a signing certificate signed by the same vendor CA as in the **x5c** field. The registered vendor CA MUST match the root of the **x5c** header field. It MAY be the case that the vendor CA has been renewed, in that case a previous valid certificate from the same vendor MAY have been used to register the actor. It that case the vendor CA MUST have been valid at the time the signing certificate had been signed.
+The actor from the **iss** field must be known to the authorization server, a vendor must have registered it using a signing certificate signed by the same vendor CA as the CA that signed the certificate in the **x5c** field. It MAY be the case that the vendor CA has been renewed, in that case a previous valid certificate from the same vendor MAY have been used to register the actor. It that case the vendor CA MUST have been valid at the time the signing certificate had been signed.
 
 **5.2.1.3. JTI check**
 

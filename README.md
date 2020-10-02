@@ -6,4 +6,5 @@ Welcome to the draft section of the Nuts specification documentation. This space
 
 The diagram below shows how the RFCs relate to each other.
 
-![RFC structure](images/spec-relations.svg)
+![RFC structure](.gitbook/assets/spec-relations.svg)
+
