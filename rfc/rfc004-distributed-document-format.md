@@ -87,19 +87,34 @@ It MUST be created using one of the following algorithms: `RS256`, `RS384`, `RS5
 Other algorithms SHALL NOT be used.
 
 The payload to be signed MUST be calculated as follows:
-1. Take the input document.
-2. Remove *ref* and *sig* properties (if present).
+1. Take the input document (assert the *ref* field is present)
+2. *jws* field if present.
 3. Canonicalize the document using the [Rundgren JSON Canonicalization Scheme (draft v17)](https://www.ietf.org/id/draft-rundgren-json-canonicalization-scheme-17.html).
 4. Sign the payload using public key of the document author.
 
 The *x5c* field of the JWS MUST contain exactly one entry with the X.509 signing certificate associated with the private key.
 The certificate MUST have the digitalSignature and contentCommitment key usages and must be valid at time of signing.
 
+All fields defined in section 4.1 MUST be included in the signing except *jws*, other fields SHALL NOT be included.
+
 ### 4.4. Ordering
 All documents except the very first document MUST specify the *prev* field referencing the last known document on the network.
 This is essential for maintaining consistent ordering across peers on the network. The *issuedAt* field SHOULD have a timestamp
 equal to or after the referenced document's *issuedAt* field. The *prev* field's reference MUST be calculated as
 documented in section 4.2.
+
+### 4.5. Validation
+Before interpreting a document's payload it SHOULD be validated according to the following rules:
+
+1. Assert that the previous document (*prev* field) is valid.
+2. Verify the document signature:
+   * Validate keyUsage, validity of the certificate in the *x5c* field and whether the issuer is trusted.
+   * Verify the cryptographic signature with the public key from the certificate.
+   * Assert that the certificate was valid at the time of signing (as specified by *issuedAt*).
+   * Assert that the certificate was not revoked on at time of signing.
+3. Calculate the document reference and compare it with the contents of the *ref* field. 
+
+If any of the steps above fail the document SHOULD be rejected and its payload SHALL NOT be deemed valid.
 
 ### 4.5. Example
 TBD
