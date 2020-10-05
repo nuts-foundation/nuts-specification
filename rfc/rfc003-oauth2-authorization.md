@@ -75,8 +75,8 @@ At this point there’s no need to use a client certificate for the TLS connecti
 #### 4.2.1. Header
 
 * **typ**: MUST be `JWT`
-* **alg**: one of `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512`
-* **x5c**: MUST contain the signing certificate. \([RFC7515](https://tools.ietf.org/html/rfc7515)\)
+* **alg**: one of `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `PS512` \([RFC7518](https://tools.ietf.org/html/rfc7518)\)
+* **x5c**: MUST contain the signing certificate. \([RFC7515](https://tools.ietf.org/html/rfc7515)\) 
 
 #### 4.2.2. Payload
 
