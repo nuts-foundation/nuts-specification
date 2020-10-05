@@ -70,7 +70,7 @@ The document reference uniquely identifies a document. All fields defined in sec
 EXCEPT the reference itself. Other fields SHALL NOT be included in the calculation.
 
 It MUST be calculated as follows:
-* Remove the *ref* field from the document (if present).
+* Remove the *ref* and *jws* fields if present.
 * Canonicalize the document using the [Rundgren JSON Canonicalization Scheme (draft v17)](https://www.ietf.org/id/draft-rundgren-json-canonicalization-scheme-17.html).
 * Hash the canonicalized document using SHA-1.
 
@@ -88,7 +88,7 @@ Other algorithms SHALL NOT be used.
 
 The payload to be signed MUST be calculated as follows:
 1. Take the input document (assert the *ref* field is present)
-2. *jws* field if present.
+2. Remove *jws* and *ref* fields if present.
 3. Canonicalize the document using the [Rundgren JSON Canonicalization Scheme (draft v17)](https://www.ietf.org/id/draft-rundgren-json-canonicalization-scheme-17.html).
 4. Sign the payload using public key of the document author.
 
@@ -106,13 +106,13 @@ documented in section 4.2.
 ### 4.5. Validation
 Before interpreting a document's payload it SHOULD be validated according to the following rules:
 
-1. Assert that the previous document (*prev* field) is valid.
-2. Verify the document signature:
+1. Assert that the previous document (*prev* field) is valid. Preceding documents should be validated first.
+2. Calculate the document reference and compare it with the contents of the *ref* field.
+3. Verify the document signature:
    * Validate keyUsage, validity of the certificate in the *x5c* field and whether the issuer is trusted.
    * Verify the cryptographic signature with the public key from the certificate.
    * Assert that the certificate was valid at the time of signing (as specified by *issuedAt*).
-   * Assert that the certificate was not revoked on at time of signing.
-3. Calculate the document reference and compare it with the contents of the *ref* field. 
+   * Assert that the certificate was not revoked on at time of signing. 
 
 If any of the steps above fail the document SHOULD be rejected and its payload SHALL NOT be deemed valid.
 
