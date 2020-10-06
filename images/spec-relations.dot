@@ -10,7 +10,7 @@ digraph D {
         RFC001 [label = "RFC001\nNuts Start Architecture",href = "rfc001-nuts-start-architecture"];
         RFC002 [label = "RFC002\nAuthentication token",href = "rfc002-authentication-token"];
         RFC003 [label = "RFC003\nOAuth2 Authorization",href = "rfc003-oauth2-authorization"];
-        RFC004 [label = "RFC004\nDistributed Document Format\n(Planned)",href = "rfc004-distributed-document-format"];
+        RFC004 [label = "RFC004\nDistributed Document Format",href = "rfc004-distributed-document-format"];
         RFC005 [label = "RFC005\nDistributed Document Network using gRPC\n(Planned)",href = "rfc005-distributed-document-network-grpc"];
         RFC006 [label = "RFC006\nDistributed Registry\n(Planned)",href = "rfc006-distributed-registry"];
     }
@@ -31,6 +31,7 @@ digraph D {
     RFC003 -> RFC7515_EXT
 
     RFC004 -> RFC001
+    RFC004 -> RFC7515_EXT
 
     RFC005 -> RFC004
 
