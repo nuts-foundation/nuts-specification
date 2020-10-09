@@ -89,6 +89,8 @@ At this point there’s no need to use a client certificate for the TLS connecti
 * **exp**: Expiration, MUST NOT be later than 5 seconds after issueing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
 * **iat**: Issued at. NumericDate value of the time at which the JWT was issued.
 
+All other claims may be ignored.
+
 #### 4.2.3. Example JWT
 
 ```yaml
