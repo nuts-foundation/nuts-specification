@@ -223,23 +223,23 @@ The first step is to validate the JWT, the **x5c** field in the JWT header holds
 
 The client certificate used in the TLS connection must come from the same Vendor CA as the certificate present in the **x5c** header. This can be checked by comparing the public keys.
 
-**5.2.1.2. Issuer validation**
+**5.2.1.3. Issuer validation**
 
 The actor from the **iss** field must be known to the authorization server, a vendor must have registered it using a signing certificate signed by the same vendor CA as the CA that signed the certificate in the **x5c** field. It MAY be the case that the vendor CA has been renewed, in that case a previous valid certificate from the same vendor MAY have been used to register the actor. It that case the vendor CA MUST have been valid at the time the signing certificate had been signed.
 
-**5.2.1.3. JWT validity**
+**5.2.1.4. JWT validity**
 
 The JWT **iat** and **exp** fields MUST be validated. The timestamp of validation MUST lie between these values. The exp field MAY not be more than 5 seconds after the **iat** field.
 
-**5.2.1.4. Login contract validation**
+**5.2.1.5. Login contract validation**
 
 The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md).
 
-**5.2.1.5. Endpoint validation**
+**5.2.1.6. Endpoint validation**
 
 The **aud** field MUST match the registered endpoint from which the authorization server is listening. This prevents the use of the JWT at any other endpoint. The endpoint reference is used for this. \([RFC7523](https://tools.ietf.org/html/rfc7523#section-3)\)
 
-**5.2.1.6. Validate legal base**
+**5.2.1.7. Validate legal base**
 
 The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base MAY be present at the authorization server/resource server side for this triple. The requested scopes MAY be present in a legal base. Any scope requests that do not follow a legal base MUST NOT be put in the response. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check MUST be skipped.
 
