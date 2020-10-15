@@ -13,6 +13,7 @@ digraph D {
         RFC004 [label = "RFC004\nDistributed Document Format",href = "rfc004-distributed-document-format"];
         RFC005 [label = "RFC005\nDistributed Document Network using gRPC\n(Planned)",href = "rfc005-distributed-document-network-grpc"];
         RFC006 [label = "RFC006\nDistributed Registry\n(Planned)",href = "rfc006-distributed-registry"];
+        RFC008 [label = "RFC008\nCertificate Structure",href = "rfc008-certificate-structure"];
     }
 
     // External RFCs
@@ -32,6 +33,7 @@ digraph D {
 
     RFC004 -> RFC001
     RFC004 -> RFC7515_EXT
+    RFC004 -> RFC008
 
     RFC005 -> RFC004
 
