@@ -243,6 +243,10 @@ The **aud** field MUST match the registered endpoint from which the authorizatio
 
 The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base MAY be present at the authorization server/resource server side for this triple. The requested scopes MAY be present in a legal base. Any scope requests that do not follow a legal base MUST NOT be put in the response. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check MUST be skipped.
 
+**5.2.1.8. Subject validation**
+
+The **sub** field in the JWT MUST be a known organisation. It MUST have been registered by the vendor of the authorization server and it MUST be valid at the time indicated by the **iat** field. 
+
 #### 5.2.2. Error responses
 
 Errors are returned as described in [https://tools.ietf.org/html/rfc6749\#section-5.2](https://tools.ietf.org/html/rfc6749#section-5.2):
