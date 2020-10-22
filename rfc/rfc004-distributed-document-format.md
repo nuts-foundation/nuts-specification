@@ -58,15 +58,19 @@ In addition to required header parameters as specified in RFC7515 the following 
 
 The **jku**, **jwk**, **kid** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
 
-In addition to the registered header parameters, the following header MUST be present as protected headers:
+The JWS payload MUST contain the actual contents of the document. The format is unspecified so MAY any data type supported by the JSON including a nested JSON document.
+
+In addition to the registered header parameters, the following headers MUST be present as protected headers:
 * **sigt**: (signing time) MUST contain the signing time of the document in UTC as string, formatted according to [RFC3339](https://tools.ietf.org/html/rfc3339).
 * **version**: MUST contain the format version of the document as number. For this version of the format the version MUST be 1.
-* **prev**: MUST contain the reference (see section 3.2) of the preceding document, or a zeroed reference if a genesis document.
+* **prevs**: (previous documents) MUST contain the references (see section 3.2) of the preceding documents (see section 3.4).
 
-The JWS payload MUST be the actual contents of the document. The format is unspecified so MAY any data type supported by the JSON including a nested JSON document.
+The following headers MAY be present as protected headers (see section 3.4 for details):
+* **tid**: (timeline ID) MUST contain the reference to the document that started the timeline.
+* **tiv**: (timeline version) MUST contain a numeric version indicating the version of the document on the timeline.
 
 ### 3.2. Document Reference
-The document reference uniquely identifies a document and is used to fill the **prev** header. It MUST be calculated by
+The document reference uniquely identifies a document and is used to refer to it. It MUST be calculated by
 taking the bytes of the JWS EXACTLY as received and hashing it using SHA-1.
 
 When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase.
@@ -75,31 +79,59 @@ Example:
 
 ```148b3f9b46787220b1eeb0fc483776beef0c2b3e```
 
-### 3.3. Ordering
-Documents ordering is casual: a document MUST refer to the last known document on the network by specifying its
-reference in the *prev* field. This is essential for maintaining consistent order across peers.
-The *iat* field SHOULD have a timestamp equal to or after the referenced document's *iat* field.
-The first document published on the network (genesis document) MUST have a zeroed *prev* field:
+### 3.3. Ordering, branching and merging
+Documents MUST form a chain by referring to the previous document. This MAY be used to establish *casual ordering*, e.g.
+registration of a care organization as child object of a vendor. A new document MUST be appended to the end of the chain
+by referring to the last document of the chain (*head*) by including its reference in the **prevs** field.
 
+Since it takes some time for the documents to be synced to all network peers (eventual consistency) there COULD be
+multiple documents referring to the previous documents in the **prevs** field, a phenomenon called *branching*. Since
+branches (especially old and/or long ones) may cause documents to be reordered which hurts performance they MUST be
+merged as soon as possible. Branches are merged by specifying their heads in the **prevs** field:
+
+![RFC structure](.gitbook/assets/rfc004-branching.svg)
+
+The first document in the chain is the *genesis document* and MUST have a single zeroed **prevs** entry:
+                                                                               
 ```0000000000000000000000000000000000000000```
 
-There MUST only be one genesis document for a network. Subsequent genesis documents MUST be ignored.
+There MUST only be one genesis document for a network and subsequent genesis documents MUST be ignored.
 
-TODO: What about branching?
+When processing a chain the system MUST start at the genesis document and work its way to the head(s) processing subsequent
+documents. When encountering a branch the documents on all branches from that point up until the merge
+MUST be ordered before processing. Individual ordering of documents happens by hash; lower hashes are processed first.
+For example in the diagram above, the processing order of documents is `A -> B -> C -> D -> E -> F`.
 
+TODO: Does this ordering between hashes actually matter? Since when ordering is required documents have to be in the
+same direct branch anyway? (casual ordering)   
 
-### 3.4. Validation
+### 3.4. Timelines
+Since documents are immutable, the only way to update them it by creating a new document. Subsequent versions of a
+document SHOULD be tracked by creating a *timeline* using the optional **tid** and **tiv** fields. These fields SHALL NOT be used
+on the first document in the timeline, only on updates. The **tid** field identifies the timeline and MUST contain the
+reference of the first document. The **tid** field MUST be present when **tiv** is specified.
+
+For guaranteed ordering of the timeline the **tiv** (timeline version) field SHOULD indicate the version of the document. It MUST
+be an incrementing integer value starting at `1`. Version increments SHOULD be complete since gaps MAY indicate
+the consumer is missing a (branching) document. A duplicate version MAY indicate a race condition where the producer updated
+the document based on out-of-date state. 
+
+Applications MUST assert that updates in a timeline have been issued by the owner (initial signer) of the original document.
+
+### 3.5. Validation
 Before interpreting a document's payload it SHOULD be validated according to the following rules:
 
-1. Assert that if it's a genesis document, we didn't already receive one.
-2. Assert that the previous document (*prev* field) is valid. Preceding documents should be validated first.
+1. When it's a genesis document, assert we didn't already receive one.
+2. Assert that the previous document (*prev* field) is valid. Preceding documents should be received and validated first.
 3. Verify the document signature:
    * Validate keyUsage, validity of the certificate in the *x5c* field and whether the issuer is trusted.
    * Verify the cryptographic signature with the public key from the certificate.
-   * Assert that the certificate was valid at the time of signing (as specified by *iat*).
-   * Assert that the certificate was not revoked on at time of signing. 
+   * Assert that the certificate was valid at the time of signing (as specified by *iat*). 
 
 If any of the steps above fail the document SHOULD be rejected and its payload SHALL NOT be deemed valid.
+
+Note there's no need for certificate revocation status checking; certificate are generally short-lived
+ (as specified by [RFC008 Certificate Structure](rfc008-certificate-structure.md)).
 
 # 4. Example
 
