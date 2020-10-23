@@ -54,7 +54,7 @@ In addition to required header parameters as specified in RFC7515 the following 
 * **alg**: MUST be one of the following algorithms: `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512`.
   other algorithms SHALL NOT be used.
 * **cty**: MUST contain the type of the payload indicating how to interpret the payload encoded as string.
-* **crit** MUST contain the **sigt** and **version** headers.
+* **crit** MUST contain the **sigt**, **version** and **prevs**" headers.
 
 The **jku**, **jwk**, **kid** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
 
@@ -91,11 +91,8 @@ merged as soon as possible. Branches are merged by specifying their heads in the
 
 ![RFC structure](.gitbook/assets/rfc004-branching.svg)
 
-The first document in the chain is the *genesis document* and MUST have a single zeroed **prevs** entry:
-                                                                               
-```0000000000000000000000000000000000000000```
-
-There MUST only be one genesis document for a network and subsequent genesis documents MUST be ignored.
+The first document in the chain is the *genesis document* and SHALL NOT have any **prevs** entries. There MUST only be
+one genesis document for a network and subsequent genesis documents MUST be ignored.
 
 When processing a chain the system MUST start at the genesis document and work its way to the head(s) processing subsequent
 documents. When encountering a branch the documents on all branches from that point up until the merge
@@ -122,7 +119,7 @@ Applications MUST assert that updates in a timeline have been issued by the owne
 Before interpreting a document's payload it SHOULD be validated according to the following rules:
 
 1. When it's a genesis document, assert we didn't already receive one.
-2. Assert that the previous document (*prev* field) is valid. Preceding documents should be received and validated first.
+2. Assert that the previous document (*prevs* field) are valid. Preceding documents should be received and validated first.
 3. Verify the document signature:
    * Validate keyUsage, validity of the certificate in the *x5c* field and whether the issuer is trusted.
    * Verify the cryptographic signature with the public key from the certificate.
