@@ -109,7 +109,7 @@ EN:PractitionerLogin:v2 Undersigned gives permission to {{service_provider}} to 
 Or the Dutch version:
 
 ```text
-NL:BehandelaarLogin:v2 Ondergetekende geeft toestemming aan {{service_provider}} om namens {{legal_entity}} en ondergetekende het Nuts netwerk te bevragen. Deze toestemming is geldig van {{valid_from}} tot {{valid_to}}.
+NL:BehandelaarLogin:v2 Ondergetekende geeft toestemming aan {{service_provider}} om namens {{care_organisation}} en ondergetekende het Nuts netwerk te bevragen. Deze toestemming is geldig van {{valid_from}} tot {{valid_to}}.
 ```
 
 Various placeholders are placed between double curly-braces:
