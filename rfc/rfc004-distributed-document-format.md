@@ -54,7 +54,7 @@ In addition to required header parameters as specified in RFC7515 the following 
 * **alg**: MUST be one of the following algorithms: `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512`.
   other algorithms SHALL NOT be used.
 * **cty**: MUST contain the type of the payload indicating how to interpret the payload encoded as string.
-* **crit** MUST contain the **sigt**, **version** and **prevs**" headers.
+* **crit** MUST contain the **sigt**, **ver** and **prevs**" headers.
 
 The **jku**, **jwk**, **kid** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
 
@@ -62,7 +62,7 @@ The JWS payload MUST contain the actual contents of the document. The format is 
 
 In addition to the registered header parameters, the following headers MUST be present as protected headers:
 * **sigt**: (signing time) MUST contain the signing time of the document in UTC as string, formatted according to [RFC3339](https://tools.ietf.org/html/rfc3339).
-* **version**: MUST contain the format version of the document as number. For this version of the format the version MUST be 1.
+* **ver**: MUST contain the format version of the document as number. For this version of the format the version MUST be 1.
 * **prevs**: (previous documents) MUST contain the references (see section 3.2) of the preceding documents (see section 3.4).
 
 The following headers MAY be present as protected headers (see section 3.4 for details):
@@ -80,9 +80,12 @@ Example:
 ```148b3f9b46787220b1eeb0fc483776beef0c2b3e```
 
 ### 3.3. Ordering, branching and merging
-Documents MUST form a chain by referring to the previous document. This MAY be used to establish *casual ordering*, e.g.
-registration of a care organization as child object of a vendor. A new document MUST be appended to the end of the chain
-by referring to the last document of the chain (*head*) by including its reference in the **prevs** field.
+Documents MUST form a rooted DAG (Directed Acyclic Graph) by referring to the previous document.
+This MAY be used to establish *casual ordering*, e.g. registration of a care organization as child object of a vendor. A new document MUST be appended to the end of the DAG
+by referring to the last document of the DAG (*head*) by including its reference in the **prevs** field.
+
+As the name implies the DAG MUST be acyclic, documents that introduce a cycle are invalid MUST be ignored. ANY following
+document that refers to the invalid document (direct or indirect) MUST be ignored as well.
 
 Since it takes some time for the documents to be synced to all network peers (eventual consistency) there COULD be
 multiple documents referring to the previous documents in the **prevs** field, a phenomenon called *branching*. Since
@@ -91,10 +94,10 @@ merged as soon as possible. Branches are merged by specifying their heads in the
 
 ![RFC structure](.gitbook/assets/rfc004-branching.svg)
 
-The first document in the chain is the *genesis document* and SHALL NOT have any **prevs** entries. There MUST only be
-one genesis document for a network and subsequent genesis documents MUST be ignored.
+The first document in the DAG is the *root document* and SHALL NOT have any **prevs** entries. There MUST only be
+one root document for a network and subsequent root documents MUST be ignored.
 
-When processing a chain the system MUST start at the genesis document and work its way to the head(s) processing subsequent
+When processing a DAG the system MUST start at the root document and work its way to the head(s) processing subsequent
 documents. When encountering a branch the documents on all branches from that point up until the merge
 MUST be ordered before processing. Individual ordering of documents happens by hash; lower hashes are processed first.
 For example in the diagram above, the processing order of documents is `A -> B -> C -> D -> E -> F`.
@@ -115,10 +118,40 @@ the document based on out-of-date state.
 
 Applications MUST assert that updates in a timeline have been issued by the owner (initial signer) of the original document.
 
-### 3.5. Validation
+### 3.5. Processing the DAG
+Processing the DAG can be seen as planning tasks required for construction: some tasks can happen in parallel
+(laying floors and installing electricity), some tasks must happen sequentially (foundation must be poured before
+building the walls). This is the same for documents on the DAG: documents on a branch MUST be processed sequentially
+but processing order of parallel branches is unspecified, and before processing a merging document all **prevs** (branches)
+must have been processed.
+
+An algorithm that COULD be used is *Breadth-First-Search*. However with branches with more than 1 document the algorithm
+processes the merging document before all preceding documents were processed. This CAN be solved by adding an extra check
+that re-adds the document to the queue when not all previous documents were processed. The pseudo code for this algorithms
+looks as follows: 
+
+```
+given FIFO queue
+add root document to queue
+until queue empty; take document from queue
+    if current document already visited
+        continue loop
+
+    if any of the previous (prevs) documents is not yet processed
+        re-add current document to (the end) of the queue
+        continue loop 
+
+    for all next documents of the current document
+        add next document to queue
+
+    process document
+```
+
+TODO: Is cryptographic correctness of the document's signature a requirement for DAG correctness? 
+
 Before interpreting a document's payload it SHOULD be validated according to the following rules:
 
-1. When it's a genesis document, assert we didn't already receive one.
+1. When it's a root document, assert we didn't already receive one.
 2. Assert that the previous document (*prevs* field) are valid. Preceding documents should be received and validated first.
 3. Verify the document signature:
    * Validate keyUsage, validity of the certificate in the *x5c* field and whether the issuer is trusted.
