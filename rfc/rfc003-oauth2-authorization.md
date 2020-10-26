@@ -233,7 +233,7 @@ The JWT **iat** and **exp** fields MUST be validated. The timestamp of validatio
 
 **5.2.1.5. Login contract validation**
 
-The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md).
+The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the name of the actor. This name MUST match the name in the registry identified by the **iss** field.
 
 **5.2.1.6. Endpoint validation**
 
