@@ -58,8 +58,6 @@ In addition to required header parameters as specified in RFC7515 the following 
 
 The **jku**, **jwk**, **kid** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
 
-The JWS payload MUST contain the actual contents of the document. The format is unspecified so MAY any data type supported by the JSON including a nested JSON document.
-
 In addition to the registered header parameters, the following headers MUST be present as protected headers:
 * **sigt**: (signing time) MUST contain the signing time of the document in UTC as string, formatted according to [RFC3339](https://tools.ietf.org/html/rfc3339).
 * **ver**: MUST contain the format version of the document as number. For this version of the format the version MUST be 1.
@@ -68,6 +66,15 @@ In addition to the registered header parameters, the following headers MUST be p
 The following headers MAY be present as protected headers (see section 3.4 for details):
 * **tid**: (timeline ID) MUST contain the reference to the document that started the timeline.
 * **tiv**: (timeline version) MUST contain a numeric version indicating the version of the document on the timeline.
+
+To aid performance of validating the DAG the JWS SHALL NOT contain the actual contents of the document. Instead, the
+JWS payload MUST contain the SHA-1 hash of the contents encoded as hexadecimal, lower case string.
+
+Example:
+
+```148b3f9b46787220b1eeb0fc483776beef0c2b3e```
+
+The contents then MAY be stored next to or apart from the document itself (but that's out of scope for this RFC).
 
 ### 3.2. Document Reference
 The document reference uniquely identifies a document and is used to refer to it. It MUST be calculated by
