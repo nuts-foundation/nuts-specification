@@ -59,7 +59,7 @@ In addition to required header parameters as specified in RFC7515 the following 
 The **jku**, **jwk**, **kid** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
 
 In addition to the registered header parameters, the following headers MUST be present as protected headers:
-* **sigt**: (signing time) MUST contain the signing time of the document in UTC as string, formatted according to [RFC3339](https://tools.ietf.org/html/rfc3339).
+* **sigt**: (signing time) MUST contain the signing time of the document as Unix time since epoch encoded as NumericValue.
 * **ver**: MUST contain the format version of the document as number. For this version of the format the version MUST be 1.
 * **prevs**: (previous documents) MUST contain the references (see section 3.2) of the preceding documents (see section 3.4).
 
