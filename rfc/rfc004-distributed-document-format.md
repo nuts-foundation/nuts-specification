@@ -76,6 +76,8 @@ Example:
 
 The contents then MAY be stored next to or apart from the document itself (but that's out of scope for this RFC).
 
+There SHOULD be only 1 signature on the JWS. If there are multiple signatures all signatures except the first one MUST be ignored.
+
 ### 3.2. Document Reference
 The document reference uniquely identifies a document and is used to refer to it. It MUST be calculated by
 taking the bytes of the JWS EXACTLY as received and hashing it using SHA-1.
