@@ -35,7 +35,7 @@ In this document we will provide a way of protecting RESTful APIs with use of an
 * **JWT bearer token**: JWT encoded bearer token contains the user’s identity, subject and custodian and is signed by the acting party. This token is used to obtain an OAuth 2 access token.
 * **Access token**: An OAuth 2 access token, provided by an authorization Server. This token is handed to the client so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
 * **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian and token validity. This mechanism is called token introspection which is described by [RFC7662](https://tools.ietf.org/html/rfc7662).
-* **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document.
+* **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document. [RFC006] describes endpoint registration.
 
 Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
@@ -198,7 +198,7 @@ The **aud** field MUST match the registered endpoint from which the authorizatio
 
 **5.2.1.7. Validate legal base**
 
-The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base MAY be present at the authorization server/resource server side for this triple. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check MUST be skipped. An error MUST be returned when this validation fails.
+The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base MAY be present at the authorization server/resource server side for this triple. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check MUST be skipped. An `invalid_request` error MUST be returned when this validation fails.
 
 **5.2.1.8. Subject validation**
 
