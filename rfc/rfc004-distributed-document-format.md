@@ -36,7 +36,7 @@ This document does not define how to transport data to other participants in a d
 
 * **Document**: piece of application data enveloped with metadata like signatures and references to other documents
   published on a distributed network.
-* **Genesis document** the first document published on a network.
+* **Root document** the first document published on a network.
 
 Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
@@ -62,6 +62,7 @@ In addition to the registered header parameters, the following headers MUST be p
 * **sigt**: (signing time) MUST contain the signing time of the document as Unix time since epoch encoded as NumericValue.
 * **ver**: MUST contain the format version of the document as number. For this version of the format the version MUST be 1.
 * **prevs**: (previous documents) MUST contain the references (see section 3.2) of the preceding documents (see section 3.4).
+  When it's a root document the field SHALL NOT have any entries.
 
 The following headers MAY be present as protected headers (see section 3.4 for details):
 * **tid**: (timeline ID) MUST contain the reference to the document that started the timeline.
@@ -91,7 +92,7 @@ Example:
 ### 3.3. Ordering, branching and merging
 Documents MUST form a rooted DAG (Directed Acyclic Graph) by referring to the previous document.
 This MAY be used to establish *casual ordering*, e.g. registration of a care organization as child object of a vendor. A new document MUST be appended to the end of the DAG
-by referring to the last document of the DAG (*head*) by including its reference in the **prevs** field.
+by referring to the last document of the DAG (*leaf*) by including its reference in the **prevs** field.
 
 As the name implies the DAG MUST be acyclic, documents that introduce a cycle are invalid MUST be ignored. ANY following
 document that refers to the invalid document (direct or indirect) MUST be ignored as well.
@@ -99,20 +100,27 @@ document that refers to the invalid document (direct or indirect) MUST be ignore
 Since it takes some time for the documents to be synced to all network peers (eventual consistency) there COULD be
 multiple documents referring to the previous documents in the **prevs** field, a phenomenon called *branching*. Since
 branches (especially old and/or long ones) may cause documents to be reordered which hurts performance they MUST be
-merged as soon as possible. Branches are merged by specifying their heads in the **prevs** field:
+merged as soon as possible. Branches are merged by specifying their leafs in the **prevs** field:
 
-![RFC structure](.gitbook/assets/rfc004-branching.svg)
+![RFC structure](../.gitbook/assets/rfc004-branching.svg)
 
 The first document in the DAG is the *root document* and SHALL NOT have any **prevs** entries. There MUST only be
 one root document for a network and subsequent root documents MUST be ignored.
 
-When processing a DAG the system MUST start at the root document and work its way to the head(s) processing subsequent
-documents. When encountering a branch the documents on all branches from that point up until the merge
-MUST be ordered before processing. Individual ordering of documents happens by hash; lower hashes are processed first.
-For example in the diagram above, the processing order of documents is `A -> B -> C -> D -> E -> F`.
+When processing a DAG the system MUST start at the root document and work its way to the leaf(s) processing subsequent
+documents. When encountering a branch the documents on all branches from that point up until the merge MUST be processed
+before processing the merge itself. Since ordering is casual processing order over parallel branches isn't important.
+When looking at the diagram above, the following processing orders are valid:
 
-TODO: Does this ordering between hashes actually matter? Since when ordering is required documents have to be in the
-same direct branch anyway? (casual ordering)   
+* `A -> B -> C -> D -> E -> F` (mixed parallel order)
+* `A -> B -> D -> C -> E -> F` (branch D first, then branch C)
+* `A -> B -> C -> E -> D -> F` (branch C first, then branch D)
+
+The following orders are invalid:
+
+* `A -> B -> C -> E -> F -> D` (merger processed before all previous were processed)
+* `A -> B -> D -> F -> C -> E` (merger processed before all previous were processed)
+* `A -> B -> D -> E -> C -> F` (branch C is processed out-of-order)
 
 ### 3.4. Timelines
 Since documents are immutable, the only way to update them it by creating a new document. Subsequent versions of a
@@ -120,12 +128,13 @@ document SHOULD be tracked by creating a *timeline* using the optional **tid** a
 on the first document in the timeline, only on updates. The **tid** field identifies the timeline and MUST contain the
 reference of the first document. The **tid** field MUST be present when **tiv** is specified.
 
-For guaranteed ordering of the timeline the **tiv** (timeline version) field SHOULD indicate the version of the document. It MUST
-be an incrementing integer value starting at `1`. Version increments SHOULD be complete since gaps MAY indicate
-the consumer is missing a (branching) document. A duplicate version MAY indicate a race condition where the producer updated
-the document based on out-of-date state. 
+For signalling updates based on out-of-date state **tiv** (timeline version) CAN be used to indicate the version of the
+document. It MUST be an incrementing integer value starting at `1`. Version increments SHOULD be complete since gaps MAY
+indicate the consumer is missing a (branching) document. A duplicate version MAY indicate a race condition where the
+producer updated the document based on out-of-date state. 
 
-Applications MUST assert that updates in a timeline have been issued by the owner (initial signer) of the original document.
+Before processing payload applications MUST assert that updates in a timeline have been issued by the owner (initial signer)
+of the original document.
 
 ### 3.5. Processing the DAG
 Processing the DAG can be seen as planning tasks required for construction: some tasks can happen in parallel
@@ -134,10 +143,10 @@ building the walls). This is the same for documents on the DAG: documents on a b
 but processing order of parallel branches is unspecified, and before processing a merging document all **prevs** (branches)
 must have been processed.
 
-An algorithm that COULD be used is *Breadth-First-Search*. However with branches with more than 1 document the algorithm
+An algorithm that COULD be used is *Breadth-First-Search*. However with branches with more than 1 document this algorithm
 processes the merging document before all preceding documents were processed. This CAN be solved by adding an extra check
-that re-adds the document to the queue when not all previous documents were processed. The pseudo code for this algorithms
-looks as follows: 
+that skips the document when not all previous documents have been processed. When the missing previous document is processed
+the merging document will be re-added to the queue for processing. The pseudo code for this algorithms looks as follows: 
 
 ```
 given FIFO queue
@@ -147,8 +156,7 @@ until queue empty; take document from queue
         continue loop
 
     if any of the previous (prevs) documents is not yet processed
-        re-add current document to (the end) of the queue
-        continue loop 
+        continue loop
 
     for all next documents of the current document
         add next document to queue
@@ -156,20 +164,16 @@ until queue empty; take document from queue
     process document
 ```
 
-TODO: Is cryptographic correctness of the document's signature a requirement for DAG correctness? 
+### 3.6. Signature verification
 
 Before interpreting a document's payload it SHOULD be validated according to the following rules:
 
-1. When it's a root document, assert we didn't already receive one.
-2. Assert that the previous document (*prevs* field) are valid. Preceding documents should be received and validated first.
-3. Verify the document signature:
-   * Validate keyUsage, validity of the certificate in the *x5c* field and whether the issuer is trusted.
-   * Verify the cryptographic signature with the public key from the certificate.
-   * Assert that the certificate was valid at the time of signing (as specified by *iat*). 
+- Assert cryptographic signature; can it be validated with the public key in the signing certificate?
+- Assert the certificate is trusted.
+- Assert the certificate and chain was valid at signing time.
+- Assert the certificate is meant for signing; key usage digital MUST be `digitalSignature`.
 
-If any of the steps above fail the document SHOULD be rejected and its payload SHALL NOT be deemed valid.
-
-Note there's no need for certificate revocation status checking; certificate are generally short-lived
+Note there's no need for certificate revocation status checking; certificates are generally short-lived
  (as specified by [RFC008 Certificate Structure](rfc008-certificate-structure.md)).
 
 # 4. Example
