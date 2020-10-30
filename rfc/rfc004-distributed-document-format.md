@@ -69,11 +69,8 @@ The following headers MAY be present as protected headers (see section 3.4 for d
 * **tiv**: (timeline version) MUST contain a numeric version indicating the version of the document on the timeline.
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual contents of the document. Instead, the
-JWS payload MUST contain the SHA-1 hash of the contents encoded as hexadecimal, lower case string.
-
-Example:
-
-```148b3f9b46787220b1eeb0fc483776beef0c2b3e```
+JWS payload MUST contain the SHA-1 hash of the contents encoded as hexadecimal, lower case string,
+e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
 
 The contents then MAY be stored next to or apart from the document itself (but that's out of scope for this RFC).
 
@@ -83,11 +80,8 @@ There SHOULD be only 1 signature on the JWS. If there are multiple signatures al
 The document reference uniquely identifies a document and is used to refer to it. It MUST be calculated by
 taking the bytes of the JWS EXACTLY as received and hashing it using SHA-1.
 
-When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase.
-
-Example:
-
-```148b3f9b46787220b1eeb0fc483776beef0c2b3e```
+When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase,
+e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
 
 ### 3.3. Ordering, branching and merging
 Documents MUST form a rooted DAG (Directed Acyclic Graph) by referring to the previous document.
@@ -146,9 +140,9 @@ must have been processed.
 An algorithm that COULD be used is *Breadth-First-Search*. However with branches with more than 1 document this algorithm
 processes the merging document before all preceding documents were processed. This CAN be solved by adding an extra check
 that skips the document when not all previous documents have been processed. When the missing previous document is processed
-the merging document will be re-added to the queue for processing. The pseudo code for this algorithms looks as follows: 
+the merging document will be re-added to the queue for processing. The pseudo code for this algorithm looks as follows: 
 
-```
+```text
 given FIFO queue
 add root document to queue
 until queue empty; take document from queue
