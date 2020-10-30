@@ -54,7 +54,7 @@ In addition to required header parameters as specified in RFC7515 the following 
 * **alg**: MUST be one of the following algorithms: `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512`.
   other algorithms SHALL NOT be used.
 * **cty**: MUST contain the type of the payload indicating how to interpret the payload encoded as string.
-* **crit** MUST contain the **sigt**, **ver** and **prevs**" headers.
+* **crit** MUST contain the **sigt**, **ver** and **prevs** headers.
 
 The **jku**, **jwk**, **kid** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
 
@@ -165,7 +165,7 @@ Before interpreting a document's payload it SHOULD be validated according to the
 - Assert cryptographic signature; can it be validated with the public key in the signing certificate?
 - Assert the certificate is trusted.
 - Assert the certificate and chain was valid at signing time.
-- Assert the certificate is meant for signing; key usage digital MUST be `digitalSignature`.
+- Assert the certificate is meant for signing; key usage MUST be `digitalSignature`.
 
 Note there's no need for certificate revocation status checking; certificates are generally short-lived
  (as specified by [RFC008 Certificate Structure](rfc008-certificate-structure.md)).
