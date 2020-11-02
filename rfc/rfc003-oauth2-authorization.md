@@ -35,7 +35,7 @@ In this document we will provide a way of protecting RESTful APIs with use of an
 * **JWT bearer token**: JWT encoded bearer token contains the user’s identity, subject and custodian and is signed by the acting party. This token is used to obtain an OAuth 2 access token.
 * **Access token**: An OAuth 2 access token, provided by an authorization Server. This token is handed to the client so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
 * **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian and token validity. This mechanism is called token introspection which is described by [RFC7662](https://tools.ietf.org/html/rfc7662).
-* **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document. [RFC006] describes endpoint registration.
+* **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document. \[RFC006\] describes endpoint registration.
 
 Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
@@ -135,7 +135,7 @@ The client application MAY also send a JSON body. The authorization server MUST 
 POST /token.oauth2 HTTP/1.1
      Host: as.example.com
      Content-Type: application/json
-     
+
      {
           "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
           "scope": nuts,
@@ -152,7 +152,7 @@ HTTP/1.1 200 OK
     Content-Type: application/json;charset=UTF-8
     Cache-Control: no-store
     Pragma: no-cache
-    
+
     {
         "access_token":"2YotnFZFEjr1zCsicMWpAA",
         "token_type":"bearer",
@@ -202,7 +202,7 @@ The **iss** fields contains the identifier of the actor, the **sub** field conta
 
 **5.2.1.8. Subject validation**
 
-The **sub** field in the JWT MUST be a known organisation. It MUST have been registered by the vendor of the authorization server and it MUST be valid at the time indicated by the **iat** field. 
+The **sub** field in the JWT MUST be a known organisation. It MUST have been registered by the vendor of the authorization server and it MUST be valid at the time indicated by the **iat** field.
 
 #### 5.2.2. Error responses
 
