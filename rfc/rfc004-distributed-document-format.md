@@ -111,11 +111,26 @@ The following orders are invalid:
 
 #### 3.4. Timelines
 
-Since documents are immutable, the only way to update them it by creating a new document. Subsequent versions of a document SHOULD be tracked by creating a _timeline_ using the optional **tid** and **tiv** fields. These fields SHALL NOT be used on the first document in the timeline, only on updates. The **tid** field identifies the timeline and MUST contain the reference of the first document. The **tid** field MUST be present when **tiv** is specified.
+Since documents are immutable, the only way to update them it by creating a new document.
+Subsequent versions of a document SHOULD be tracked by creating a _timeline_ using the optional **tid** and **tiv** fields.
+These fields SHALL NOT be used on the first document in the timeline, only on updates.
+The **tid** field identifies the timeline and MUST contain the reference to the first document.
+The **tid** field MUST be present when **tiv** is specified.
 
-For signalling updates based on out-of-date state **tiv** \(timeline version\) CAN be used to indicate the version of the document. It MUST be an incrementing integer value starting at `1`. Version increments SHOULD be complete since gaps MAY indicate the consumer is missing a \(branching\) document. A duplicate version MAY indicate a race condition where the producer updated the document based on out-of-date state.
+For signalling updates based on out-of-date state **tiv** \(timeline version\) CAN be used to indicate the version of the document.
+It MUST be an incrementing integer value starting at `1` for the first update.
 
-Before processing payload applications MUST assert that updates in a timeline have been issued by the owner \(initial signer\) of the original document.
+Incorrect state due to incorrect updates (e.g. duplicate **tiv**, see below) SHOULD be fixed by issuing a new update with incremented **tiv**.
+
+##### 3.4.1. Timeline validation
+It's up to the processing application to validate the timeline, but the following points SHOULD be taken into consideration:
+
+* Assert that the update has been issued by the owner \(signer\) of the original document.
+* Gaps in timeline versioning MAY indicate the consumer is missing a \(branching\) document.
+* Duplicates in timeline versioning MAY indicate a race condition in which the producer updated the document based on out-of-date state.
+  * When the payloads are equal one of the updates COULD be applied and the other one ignored.
+  * When the payloads differ the document with the lowest **iat** SHOULD be applied first.
+    If **iat**s are equal the document with the lowest hash should be applied first.
 
 #### 3.5. Processing the DAG
 
@@ -154,13 +169,13 @@ Note there's no need for certificate revocation status checking; certificates ar
 
 ### 4.1. Compact Serialization
 
-```javascript
+```json
 { "TODO": "..." }
 ```
 
 ### 4.2. JSON Serialization
 
-```javascript
+```json
 { "TODO": "..." }
 ```
 
