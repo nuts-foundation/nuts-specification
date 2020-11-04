@@ -71,7 +71,8 @@ In addition to the registered header parameters, the following headers MUST be p
 The following headers MAY be present as protected headers \(see section 3.4 for details\):
 
 * **tid**: \(timeline ID\) MUST contain the reference to the document that started the timeline.
-* **tiv**: \(timeline version\) MUST contain a numeric version indicating the version of the document on the timeline.
+* **tiv**: \(timeline version\) MUST contain a numeric version indicating the version of the document on the timeline,
+  defaults to `0`.
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual contents of the document. Instead, the JWS payload MUST contain the SHA-1 hash of the contents encoded as hexadecimal, lower case string, e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
 
@@ -117,8 +118,10 @@ These fields SHALL NOT be used on the first document in the timeline, only on up
 The **tid** field identifies the timeline and MUST contain the reference to the first document.
 The **tid** field MUST be present when **tiv** is specified.
 
-For signalling updates based on out-of-date state **tiv** \(timeline version\) CAN be used to indicate the version of the document.
-It MUST be an incrementing integer value starting at `1` for the first update.
+For signalling updates based on out-of-date state **tiv** \(timeline version\) incrementing integer CAN be used to
+indicate the version of the document. The first document in the timeline MUST have a **tiv** of `0`, but since this
+is the default value it CAN be omitted. The first update in the timeline MUST have a **tiv** of `1`, the second `2` and
+so on.
 
 Incorrect state due to incorrect updates (e.g. duplicate **tiv**, see below) SHOULD be fixed by issuing a new update with incremented **tiv**.
 
