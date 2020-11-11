@@ -288,9 +288,94 @@ The response is quite lengthy and contains tons of information. Luckily the IRMA
 
 The response is used as part of the authorization token in the [OAuth flow](rfc003-oauth2-authorization.md).
 
-#### 7.1.4 Container usages
+#### 7.1.4 AuthenticationToken __Container usage
 
-To use the IRMA _Authentication Token_ in a Authentication_Token Container_, the "type" member of the Authentication_Token Container_ MUST set to the value `irma`
+To use the IRMA _Authentication Token_ in a Authentication_Token Container_, the `type` member of the Authentication_Token Container_ MUST set to the value `irma`
 
-The "token" value MUST be the base64 encoded JSON response.
+The `token` value MUST be the base64 encoded JSON response.
+
+### 7.2 UZI
+
+UZI is a Dutch abbriviation for "Unieke Zorgverlener Identificatienummer" and translates to Unique Care-professional Identification number. The number is issued by the CIBG authority, an organisation implementing Dutch government policies related to care professions.
+
+The number is coupled to the BIG register, a Dutch authority which registers the competence of a care professional, based on education and training.
+
+For more detailed information it is recommended to read the [Certification Practice Statement, UZI-register v10.0](https://zorgcsp.nl/Media/Default/documenten/2020-05-06_RK1%20CPS%20UZI-register%20V10.0.pdf) \(UZI CPS from now on\). 
+
+#### 7.2.1 UZI card
+
+The UZI number can be used to uniquely identify a care giver. The means to do this is by using a smart card. This card contains 2 or 3 certificates and keypairs. Personal cards have a certificate which can be used to sign data on behalf of the care professional.
+
+Certificates on the card follow a known chain: The certificates descent from the Dutch PKI root _Staat der Nederlanden Root CA - G3_. The full tree can be found [here](https://www.zorgcsp.nl/ca-certificaten). Every signature can be verified by validating the chain and checking for revoked cards.
+
+#### 7.2.2 Attributes
+
+The certificate contains the following attributes which can be used to identify the care giver and optionally its organisation. These fields are included here for clearity. More information can be found in the the UZI CPS, section 7.1.5: 
+
+* `oidCa` The OID that Identifies the certificates CA. Different CAs are used for different card types. 
+* `cartType` A single char which indicates what type of card it is:
+  * Z: Health care professional \(Zorgverlener\)
+  * N: Employee registred \(Medewerker op naam\)
+  * M: Anonymous employee \(Medewerker niet op naam\)
+  * S: Server
+* `orgID` Numer to identify the care organisation
+* `rollCode`Indicates the profession of the care professional and its specialism.
+* `uziNr` The actual identifying number.
+* `givenName` First names of certificate holder
+* `surname` Prefix and birthname of certificate holder
+
+#### 7.2.3 UZI signed JWS
+
+A convenient way of packaging data with its signature is the form of a JWS \[RFC7515\]. 
+
+A JWS contains of a header, payload and signature. The **header** MUST contain the the `typ` , `x5c`and `alg` fields. The type depends on the content of the payload,  the `x5c` field MUST contain the certificate from the UZI card used to sign the JWS. The `alg` SHOULD contain the value `RS256` value. The **payload** can be any set of bytes. 
+
+The header SHOULD NOT contain any other fields.
+
+The **signature** MUST be a RS256 signature of `ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload))`
+
+#### 7.2.4 UZI signed JWT
+
+To use the UZI card to sign an _authentication token_, the form of a JWT MUST be used. The header `typ` field MUST contain the value `JWT`, the payload MUST be an encoded JSON object and MUST have the fields `iat` set to the issuence time as described in \[[RFC7519](https://tools.ietf.org/html/rfc7519#section-4.1.6)\] and the `message` field set to a valid login contract. The payload JSON object SHOULD NOT contain any other fields.
+
+#### 7.2.5 Validation
+
+In order to validate an UZI signed JWS, the validator MUST perform the following checks:
+
+* The `alg` value MUST be equal to`RS256`
+* The `signature` MUST be correct and created with the certificate from the `x5c` header field
+* The certificate MUST descend from the known CA tree
+* The certificate MUST have the `repudiation` bit set
+* The certificate MUST NOT be revoked
+* If the `typ` is a JWT and the JSON payload contains an `iat`, the certificate chain MUST be valid at the given date.
+
+#### 7.2.6 Examples
+
+The following snippets contain exaples of an UZI signed JWT with a login contract.
+
+{% code title="Header" %}
+```javascript
+{
+    "typ":"JWT",
+    "alg":"RS256"
+}
+```
+{% endcode %}
+
+{% code title="Payload" %}
+```javascript
+{
+    "iat":"1605000446",
+    "message":"NL:BehandelaarLogin:v1 Ondergetekende geeft toestemming aan Demo EHR om namens Zorggroep Nuts en ondergetekende het Nuts netwerk te bevragen. Deze toestemming is geldig van maandag, 24 februari 2020 16:15:47 tot maandag, 24 februari 2020 17:15:47.",
+}
+```
+{% endcode %}
+
+#### 7.4.7 AuthenticationToken __Container usage
+
+To use the the UZI signed JWT in a _Authentication Token_ , the `type` member of the _AuthenticationToken Container_ MUST set to the value `uzi`.
+
+The `token` field MUST contain the JWT in its compact serialization form as described in \[[RFC7515 section 3.1](https://tools.ietf.org/html/rfc7515#section-3.1)\]
+
+
 
