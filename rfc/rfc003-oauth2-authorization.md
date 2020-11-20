@@ -83,7 +83,7 @@ To protect the access token endpoint better, a client certificate is required to
 * **sub**: The subject contains the urn of the custodian. The custodian information could be used to find the relevant consent \(together with actor and subject\).
 * **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional
 * **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the token endpoint reference. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
-* **usi**: User identity signature. The signed login contract according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
+* **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
 * **exp**: Expiration, MUST NOT be later than 5 seconds after issueing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
 * **iat**: Issued at. NumericDate value of the time at which the JWT was issued.
@@ -106,7 +106,7 @@ All other claims may be ignored.
   "sub": "urn:oid:2.16.840.1.113883.2.4.6.1:12481248",
   "sid": "urn:oid:2.16.840.1.113883.2.4.6.3:9999990",
   "aud": "8agAwIBAgICAwEwDQYJKoZIh",
-  "usi": {...Base64 encoded login contract...},
+  "usi": {...Base64 encoded token container...},
   "osi": {...hardware token sig...},
   "exp": 1578915481,
   "iat": 1578910481

@@ -114,15 +114,15 @@ In a perfect world, the legal base should also have a digital signature that can
 
 ### 4.3. Trust & Security
 
-Trust is, in the case of Nuts, the collective of authorizations, digital signatures and curated list of trusted 3rd parties. This relates closely to the general security of the network as a whole. An exchange of data between a custodian and actor is only allowed if all involved parties can be trusted \[M7\]. An action in the virtual domain must be linkable to real world parties \[M6\]. 
+Trust is, in the case of Nuts, the collective of authorizations, digital signatures and curated list of trusted 3rd parties. This relates closely to the general security of the network as a whole. An exchange of data between a custodian and actor is only allowed if all involved parties can be trusted \[M7\]. An action in the virtual domain must be linkable to real world parties \[M6\].
 
-The Nuts trust model is multi-layered. All layers combined provide the level of trust that is required for exchanging medical data. Each layer has its own set of allowed digital signatures. The separation makes sure an organisation can't act as a care professional and that a service provider can't act as a care organisation. The only exceptions are a one-man practise where the care professional is also the owner of the organisation or when a care organisation is hosting its own services (on-premise). 
+The Nuts trust model is multi-layered. All layers combined provide the level of trust that is required for exchanging medical data. Each layer has its own set of allowed digital signatures. The separation makes sure an organisation can't act as a care professional and that a service provider can't act as a care organisation. The only exceptions are a one-man practise where the care professional is also the owner of the organisation or when a care organisation is hosting its own services \(on-premise\).
 
-| layer     | responsible party | establishes trust in  |
-|-------    |----------------   |--------------------	|
-| user 	    | Care professional | a user session exists. This session is linked to the care organisation. [\[RFC002\]](rfc002-authentication-token.md).	|
-| data 	    | Care organisation	| registry data. The connection between care organisations, services and endpoints. \[RFC006\]. |
-| network 	| Service provider 	| members of the private network. \[RFC005\].	|
+| layer | responsible party | establishes trust in |
+| :--- | :--- | :--- |
+| user | Care professional | a user session exists. This session is linked to the care organisation. [\[RFC002\]](rfc002-authentication-token.md). |
+| data | Care organisation | registry data. The connection between care organisations, services and endpoints. \[RFC006\]. |
+| network | Service provider | members of the private network. \[RFC005\]. |
 
 A fundamental choice has been made to place trust in a curated list of 3rd parties \[M4\]. Trust between individual service providers or care organisations does not play a role \[M7\]. Technically this is enforced with the use of digital signatures \[M8\]. Attributes that are exchanged between parties do not hold any value unless it can be verified by a digital signature. Besides the improved security, it also levels the playing field for new parties and eliminates the value of inter-party political relationships \[M1, M3\]. Placing trust in certain 3rd parties does create a dependency on those parties and their security and trust model.
 
@@ -161,6 +161,4 @@ An important part of the automated process is how nodes can make sure they can t
 #### 4.5.1. Eventual Consistency for Distributed Data
 
 Since the Nuts network is distributed \[M4\] there's a trade-off to be made between consistency, availability and network partition tolerance \(CAP-theorem, [https://en.wikipedia.org/wiki/CAP\_theorem](https://en.wikipedia.org/wiki/CAP_theorem)\). Since strong consistency is very expensive for distributed networks the Nuts network aims for maximum availability \(of data\) and network partition tolerance, thus sacrificing. This means distributed data is _eventual consistent._
-
-
 
