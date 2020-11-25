@@ -288,7 +288,7 @@ The response is quite lengthy and contains tons of information. Luckily the IRMA
 
 The response is used as part of the authorization token in the [OAuth flow](rfc003-oauth2-authorization.md).
 
-#### 7.1.4 AuthenticationToken __Container usage
+#### 7.1.4 AuthenticationToken \_\_Container usage
 
 To use the IRMA _Authentication Token_ in a Authentication_Token Container_, the `type` member of the Authentication_Token Container_ MUST set to the value `irma`
 
@@ -300,7 +300,7 @@ UZI is a Dutch abbriviation for "Unieke Zorgverlener Identificatienummer" and tr
 
 The number is coupled to the BIG register, a Dutch authority which registers the competence of a care professional, based on education and training.
 
-For more detailed information it is recommended to read the [Certification Practice Statement, UZI-register v10.0](https://zorgcsp.nl/Media/Default/documenten/2020-05-06_RK1%20CPS%20UZI-register%20V10.0.pdf) \(UZI CPS from now on\). 
+For more detailed information it is recommended to read the [Certification Practice Statement, UZI-register v10.0](https://zorgcsp.nl/Media/Default/documenten/2020-05-06_RK1%20CPS%20UZI-register%20V10.0.pdf) \(UZI CPS from now on\).
 
 #### 7.2.1 UZI card
 
@@ -310,7 +310,7 @@ Certificates on the card follow a known chain: The certificates descent from the
 
 #### 7.2.2 Attributes
 
-The certificate contains the following attributes which can be used to identify the care giver and optionally its organisation. These fields are included here for clearity. More information can be found in the the UZI CPS, section 7.1.5: 
+The certificate contains the following attributes which can be used to identify the care giver and optionally its organisation. These fields are included here for clearity. More information can be found in the the UZI CPS, section 7.1.5:
 
 * `oidCa` The OID that Identifies the certificates CA. Different CAs are used for different card types. 
 * `cartType` A single char which indicates what type of card it is:
@@ -326,9 +326,9 @@ The certificate contains the following attributes which can be used to identify 
 
 #### 7.2.3 UZI signed JWS
 
-A convenient way of packaging data with its signature is the form of a JWS \[RFC7515\]. 
+A convenient way of packaging data with its signature is the form of a JWS \[RFC7515\].
 
-A JWS contains of a header, payload and signature. The **header** MUST contain the the `typ` , `x5c`and `alg` fields. The type depends on the content of the payload,  the `x5c` field MUST contain the certificate from the UZI card used to sign the JWS. The `alg` SHOULD contain the value `RS256` value. The **payload** can be any set of bytes. 
+A JWS contains of a header, payload and signature. The **header** MUST contain the the `typ` , `x5c`and `alg` fields. The type depends on the content of the payload, the `x5c` field MUST contain the certificate from the UZI card used to sign the JWS. The `alg` SHOULD contain the value `RS256` value. The **payload** can be any set of bytes.
 
 The header SHOULD NOT contain any other fields.
 
@@ -371,11 +371,9 @@ The following snippets contain exaples of an UZI signed JWT with a login contrac
 ```
 {% endcode %}
 
-#### 7.4.7 AuthenticationToken __Container usage
+#### 7.4.7 AuthenticationToken \_\_Container usage
 
 To use the the UZI signed JWT in a _Authentication Token_ , the `type` member of the _AuthenticationToken Container_ MUST set to the value `uzi`.
 
 The `token` field MUST contain the JWT in its compact serialization form as described in \[[RFC7515 section 3.1](https://tools.ietf.org/html/rfc7515#section-3.1)\]
-
-
 

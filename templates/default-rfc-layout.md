@@ -4,9 +4,7 @@
 | :--- | :--- |
 | Nuts foundation | author 1 |
 | Request for Comments: XXX | author 2 |
-|   | Month year |
-
-
+|  | Month year |
 
 ## Title
 
@@ -16,7 +14,7 @@ short description on the RFC
 
 ### Status of document
 
-Draft, open for comments, released 
+Draft, open for comments, released
 
 ### Copyright Notice
 
