@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Welcome](README.md)
+* [Nuts specifications](README.md)
 
 ## RFC
 
