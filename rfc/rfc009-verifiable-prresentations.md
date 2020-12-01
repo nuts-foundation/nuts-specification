@@ -98,14 +98,14 @@ An authenticated participant of the Nuts network holds credentials and presents 
 
 - *The holder posts a request to the verifier with the verifiable presentation.*
 - *The verifier must have NTP configured for the timezone of the location where the organization resides that is accountable for processing the verifiable presentation/credential.*
-- The holder hosts a service 
+- *The holder hosts a service to receive messages.*
 - *The holder is an authenticated participant of the Nuts network (under discussion, see known issues).*
 - *The holder and verifier use mutual TLS for authentication of domain and organization.*
 - *TLS is also used to encrypt the transport channel for the request and response messages.*
 
 ### Main success scenario
 
-1. *The system receives the message*
+1. *The system receives the inbound message*
 
 2. *The system verifies the presentation as token performing the next steps.*
 
@@ -123,13 +123,15 @@ An authenticated participant of the Nuts network holds credentials and presents 
 
 5. *For every embedded verifiable credential, the system queries the issuer trust list if the issuer DID is part of the list.*
 
-6. *For every embedded verifiable credential, the system triggers the credential handler to process the verifiable credential.*
+6. *For every embedded verifiable credential, the system triggers the credential handler to process the verifiable credential.* *When the credential handler needs to send a response to the holder, the system sends the inbound message to the holder*
 
 The use case ends.
 
 ### Extensions
 
 #### Extension 2b-2: Proof bi-directional relationship between the controller of an origin and a DID
+
+** **To be discussed if needed** **
 
 At 2b when the system resolves the DID using the web method, the system verifies that the DID controls the origin (the domain where the DID document resides).
 
@@ -183,7 +185,7 @@ The system concludes that the key type (`kty`) of the JSON Web Key is not equal 
 
 #### Error 2e-1: The signature is not valid.
 
-The system concludes that the tokens signature can not be decoded with the public key in the verification method:*
+The system concludes that the tokens signature can not be decoded with the public key in the verification method.
 
 #### Error 2e-2: The token is not intended for the verifier
 
@@ -197,9 +199,9 @@ The system concludes that the current date is before the date the token can be u
 
 The system concludes that the current date is after the expiration date (`exp`) of the token.
 
-#### Error 4-1: The  verifiable credential is revoked
+#### Error 4-1: The  verifiable credential is suspended or revoked
 
-
+The system concludes that the credential has status suspended or revoked.
 
 ## 4 Realization of the use case
 
@@ -213,19 +215,103 @@ The system concludes that the current date is after the expiration date (`exp`) 
 
 
 
+### 4.1 Inbound message
+
+An transport layer is needed to enable routing between actors. It also enables to use message types, envelopes and encrypt and sign the payload independantly from the content of the payload. The transport layer therefore is autonomous. 
+
+To realize this use case, plain text messages are used. Precondition is peer to peer transport between holder and verifier, that the message is not transported across security boundaries, and mutual transport layer security (mTLS) is used between peers.
+
+This specification is inspired on the DIDComm specification. See https://identity.foundation/didcomm-messaging/spec/ and the proposed JSON Web Message format. See: https://tools.ietf.org/id/draft-looker-jwm-01.html.
 
 
-### 4.1 Request
 
-### 4.2 Response
+```json
+"protected": {
+    "alg": "none", 
+    "typ": "JWM"
+},
+"payload": {
+    "id": "<unique identifier of the message, for example: urn:uuid:ef5a7369-f0b9-4143-a49d-2b9c7ee51117>",
+    "type": "basic-message",
+    "from": "<did of holder>",
+    "to": "<did of intended verifier>",
+    "exp": "<expiration date>",
+    "iat":"<issuance date>",
+    "thread_id": "<identifier to associate the JWM to a group of related messages (conversation)>",
+    "reply_url": "<url to which the response of the message can be sent>",
+    "body": {
+        "message": "<base64url-encoded JWT as string containing the verifiabble presentation>"
+    }
+},
+"signature": ""
+
+```
+
+Date and time values MUST be a number containing a NumericDate value (Unix epoch timestamps).
+
+
+
+### 4.2 Outbound message
+
+The outbound message is send as a response to the inbound message.
+
+```json
+"protected": {
+    "alg": "none", 
+    "typ": "JWM"
+},
+"payload": {
+    "id": "<unique identifier of the message, for example: urn:uuid:ef5a7369-f0b9-4143-a49d-2b9c7ee51117>",
+    "type": "basic-message",
+    "from": "<did of verifier>",
+    "to": "<did of holder>",
+    "exp": "<expiration date>",
+    "iat":"<issuance date>",
+    "thread_id": "<same identifier as used in inbound message>",
+    "body": {
+        "message": "<response>"
+    }
+},
+"signature": ""
+
+```
+
+  Date and time values MUST be a number containing a NumericDate value (Unix epoch timestamps).
+
+
 
 ### 4.3 Error report
+
+The error report message is send as a response to the inbound message.
+
+```json
+"protected": {
+    "alg": "none", 
+    "typ": "JWM"
+},
+"payload": {
+    "id": "<unique identifier of the message, for example: urn:uuid:ef5a7369-f0b9-4143-a49d-2b9c7ee51117>",
+    "type": "error-report",
+    "from": "<did of verifier>",
+    "to": "<did of holder>",
+    "exp": "<expiration date>",
+    "iat":"<issuance date>",
+    "thread_id": "<same identifier as used in inbound message>",
+    "body": {
+        "message": "<error message as specified in use case>"
+    }
+},
+"signature": ""
+
+```
+
+  Date and time values MUST be a number containing a NumericDate value (Unix epoch timestamps).
 
 
 
 ## 5. Realization of the verifiable presentation
 
-
+The verifiable presentation holds the credentials that are presented to the verifier.
 
 ```json
 "protected": {
@@ -246,15 +332,17 @@ The system concludes that the current date is after the expiration date (`exp`) 
         "verifiableCredential": ["<base64url-encoded JWT as string>"]
     }
 },
-"signature":
+"signature": "<signature of the holder>"
 
 ```
 
-  
+Date and time values MUST be a number containing a NumericDate value (Unix epoch timestamps).
+
+
 
 ## 6. Realization of the verifiable credential
 
-
+The JSON Web Token of the credential.
 
 ```json
 "protected": {
@@ -276,22 +364,24 @@ The system concludes that the current date is after the expiration date (`exp`) 
 "signature":
 ```
 
+Date and time values MUST be a number containing a NumericDate value (Unix epoch timestamps).
 
 
 
+## 7. Realization of the status registry
 
-## 7. Realization of the revocation registry
+The verifiable credential SHOULD have a property for the discovery of information about the current status of a verifiable credential. The property is specified in the verifiable credential data model (https://www.w3.org/TR/vc-data-model/#status).
 
-
+Allowed status of a verifiable credential is valid, suspended, or revoked.
 
 ```json
  "credentialStatus": {
     "id": "https://example.com/status/<status list identifier>",
-    "type": "NutsCredentialStatusList2020"
+    "type": "CredentialStatusList2017"
   },
 ```
 
-The id is a URL to a restful interface
+The credentials list is specified in: https://w3c-ccg.github.io/vc-csl2017/
 
 
 
