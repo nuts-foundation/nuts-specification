@@ -9,6 +9,7 @@
 * [RFC003 OAuth2 Authorization](rfc/rfc003-oauth2-authorization.md)
 * [RFC004 Distributed Document Format](rfc/rfc004-distributed-document-format.md)
 * [RFC008 Certificate Structure](rfc/rfc008-certificate-structure.md)
+* [RFC009 Verifiable Presenttations](rfc/rfc009-verifiable-prresentations.md)
 
 ## templates
 
