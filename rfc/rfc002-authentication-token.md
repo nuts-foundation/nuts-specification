@@ -129,26 +129,13 @@ EN:PractitionerLogin:v2 Undersigned gives permission to Nuts foundation to make 
 
 The time layout used is constructed as: `Monday, 2 January 2006 15:04:05` The name of the service provider must match the name that has been registered for this service provider. The name of the care organisation must match the name within the proof that has been published by the service provider. The signature must be made by cryptographic means which can be connected to the user.
 
-## 6. Authentication Token Container
+## 6. Verifiable Presentation
 
-The Authentication Token MUST be signed by the user. See section 7 for more detail on supported means. In order to support several signing means, the signed token MUST be encapsulated by a Authentication Token Container.
+The Authentication Token MUST be signed by the user. See section 7 for more detail on supported means. In order to support several signing means, the signed token MUST be encapsulated by a Container. As a container specification we use the [W3C Verifiable Presentation specification 1.0](https://www.w3.org/TR/vc-data-model/).
 
-The container MUST be formatted as a JSON object with the following members.
+It is recommended to reuse existing specifications for Verifiable Presentations (VP). If no existing specification exists, the type of the VP MUST be prepended with `Nuts`. This indicates that the VP is specified within this RFC.
 
-The "type" uniquely identifies the means used for creating the token. The value MUST be a lower case string without spaces. The means identifier gives the validator a hint about the contents of the token.
-
-The "token" member MUST contain the base64 encoded _Authentication Token_. The contents of the token can be anything and must be specified by the means.
-
-Other members than the ones specified here SHOULD NOT be used and MUST be ignored.
-
-Example of a Authentication Token Container:
-
-```yaml
-{
-  "type": "irma",
-  "token": "ewoiQGNvbnRleHQiOiAiaHR...FJJd05QN1N1dlAwSi9NL05WNTFWWnZxQ3lPKzdlRHdKOD0iCiAgfQp9Cn0=0"
-}
-```
+This specification uses the JSON-LD format for VPs since the JWT format isn't usable for all type of proofs. See the [linked data proofs](https://www.w3.org/TR/vc-data-model/#linked-data-proofs) section for more detail.
 
 ## 7. Supported means
 
@@ -288,11 +275,29 @@ The response is quite lengthy and contains tons of information. Luckily the IRMA
 
 The response is used as part of the authorization token in the [OAuth flow](rfc003-oauth2-authorization.md).
 
-#### 7.1.4 AuthenticationToken \_\_Container usage
+#### 7.1.4 Verifiable Presentation
 
-To use the IRMA _Authentication Token_ in a Authentication_Token Container_, the `type` member of the Authentication_Token Container_ MUST set to the value `irma`
+Below is a complete example of how an Irma proof can be embedded in a VP:
 
-The `token` value MUST be the base64 encoded JSON response.
+```yaml
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1"
+  ],
+  "type": ["VerifiablePresentation", "NutsIrmaPresentation"],
+  "proof": {
+    "type": "NutsIrmaSignedContract",
+    "proofValue": "DgYdYMUYHURJLD7xdnWRinqWCEY5u5fK...j915Lt3hMzLHoPiPQ9sSVfRrs1D"
+  }
+}
+```
+
+Beside the mandatory VP fields, the following applies:
+
+* The `type` field MUST be set to the value `["VerifiablePresentation", "NutsIrmaPresentation"]`.
+* The `proof` field MUST be a singular object.
+* The `proof.type` field MUST equal `NutsIrmaSignedContract`.
+* The `proof.proofValue` field MUST be the base64 encoded JSON response from §7.1.3
 
 ### 7.2 UZI
 
@@ -354,7 +359,7 @@ In order to validate an UZI signed JWS, the validator MUST perform the following
 The following snippets contain exaples of an UZI signed JWT with a login contract.
 
 {% code title="Header" %}
-```javascript
+```yaml
 {
     "typ":"JWT",
     "alg":"RS256"
@@ -363,7 +368,7 @@ The following snippets contain exaples of an UZI signed JWT with a login contrac
 {% endcode %}
 
 {% code title="Payload" %}
-```javascript
+```yaml
 {
     "iat":"1605000446",
     "message":"NL:BehandelaarLogin:v1 Ondergetekende geeft toestemming aan Demo EHR om namens Zorggroep Nuts en ondergetekende het Nuts netwerk te bevragen. Deze toestemming is geldig van maandag, 24 februari 2020 16:15:47 tot maandag, 24 februari 2020 17:15:47.",
@@ -371,9 +376,27 @@ The following snippets contain exaples of an UZI signed JWT with a login contrac
 ```
 {% endcode %}
 
-#### 7.4.7 AuthenticationToken \_\_Container usage
+#### 7.4.7 Verifiable Presentation
 
-To use the the UZI signed JWT in a _Authentication Token_ , the `type` member of the _AuthenticationToken Container_ MUST set to the value `uzi`.
+Below is a complete example of how an UZI proof can be embedded in a VP:
 
-The `token` field MUST contain the JWT in its compact serialization form as described in \[[RFC7515 section 3.1](https://tools.ietf.org/html/rfc7515#section-3.1)\]
+```yaml
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1"
+  ],
+  "type": ["VerifiablePresentation", "NutsUZIPresentation"],
+  "proof": {
+    "type": "NutsUZISignedContract",
+    "proofValue": "DgYdYMUYHURJLD7xdnWRinqW.CEY5u5fK...j915L.t3hMzLHoPiPQ9sSVfRrs1D"
+  }
+}
+```
+
+Beside the mandatory VP fields, the following applies:
+
+* The `type` field MUST be set to the value `["VerifiablePresentation", "NutsUZIPresentation"]`.
+* The `proof` field MUST be a singular object.
+* The `proof.type` field MUST equal `NutsUZISignedContract`.
+* The `proof.proofValue` field MUST contain the JWT in its compact serialization form as described in \[[RFC7515 section 3.1](https://tools.ietf.org/html/rfc7515#section-3.1)\]
 
