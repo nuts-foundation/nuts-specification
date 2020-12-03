@@ -385,9 +385,9 @@ Below is a complete example of how an UZI proof can be embedded in a VP:
   "@context": [
     "https://www.w3.org/2018/credentials/v1"
   ],
-  "type": ["VerifiablePresentation", "NutsUZIPresentation"],
+  "type": ["VerifiablePresentation", "NutsUziPresentation"],
   "proof": {
-    "type": "NutsUZISignedContract",
+    "type": "NutsUziSignedContract",
     "proofValue": "DgYdYMUYHURJLD7xdnWRinqW.CEY5u5fK...j915L.t3hMzLHoPiPQ9sSVfRrs1D"
   }
 }
@@ -395,8 +395,8 @@ Below is a complete example of how an UZI proof can be embedded in a VP:
 
 Beside the mandatory VP fields, the following applies:
 
-* The `type` field MUST be set to the value `["VerifiablePresentation", "NutsUZIPresentation"]`.
+* The `type` field MUST be set to the value `["VerifiablePresentation", "NutsUziPresentation"]`.
 * The `proof` field MUST be a singular object.
-* The `proof.type` field MUST equal `NutsUZISignedContract`.
+* The `proof.type` field MUST equal `NutsUziSignedContract`.
 * The `proof.proofValue` field MUST contain the JWT in its compact serialization form as described in \[[RFC7515 section 3.1](https://tools.ietf.org/html/rfc7515#section-3.1)\]
 
