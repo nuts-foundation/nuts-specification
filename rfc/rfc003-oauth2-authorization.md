@@ -67,7 +67,9 @@ When requesting data, the client application MUST add the access token to the Au
 
 In common OAuth2 flows a client application must be registered by an authorization server with a client id and client secret. In a network of trust with many OAuth servers, this approach is difficult because it would mean every node needs to exchange secrets with every other node. Instead, the JWT signing public key needs to be approved by the client applications vendor. A client application needs to generate a key pair. The vendor should sign a certificate for the client application with its vendor CA certificate. The vendor CA certificate MUST be known by both client application and authorization server. The resulting certificate and the vendor CA MUST be added to the x5c header field. The certificate MUST not be valid for longer than 4 days. A vendor SHOULD generate a key-pair and certificate per deployment to reduce the exposure of the private key. The vendor is left with the choice to generate a certificate per actor, this is not required.
 
-To protect the access token endpoint better, a client certificate is required to establish the TLS connection. This allows for vendors to use proven technologies such as reverse proxies. The client certificate to use will be self issued by the vendor and signed with the Vendor CA \[RFC008\].
+To protect the access token endpoint better, a client certificate is required to establish the TLS connection. This allows for vendors to use proven technologies such as reverse proxies. The client certificate to use will be self issued by the vendor and signed with the Vendor CA \[[Certificate structure RFC](rfc008-certificate-structure.md)\].
+
+Every service requiring authentication MUST refer to an OAuth endpoint in the registry. The OAuth endpoint MUST have the type: `urn:oid:1.3.6.1.4.1.54851.2:oauth`. Its **loc** MUST point to the complete URL of the authorization server. The [Distributed Registry RFC](rfc006-distributed-registry.md) describes the registration format of an endpoint and service.
 
 ### 4.2. Constructing the JWT
 
