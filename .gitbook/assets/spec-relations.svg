@@ -66,9 +66,9 @@
 <polygon fill="black" stroke="black" points="377,-150.3 369.1,-143.24 370.88,-153.69 377,-150.3"/>
 </g>
 <!-- RFC7662_EXT -->
-<g id="node8" class="node">
+<g id="node9" class="node">
 <title>RFC7662_EXT</title>
-<g id="a_node8"><a xlink:href="https://tools.ietf.org/html/rfc7662" xlink:title="RFC7662\nOAuth 2.0 Token Introspection">
+<g id="a_node9"><a xlink:href="https://tools.ietf.org/html/rfc7662" xlink:title="RFC7662\nOAuth 2.0 Token Introspection">
 <polygon fill="#e0eeee" stroke="black" points="905.5,-61.5 706.5,-61.5 706.5,-23.5 905.5,-23.5 905.5,-61.5"/>
 <text text-anchor="middle" x="806" y="-46.3" font-family="Helvetica,sans-Serif" font-size="14.00">RFC7662</text>
 <text text-anchor="middle" x="806" y="-31.3" font-family="Helvetica,sans-Serif" font-size="14.00">OAuth 2.0 Token Introspection</text>
@@ -82,9 +82,9 @@
 <polygon fill="black" stroke="black" points="752.94,-68.47 760.93,-61.51 750.34,-61.97 752.94,-68.47"/>
 </g>
 <!-- RFC7523_EXT -->
-<g id="node9" class="node">
+<g id="node10" class="node">
 <title>RFC7523_EXT</title>
-<g id="a_node9"><a xlink:href="https://tools.ietf.org/html/rfc7523" xlink:title="RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants">
+<g id="a_node10"><a xlink:href="https://tools.ietf.org/html/rfc7523" xlink:title="RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants">
 <polygon fill="#e0eeee" stroke="black" points="1302.5,-69 923.5,-69 923.5,-16 1302.5,-16 1302.5,-69"/>
 <text text-anchor="middle" x="1113" y="-53.8" font-family="Helvetica,sans-Serif" font-size="14.00">RFC7523</text>
 <text text-anchor="middle" x="1113" y="-38.8" font-family="Helvetica,sans-Serif" font-size="14.00">JSON Web Token (JWT) Profile</text>
@@ -99,9 +99,9 @@
 <polygon fill="black" stroke="black" points="991.32,-74.68 1000.3,-69.06 989.77,-67.85 991.32,-74.68"/>
 </g>
 <!-- RFC7515_EXT -->
-<g id="node10" class="node">
+<g id="node11" class="node">
 <title>RFC7515_EXT</title>
-<g id="a_node10"><a xlink:href="https://tools.ietf.org/html/rfc7515" xlink:title="RFC7515\nJSON Web Signature (JWS)">
+<g id="a_node11"><a xlink:href="https://tools.ietf.org/html/rfc7515" xlink:title="RFC7515\nJSON Web Signature (JWS)">
 <polygon fill="#e0eeee" stroke="black" points="688,-61.5 500,-61.5 500,-23.5 688,-23.5 688,-61.5"/>
 <text text-anchor="middle" x="594" y="-46.3" font-family="Helvetica,sans-Serif" font-size="14.00">RFC7515</text>
 <text text-anchor="middle" x="594" y="-31.3" font-family="Helvetica,sans-Serif" font-size="14.00">JSON Web Signature (JWS)</text>
@@ -173,24 +173,34 @@
 <g id="node6" class="node">
 <title>RFC006</title>
 <g id="a_node6"><a xlink:href="rfc006-distributed-registry" xlink:title="RFC006\nDistributed Registry\n(Planned)">
-<polygon fill="none" stroke="black" points="195,-321 61,-321 61,-268 195,-268 195,-321"/>
-<text text-anchor="middle" x="128" y="-305.8" font-family="Helvetica,sans-Serif" font-size="14.00">RFC006</text>
-<text text-anchor="middle" x="128" y="-290.8" font-family="Helvetica,sans-Serif" font-size="14.00">Distributed Registry</text>
-<text text-anchor="middle" x="128" y="-275.8" font-family="Helvetica,sans-Serif" font-size="14.00">(Planned)</text>
+<polygon fill="none" stroke="black" points="328,-321 194,-321 194,-268 328,-268 328,-321"/>
+<text text-anchor="middle" x="261" y="-305.8" font-family="Helvetica,sans-Serif" font-size="14.00">RFC006</text>
+<text text-anchor="middle" x="261" y="-290.8" font-family="Helvetica,sans-Serif" font-size="14.00">Distributed Registry</text>
+<text text-anchor="middle" x="261" y="-275.8" font-family="Helvetica,sans-Serif" font-size="14.00">(Planned)</text>
 </a>
 </g>
 </g>
 <!-- RFC006&#45;&gt;RFC004 -->
 <g id="edge11" class="edge">
 <title>RFC006&#45;&gt;RFC004</title>
-<path fill="none" stroke="black" d="M63.93,-267.88C49.23,-258.82 35.45,-247.03 27,-232 15.46,-211.46 13.52,-198.32 27,-179 37.08,-164.56 51.47,-153.96 67.35,-146.2"/>
+<path fill="none" stroke="black" d="M193.92,-270.87C190.58,-269.87 187.25,-268.91 184,-268 115.05,-248.73 71.61,-287.99 27,-232 12.32,-213.58 13.52,-198.32 27,-179 37.08,-164.56 51.47,-153.96 67.35,-146.2"/>
 <polygon fill="black" stroke="black" points="69.15,-149.23 76.85,-141.95 66.29,-142.84 69.15,-149.23"/>
 </g>
 <!-- RFC006&#45;&gt;RFC005 -->
 <g id="edge12" class="edge">
 <title>RFC006&#45;&gt;RFC005</title>
-<path fill="none" stroke="black" d="M141.55,-267.87C145.96,-259.53 150.92,-250.14 155.62,-241.26"/>
-<polygon fill="black" stroke="black" points="158.81,-242.73 160.39,-232.25 152.62,-239.45 158.81,-242.73"/>
+<path fill="none" stroke="black" d="M235.37,-267.87C226.51,-259.01 216.45,-248.95 207.08,-239.58"/>
+<polygon fill="black" stroke="black" points="209.3,-236.85 199.75,-232.25 204.35,-241.8 209.3,-236.85"/>
+</g>
+<!-- RFC009 -->
+<g id="node8" class="node">
+<title>RFC009</title>
+<g id="a_node8"><a xlink:href="rfc009-verifiable-presentations" xlink:title="RFC009\nVerifiable Presentations">
+<polygon fill="none" stroke="black" points="175.5,-313.5 16.5,-313.5 16.5,-275.5 175.5,-275.5 175.5,-313.5"/>
+<text text-anchor="middle" x="96" y="-298.3" font-family="Helvetica,sans-Serif" font-size="14.00">RFC009</text>
+<text text-anchor="middle" x="96" y="-283.3" font-family="Helvetica,sans-Serif" font-size="14.00">Verifiable Presentations</text>
+</a>
+</g>
 </g>
 </g>
 </svg>

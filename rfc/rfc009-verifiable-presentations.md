@@ -4,9 +4,9 @@
 
 ## Abstract
 
-We use credentials every day. Your driving license, certificates of courses, university degrees. All are examples of credentials. There are also many examples in healthcare, such as a prescription, diagnosis, or allergies. Credentials can be issued to a person or an organization.Verifiable credentials are a generic mechanism to issue, hold, and verify claims on a subject. This use case describes how a holder presents verifiable credentials to a verifier. The system in its role of verifier receives and verifies the origin, integrity, and validity of the credentials. 
+We use credentials every day. Your driving license, certificates of courses, university degrees. All are examples of credentials. There are also many examples in healthcare such as a prescription, diagnosis, or allergies. Credentials can be issued to a person or an organization. Verifiable credentials are a generic mechanism to issue, hold, and verify claims on a subject. This use case describes how a holder presents verifiable credentials to a verifier. The system in its role of verifier receives and verifies the origin, integrity, and validity of the credentials. 
 
-Verifiable credentials are an implementation of the[ W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/). Other roles are issuer and holder. These roles are described in other use cases (RFCs).
+Verifiable credentials are an implementation of the [W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/). Other roles are issuer and holder. These roles are described in other use cases (RFCs).
 
 ## Status of document
 
@@ -14,13 +14,15 @@ This document is currently a draft.
 
 ### Topics for discussion
 
-This document needs to be discussed on the following issues:Support of multiple networks. 
+This document needs to be discussed on the following issues.
 
-- The DID method supports multiple networks in the schema of the identifier. The method resolves to a verifiable data registry. The current network is limited to participants of the Nuts network because of the need to have a Nuts PKI Certificate. Local Governments, and even care providers, might not use the Nuts network. Local Governments will probably use nId. Other networks should be supported.
-- The implementation will use partials/ideas from the DIDComm message standard to send a request and response, including the error report message. DIDComm 2.0 (https://identity.foundation/didcomm-messaging/spec/) is currently in development and includes the draft version of JSON Web Message (https://tools.ietf.org/id/draft-looker-jwm-01.html). Usage of parts of an international standard in development is preferred above the development of a Nuts standard.
-- Trust is based on the use of Nuts certificates. To extend the trust to other domains and other networks, support for other certificates than the Nuts certificate is needed, or the use of verifiable credentials to proof an identity. Part of the network perspective is actor responsibility. The actor who gives access to data is repsonsible to ask proof and to conclude that the other actor has authorization.
-- Part of the onboarding on the network is findability of the particepant.
-- Support for an nId DID method for local governments. nId uses JSON Web Key Stores for verification.  Should be discussed to change this to DID documents. JSON Web Key Stores can be resolved from https://example.com/.well-known/jwks.json. The verifiable credential specifications state the the the `kid` can refer to a key in a [DID document](https://www.w3.org/TR/vc-data-model/#dfn-decentralized-identifier-documents), or can be the identifier of a key inside a JWKS.
+#### Support of multiple networks
+
+- The DID method supports multiple networks in the schema of the identifier. The method resolves to a verifiable data registry. The current network is limited to participants of the Nuts network because of the need to have a Nuts PKI Certificate. Local Governments, and even care providers, might not use the Nuts network. Local Governments will probably use [nID](https://www.vngrealisatie.nl/producten/nid-stelsel-privacy-een-informatiemaatschappij). Other networks should be supported.
+- The implementation will use partials/ideas from the DIDComm message standard to send a request and response, including the error report message. [DIDComm 2.0](https://identity.foundation/didcomm-messaging/spec/) is currently in development and includes the draft version of [JSON Web Message](https://tools.ietf.org/id/draft-looker-jwm-01.html). Usage of parts of an international standard in development is preferred above the development of a Nuts standard.
+- Trust is based on the use of Nuts certificates. To extend the trust to other domains and other networks, support for other certificates than the Nuts certificate is needed, or the use of verifiable credentials to proof an identity. Part of the network perspective is actor responsibility. The actor who gives access to data is responsible to ask proof and to conclude that the other actor has authorization.
+- Part of the onboarding on the network is findability of the participant.
+- Support for an nID DID method for local governments. nID uses JSON Web Key Sets (JWKS) for verification. Should be discussed to change this to DID documents. JWKS can be resolved from https://example.com/.well-known/jwks.json. The verifiable credential specifications state the the `kid` can refer to a key in a [DID document](https://www.w3.org/TR/vc-data-model/#dfn-decentralized-identifier-documents), or can be the identifier of a key inside a JWKS.
 
 
 
@@ -34,13 +36,13 @@ This document is released under the [Attribution-ShareAlike 4.0 International (C
 
 ## 1. Introduction
 
-The use cases for verifying credentials data model holds the four roles as described in[ https://www.w3.org/TR/vc-use-cases/](https://www.w3.org/TR/vc-use-cases/). The data model (https://www.w3.org/TR/vc-data-model/) adds an extra role, the verifiable data registry. Verifiable credentials are containers for different types of claims.
+The use cases for verifying credentials data model holds the four roles as described in [Verifiable Credentials Use Cases](https://www.w3.org/TR/vc-use-cases/). The data model (https://www.w3.org/TR/vc-data-model/) adds an extra role, the verifiable data registry. Verifiable credentials are containers for different types of claims.
 
 ![Image of User Tasks](https://www.w3.org/TR/vc-use-cases/VerifiableCredentialsUserTasks.png)
 
 This RFC describes the verify claim use case and its implementation in the Nuts network. The goal is to enable the verification of credentials presented by a holder. The credential is presented as a verifiable presentation with proof of the holder. The verifiable credentials are embedded in the presentation and hold proof of the issuer. It also contains a reference to the revocation registry of the issuer.
 
-To be able to verify the proof of the holder and the issuer, the verifier must resolve their identifiers to a decentralized identifier (DID) document (https://www.w3.org/TR/did-core/). The document contains the verification method, the public key of the holder, or the issuer.
+To be able to verify the proof of the holder and the issuer, the verifier must resolve their identifiers to a decentralized identifier ((DID) document)[https://www.w3.org/TR/did-core/]. The document contains the verification method, the public key of the holder, or the issuer.
 
 
 
@@ -48,8 +50,8 @@ To be able to verify the proof of the holder and the issuer, the verifier must r
 
 The W3C specifications are Recommendations and can be altered in time. The RFC describes the implementation in the Nuts network and has limited support on the following issues:
 
-- The implementation supports the JSON Web Keys as key format (verification method type equals JsonWebKey2020).
-- The implementation uses JSON Web Tokens as a proof format.
+- The implementation supports the JSON Web Keys (JWK) as key format (verification method type equals `JsonWebKey2020`).
+- The implementation uses JSON Web Tokens (JWT) as a proof format.
 - The implementation has limited support for key types (only OKP) and algorithms (only EdDSA).
 - The implementation has limited support for DID methods (only web method), which resolve to a DID document in a verifiable data registry.
 - ...
@@ -97,7 +99,7 @@ An authenticated participant of the Nuts network holds credentials and presents 
 ### Trigger event / precondition
 
 - *The holder posts a request to the verifier with the verifiable presentation.*
-- *The verifier must have NTP configured for the timezone of the location where the organization resides that is accountable for processing the verifiable presentation/credential.*
+- *The verifier must have NTP (Network Time Protocol) configured for the timezone of the location where the organization resides that is accountable for processing the verifiable presentation/credential.*
 - *The holder hosts a service to receive messages.*
 - *The holder is an authenticated participant of the Nuts network (under discussion, see known issues).*
 - *The holder and verifier use mutual TLS for authentication of domain and organization.*
@@ -105,9 +107,9 @@ An authenticated participant of the Nuts network holds credentials and presents 
 
 ### Main success scenario
 
-1. *The system receives the inbound message*
+1. *The system receives the inbound message*.
 
-2. *The system verifies the presentation as token performing the next steps.*
+2. *The system verifies the presentation as token by performing the next steps:*
 
    <ol type='a'>
      <li><i>The system decodes the token.</i></li>
@@ -133,17 +135,17 @@ The use case ends.
 
 ** **To be discussed if needed** **
 
-At 2b when the system resolves the DID using the web method, the system verifies that the DID controls the origin (the domain where the DID document resides).
+At 2b when the system resolves the DID using the web method, the system verifies that the DID controls the origin (the domain where the DID document resides):
 
-1. The system verifies the domain linkage credential for the DID used in the token. 
+- The system verifies the domain linkage credential for the DID used in the token. 
 
-   The domain linkage credential is a self-issued credential. 
+- The domain linkage credential is a self-issued credential. 
 
-   The verification of the domain linkage credential is performed with the same steps as any other verifiable credential.
+- The verification of the domain linkage credential is performed with the same steps as any other verifiable credential.
 
-   When the verification fails, the system sends an error report as a response of the original message, otherwise the system continues the use case.
+- When the verification fails, the system sends an error report as a response of the original message, otherwise the system continues the use case.
 
-See the specification of the linkage credential: https://identity.foundation/.well-known/resources/did-configuration/. The credentials must be a valid credential within the Nuts implementation using JSON Web Tokens as proof format. 
+See the specification of the [Domain Linkage Credential](https://identity.foundation/.well-known/resources/did-configuration/#domain-linkage-credential). The credential must be a valid credential within the Nuts implementation using JWTs as proof format. 
 
 The DID Configuration resource provides proof of a bi-directional relationship between the controller of an origin and a DID via cryptographically verifiable signatures that are linked to a DID's key material. Making it possible to connect existing systems and [Decentralized Identifiers](https://w3c.github.io/did-spec/) (DIDs) is an important undertaking that can aid in bootstrapping adoption and usefulness of DIDs. One such form of connection is the ability of a DID controller to prove they are the same entity that controls an origin.
 
@@ -151,15 +153,15 @@ The use case will have the following extensions. When an extension is a processi
 
 ### Error handling
 
-#### Error 2a-1: The verifiable presentation is not encoded as JSON Web Token
+#### Error 2a-1: The verifiable presentation is not encoded as JWT
 
 #### Error 2b-1: The DID can not be resolved
 
 Table of supported DID methods:
 
-| DID Method                                                   |
-| ------------------------------------------------------------ |
-| Web method (see: https://w3c-ccg.github.io/did-method-web/). <br />The DID document resource *MUST* exist at the origin's root, in the [IETF 8615 Well-Known Resource](https://tools.ietf.org/html/rfc8615) directory, as follows: <br />Example: `did:web:example.com` resolves to https://example.com/.well-known/did.json |
+| DID Method | Description | Example |
+| ----------- | --- | --- |
+| [Web method](https://w3c-ccg.github.io/did-method-web/) | The DID document resource *MUST* exist at the origin's root, in the [IETF 8615 Well-Known Resource](https://tools.ietf.org/html/rfc8615) directory. | `did:web:example.com` resolves to https://example.com/.well-known/did.json |
 
 #### Error 2c-1: The assertion method can not be found
 
@@ -171,17 +173,17 @@ The system is not able to find the verification method referenced by the asserti
 
 #### Error 2d-1: The verification method type is not supported
 
-The system concludes that the verification method type is not equal to JsonWebKey2020.
+The system concludes that the verification method type is not equal to `JsonWebKey2020`.
 
 See also: https://w3c.github.io/did-spec-registries/
 
 #### Error 2d-2: The curve is not supported
 
-The system concludes that the curve (`crv`) of the JSON Web Key is not equal to EdDsa (Edwards curve).
+The system concludes that the curve (`crv`) of the JWK is not equal to `EdDsa` (Edwards curve).
 
 #### Error 2d-3: The key type is not supported
 
-The system concludes that the key type (`kty`) of the JSON Web Key is not equal to OKP (Octet Key Pair with subtype Ed25519).
+The system concludes that the key type (`kty`) of the JWK is not equal to `OKP` (Octet Key Pair with subtype `Ed25519`).
 
 #### Error 2e-1: The signature is not valid.
 
@@ -217,11 +219,11 @@ The system concludes that the credential has status suspended or revoked.
 
 ### 4.1 Inbound message
 
-An transport layer is needed to enable routing between actors. It also enables to use message types, envelopes and encrypt and sign the payload independantly from the content of the payload. The transport layer therefore is autonomous. 
+Routing between actors requires a transport layer. It also enables actors to use message types and envelopes, and encrypt and/or sign the payload independently of the content of the payload. The transport layer therefore is autonomous. 
 
 To realize this use case, plain text messages are used. Precondition is peer to peer transport between holder and verifier, that the message is not transported across security boundaries, and mutual transport layer security (mTLS) is used between peers.
 
-This specification is inspired on the DIDComm specification. See https://identity.foundation/didcomm-messaging/spec/ and the proposed JSON Web Message format. See: https://tools.ietf.org/id/draft-looker-jwm-01.html.
+This specification is inspired by the [DIDComm specification](https://identity.foundation/didcomm-messaging/spec/) and the proposed [JSON Web Message](https://tools.ietf.org/id/draft-looker-jwm-01.html) format.
 
 
 
@@ -342,7 +344,7 @@ Date and time values MUST be a number containing a NumericDate value (Unix epoch
 
 ## 6. Realization of the verifiable credential
 
-The JSON Web Token of the credential.
+The JWT of the credential.
 
 ```json
 "protected": {
@@ -370,18 +372,18 @@ Date and time values MUST be a number containing a NumericDate value (Unix epoch
 
 ## 7. Realization of the status registry
 
-The verifiable credential SHOULD have a property for the discovery of information about the current status of a verifiable credential. The property is specified in the verifiable credential data model (https://www.w3.org/TR/vc-data-model/#status).
+The verifiable credential SHOULD have a property for the discovery of information about the current status of a verifiable credential. The property is specified in the [Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/#status).
 
 Allowed status of a verifiable credential is valid, suspended, or revoked.
 
 ```json
- "credentialStatus": {
+  "credentialStatus": {
     "id": "https://example.com/status/<status list identifier>",
     "type": "CredentialStatusList2017"
-  },
+  }
 ```
 
-The credentials list is specified in: https://w3c-ccg.github.io/vc-csl2017/
+The credentials list is specified by [Credential Status List (2017)](https://w3c-ccg.github.io/vc-csl2017/).
 
 
 
