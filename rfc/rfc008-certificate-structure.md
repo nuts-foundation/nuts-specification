@@ -72,6 +72,7 @@ This CA signs TLS certificates and signing certificates. This is a very importan
 | Validity | 3 years |
 | Is CA? | true |
 | Key Usage | certSign |
+| Extended Key Usage | serverAuthentication, clientAuthentication |
 | SubjectAlternativeName | otherName=1.3.6.1.4.1.54851.4: |
 | Subject | Free to choose, but must comply with the following rules: Country \(C\) must be present and contain the vendor’s country where it’s registered\*. Organization \(O\) must be present and contain the organization’s name as registered. Common Name \(CN\) MUST be present and have the following format:  CA. ‘Legal Name’ contains the name of the vendor as registered. ‘Optional Text’ is optional and can contain anything the vendor wishes to specify. ‘CA’ postfix is mandatory, indicating it’s a Certificate Authority |
 
@@ -97,9 +98,8 @@ The TLS certificate is used for setting up connections between the nodes. When a
 | Validity | 4 days |
 | Is CA? | false |
 | Key Usage | digitalSignature |
-| Extended Key Usage |  |
-
-serverAuthentication, clientAuthentication \| \| SubjectAlternativeName \| otherName=1.3.6.1.4.1.54851.4: \|
+| Extended Key Usage | serverAuthentication, clientAuthentication | 
+| SubjectAlternativeName | otherName=1.3.6.1.4.1.54851.4: |
 
 ## 5. Private key algorithms
 
