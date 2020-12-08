@@ -12,16 +12,16 @@ digraph D {
         RFC003 [label = "RFC003\nOAuth2 Authorization",href = "rfc003-oauth2-authorization"];
         RFC004 [label = "RFC004\nDistributed Document Format",href = "rfc004-distributed-document-format"];
         RFC005 [label = "RFC005\nDistributed Document Network using gRPC\n(Planned)",href = "rfc005-distributed-document-network-grpc"];
-        RFC006 [label = "RFC006\nDistributed Registry\n(Planned)",href = "rfc006-distributed-registry"];
+        RFC006 [label = "RFC006\nDistributed Registry",href = "rfc006-distributed-registry"];
         RFC008 [label = "RFC008\nCertificate Structure",href = "rfc008-certificate-structure"];
         RFC009 [label = "RFC009\nVerifiable Presentations",href = "rfc009-verifiable-presentations"];
     }
 
     // External RFCs
     subgraph cluster_external {
-        RFC7662_EXT [label = "RFC7662\nOAuth 2.0 Token Introspection", fillcolor=azure2, style=filled, href = "https://tools.ietf.org/html/rfc7662"]
-        RFC7523_EXT [label = "RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants", fillcolor=azure2, style=filled, href = "https://tools.ietf.org/html/rfc7523"]
-        RFC7515_EXT [label = "RFC7515\nJSON Web Signature (JWS)", fillcolor=azure2, style=filled, href = "https://tools.ietf.org/html/rfc7515"]
+        RFC7662_EXT [label = "RFC7662\nOAuth 2.0 Token Introspection", href = "https://tools.ietf.org/html/rfc7662", fillcolor = azure2, style = filled]
+        RFC7523_EXT [label = "RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants", href = "https://tools.ietf.org/html/rfc7523", fillcolor = azure2, style = filled,]
+        RFC7515_EXT [label = "RFC7515\nJSON Web Signature (JWS)", href = "https://tools.ietf.org/html/rfc7515", fillcolor = azure2, style = filled]
     }
 
     RFC002 -> RFC001
@@ -39,5 +39,5 @@ digraph D {
     RFC005 -> RFC004
 
     RFC006 -> RFC004
-    RFC006 -> RFC005
+    RFC006 -> RFC008
 }
