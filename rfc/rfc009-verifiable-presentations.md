@@ -36,19 +36,16 @@ The terminology used is defined in https://www.w3.org/TR/did-core/#terminology a
 
 ## 3. Requirements for verifiable credentials
 
-The Nuts framework MUST support the use of verifiable credentials in the roles of Issuer, Holder, and Verifier as described in [Verifiable Credentials Use Cases](https://www.w3.org/TR/vc-use-cases/) and [W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/). In the terms of decentralized Identifiers, the Nuts framework acts as a software agent of the person or organisation accountable for the role of Issuer, Holder, and Verifier.
+The implementation MUST support the use of verifiable credentials in the roles of Issuer, Holder, and Verifier as described in [Verifiable Credentials Use Cases](https://www.w3.org/TR/vc-use-cases/) and [W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/). In the terms of decentralized Identifiers, the implementation acts as a software agent of the person or organisation accountable for the role of Issuer, Holder, and Verifier.
 
-The Nuts framework MUST support the use decentralized identifiers as described in https://www.w3.org/TR/did-core/.
+The implementation MUST support the DID web method. See https://w3c-ccg.github.io/did-method-web/. To be able to support the web method, the implementation MUST support the use core specification of decentralized identifiers as described in https://www.w3.org/TR/did-core/.
 
-The Nuts framework MAY have limited support on the following issues:
+The implementation MAY have limited support on the following issues:
 
-- The framework supports the JSON Web Keys (JWK) as key format (verification method type equals `JsonWebKey2020`). See also https://www.w3.org/TR/did-spec-registries/.
-- The framework has limited support for key types (minimal OKP) and algorithms (minimal EdDSA).
-- The framework has limited support for DID methods (only web method), which resolve to a DID document in a verifiable data registry. See https://w3c-ccg.github.io/did-method-web/.
+- The implementation supports the JSON Web Keys (JWK) as key format (verification method type equals `JsonWebKey2020`). See also https://www.w3.org/TR/did-spec-registries/.
+- The implementation has limited support for key types (minimal OKP) and algorithms (minimal EdDSA).
 
-The Nuts framework MUST implement a secure Wallet to store decentralized Identifiers (DID) and their private key, and to store verifiable credentials that the agent holds.
-
-The Nuts framework MAY introduce 'irma' as did method to support the IRMA signing and verification.
+The implementation MUST implement a secure Wallet to store decentralized Identifiers (DID) and their private key, and to store verifiable credentials that the agent holds.
 
 
 
