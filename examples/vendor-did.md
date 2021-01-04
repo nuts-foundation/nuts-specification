@@ -1,4 +1,4 @@
-The example below describes a DID Document for a vendor:
+The example below expands on the generic Nuts DID and describes a DID Document for a vendor:
 
 ```json
 {

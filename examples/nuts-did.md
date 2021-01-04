@@ -1,11 +1,11 @@
-The example below describes a generic DID as can be used in the Nuts network:
+The example below describes a generic Nuts DID to be used in the Nuts network:
 
 ```json
 {
   "@context": [
     "https://www.w3.org/ns/did/v1"
   ],
-  // The ID of this care organization DID document. Notice the ID doesn't indicate the entity type (vendor/care organization),
+  // The ID of the DID. Notice the ID doesn't indicate the entity type (vendor/care organization),
   // that should be derived from the entity's credentials.
   // MUST start with `did`
   // MUST be a `nuts` method
@@ -18,19 +18,18 @@ The example below describes a generic DID as can be used in the Nuts network:
   //   If present and lists another DID, that subject can also control the DID
   //   If present but the DID subject itself is not listed, the DID subject DOES NOT have control over this document.
   "controller": [
-    // This organisation controls its own document
+    // First controller equals this document's DID, meaning it controls its own document
     "did:nuts:04cf1e20-378a-4e38-ab1b-401a5018c9ff",
     // This entity is allowed to make changes to this document as well
     // example usages are:
     // - a trusted third party (e.g. nuts foundation or a vendor).
-    // - another document for the same legal organisation (when care organizations merge).
-    // - parent document of this organisation document which holds all key material (allows nesting for larger or complex organizations).
+    // - another document for the same legal care organization (when organizations merge).
+    // - parent document of this document which holds all key material (allows nesting for larger or complex organizations).
     "did:nuts:f03a00f1-9615-4060-bd00-bd282e150c46"
   ],
-  // All cryptographic methods associated with this DID
-  // SHOULD these keys always be referenced in one of the verification relationships?
+  // `verificationMethod` contains all cryptographic keys associated with this DID. They are referenced by the 
+  // verification relationships (e.g. `authentication` or `assertionMethod`)
   "verificationMethod": [
-    // Key used by the care organization to control this document (e.g. alter services)
     {
       "id": "did:nuts:04cf1e20-378a-4e38-ab1b-401a5018c9ff#key-1",
       "type": "RsaVerificationKey2018",
@@ -41,16 +40,9 @@ The example below describes a generic DID as can be used in the Nuts network:
         "kty": "OKP",
         "kid": "_Qq0UL2Fq651Q0Fjd6TvnYE-faHiOpRlPVQcY_-tA4A"
       }
-    }
-  ],
-  // Keys specified in the section below are used to authenticate as DID controller. In other words;
-  // keys specified below can alter this DID document.
-  "authentication": [
-    // Refers to a key specified in `verificationMethod`
-    "did:nuts:04cf1e20-378a-4e38-ab1b-401a5018c9ff#key-1",
-    // This could be a recovery key for when the organization loses its private key,
+    },
+    // This could be a recovery key for when the party loses its private key,
     // residing on a hardtoken (e.g. a Yubikey in a safe).
-    // This key COULD also reside in `verificationMethod` and be referenced by this section.
     {
       "id": "did:nuts:04cf1e20-378a-4e38-ab1b-401a5018c9ff#key-2",
       "type": "JsonWebKey2020",
@@ -62,10 +54,23 @@ The example below describes a generic DID as can be used in the Nuts network:
       }
     }
   ],
-  "assertionMethod": [
-    "did:nuts:vendor:123#key-2"
-    // key used to sign claims
+  // Keys specified in the section below are used to authenticate as DID controller. In other words;
+  // keys specified below can alter this DID document.
+  // Entries MUST NOT contain embedded key material and all MUST reference keys containing in the verificationMethod
+  "authentication": [
+    // Key used by the party to control this document (e.g. alter services)
+    "did:nuts:04cf1e20-378a-4e38-ab1b-401a5018c9ff#key-1",
+    // Recovery key (e.g. hardtoken)
+    "did:nuts:04cf1e20-378a-4e38-ab1b-401a5018c9ff#key-2"
   ],
+  // `assertionMethod` indicates the keys used when signing Verifiable Credentials (VC). Examples use cases:
+  // - Vendor issuing a VC to care organization stating "this is my client"
+  // - Care organization issuing a VC stating "this is my software vendor"
+  // TODO: discuss these use cases and specify
+  "assertionMethod": [
+    "did:nuts:04cf1e20-378a-4e38-ab1b-401a5018c9ff#key-1"
+  ],
+  // `service` indicate high-level 
   "service": [
     {
       "id": "did:nuts:04cf1e20-378a-4e38-ab1b-401a5018c9ff#service-1",
@@ -80,7 +85,9 @@ The example below describes a generic DID as can be used in the Nuts network:
       "serviceEndpoint": "did:nuts:<vendor>#service-2"
     }
   ],
+  // MUST contain the timestamp at which the DID document was first created
   "created": "2019-03-23T06:35:22Z",
+  // MUST contain the timestamp at which the DID document was last updated
   "updated": "2020-08-10T13:40:06Z"
 }
 ```

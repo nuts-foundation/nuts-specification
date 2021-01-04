@@ -1,4 +1,4 @@
-The example below describes a DID Document for a care organization:
+The example below expands on the generic Nuts DID and describes a DID Document for a care organization:
 
 ```json
 {
