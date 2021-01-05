@@ -223,7 +223,7 @@ Almost all security considerations are covered by the mechanisms described in RF
 - **man-in-the-middle** - All communications is sent over two-way TLS and all documents are signed. A DID can not be hijacked since it is derived from the public key.
 - **denial of service** - This is out of scope and handled by RFC004.
 
-### 4.1. Protection against DID hijacking
+### 4.1 Protection against DID hijacking
 
 The Nuts network is a mesh network without central authority. This means that any party can generate a DID. 
 This DID must be protected against forgery and hijacking since duplicates are accepted in the Nuts network. 
@@ -241,7 +241,10 @@ The keys of that controller can be kept offline.
 A stolen key can alter the DID document in such a way that the attacker can get full control with a new key and can exclude the previous owner from making changes.
 Appropriate measures MUST be taken to keep authentication keys secure. 
 
-It's recommended to add a 2nd controller to every DID document. That DID document MAY have more than 1 controller as well.
-The DID subject whose DID document only contains a single controller SHOULD keep their authentication keys offline.
-Since the controller field may not be altered, this would always allow the owner of the offline key to be in control.
+When control over a DID document has been lost, the DID subject will have to have all Verifiable Credentials revoked. 
+Without Verifiable Credentials linked to the DID document, the DID document no longer has any value.
+The DID subject will have to go through the process of reacquiring all Verifiable Credentials for a new DID document.
 
+## 5. Privacy considerations
+
+All data is public knowledge. All considerations from [§10 of did-core](https://www.w3.org/TR/did-core/#privacy-considerations) apply.
