@@ -8,6 +8,8 @@
 Draft
 
 #### Copyright Notice
+![](../.gitbook/assets/license.png)
+
 This document is released under the [Attribution-ShareAlike 4.0 International \(CC BY-SA 4.0\) license](https://creativecommons.org/licenses/by-sa/4.0/).
 
 ## 1. Nuts DID Method
@@ -43,6 +45,13 @@ var key = {
 Where the `x` parameter is the base64 encoded public key.
 `idString = Base58Encode(Sha256(Base64urlDecode(key.x)))`
 
+example:
+```json
+{
+  "id": "did:nuts:e3cacd5c2d931295a64f6c3bb3f6ea58c3a9b253b990e32c5abce43c2f94c564"
+}
+```
+
 ## 2. Namespace Specific Identifier (NSI)
 
 Identifiers are derived from public keys that are valid at the moment of creating the DID document. 
@@ -50,6 +59,11 @@ It MUST be the public key that corresponds to the private key that was used to s
 The public key MUST also be present in the `verificationMethods`. When multiple keys are present, one MUST verify in this matter.
 
 ## 3. Method operations
+
+DID documents are enclosed in a message envelope to ensure consistency in the network.
+The envelope is in the form of a JWS as described in [RFC004].
+Once the network layer has confirmed the signature of the JWS, the registry MUST validate if the submitter is authorized to create, update or delete the document.
+If the authorization fails, the document should be ignored.
 
 Changes to DID documents can only be accepted if the update is signed with one of the following keys:
 
@@ -61,37 +75,128 @@ Changes to DID documents can only be accepted if the update is signed with one o
 The `controller` field MAY be present. If no `controller` field is present, the DID subject itself is the controller.
 If the `controller` field is present, only the DID subjects from the `controller` field can change the DID document.
 
+jws specification
+
+`cty` MUST contain the value `application/json+did-document`
+
+
 ### Create (Register)
 
+Example JOSE header
+
+```json
+{
+  "alg": "PS256",
+  "cty": "application/json+did-document",
+  "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+  "jwk": {
+    "crv": "P-256",
+    "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+    "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+    "kty": "EC",
+    "kid": "_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
+  },
+  "crit": [
+    "sigt",
+    "ver",
+    "prevs"
+  ],
+  "sigt": "",
+  "ver": "1",
+  "prevs": [
+    "148b3f9b46787220b1eeb0fc483776beef0c2b3e"
+  ]
+}
+```
+
 Jws payload:
+
 ```json
 {
   "id": "<nuts did id>",
   "controller": [],
-  "verificationMethod": [],
-  "authentication": [],
-  "service":[]
+  "verificationMethod": [{
+    "id": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+    "type": "JsonWebKey2020",
+    "controller": "did:nuts:123",
+    "publicKeyJwk": {
+      "crv": "P-256",
+      "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+      "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+      "kty": "EC",
+      "kid": "_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
+    }
+  }],
+  "authentication": ["did:example:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
+  "service": []
 }
+```
+
+Example signature:
+```
+SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 ```
 
 ### Read (Resolve)
 A Nuts DID can only be resolved locally. The concept of the Nuts registry is the state based upon all Create, Update and Delete operations received through the Nuts Network.
-Therefore any DID SHOULD already be present in the local storage.
+Therefore, any DID SHOULD already be present in the local storage.
 
-### Update (Replace or patch?)
-Only the following properties COULD be updated:
-
-
-The following example shows a replace:
 ```json
 {
-  "did": "<nuts did id>",
   "document": {
+    "@context": [ "https://www.w3.org/ns/did/v1" ],
+    "id": "did:nuts:a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
     "controller": [],
     "verificationMethod": [],
     "authentication": [],
     "service":[]
+  },
+  "metadata": {
+    "kid": "did:nuts:a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3#key1",
+    "created": "2021-01-04T12:15:06Z",
+    "updated": "2021-01-05T10:27:22Z"
   }
+}
+```
+
+### Update (Replace)
+The complete document gets replaced.
+
+The following example shows a replace (not a patch):
+Example JOSE header
+```json
+{
+  "alg": "PS256",
+  "cty": "application/json+did-document",
+  "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+  "crit": ["sigt", "ver","prevs"],
+  "sigt": "",
+  "ver": "1",
+  "prevs": ["148b3f9b46787220b1eeb0fc483776beef0c2b3e"],
+  "tid": "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+  "tiv": "1"
+}
+```
+
+Example payload:
+```json
+{
+  "id": "did:nuts:123",
+  "controller": [],
+  "verificationMethod": [{
+    "id": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+    "type": "JsonWebKey2020",
+    "controller": "did:nuts:123",
+    "publicKeyJwk": {
+      "crv": "P-256",
+      "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+      "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+      "kty": "EC",
+      "kid": "_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
+    }
+  }],
+  "authentication": ["did:example:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
+  "service":[]
 }
 ```
 
@@ -104,4 +209,39 @@ To revoke the keys to prevent future updates;
    these keys from the document. 
 2. Remove all controllers from the document.
 
+Deletion can not be undone.
+
 ## 4. Security Considerations
+
+Almost all security considerations are covered by the mechanisms described in RFC004. An overview of countermeasures:
+
+- **eavesdropping** - All communications is sent over two-way TLS. All data is public anyway.
+- **replay** - DID documents are identified and published by their hash (SHA256). Replaying will result in replaying the exact same content.
+- **message insertion** - RFC004 defines hashing and signing of published documents.
+- **deletion** - All DID documents are published and copied on a mesh network. Deletion of a single document will only occur locally and will not damage other nodes.
+- **modification** - DID documents can only be modified if they are published with a signature from one of the `authentication` keys.
+- **man-in-the-middle** - All communications is sent over two-way TLS and all documents are signed. A DID can not be hijacked since it is derived from the public key.
+- **denial of service** - This is out of scope and handled by RFC004.
+
+### 4.1. Protection against DID hijacking
+
+The Nuts network is a mesh network without central authority. This means that any party can generate a DID. 
+This DID must be protected against forgery and hijacking since duplicates are accepted in the Nuts network. 
+The duplicates are sorted and one will eventually be accepted (consistency rules of RFC004). This would open up a DID to hijacking. 
+Therefore, the DID MUST be a derivative of the public key used to sign the document as described in chapter 2. 
+
+### 4.2 Protection against loss of private key
+
+The loss of a single private key can be countered by registering multiple keys. Keys can be kept offline, in a vault for example.
+Such a key can later be used to register new keys when needed. Another option is to add a second controller that acts as an emergency backup.
+The keys of that controller can be kept offline.
+
+### 4.3 Protection against theft of private key
+
+A stolen key can alter the DID document in such a way that the attacker can get full control with a new key and can exclude the previous owner from making changes.
+Appropriate measures MUST be taken to keep authentication keys secure. 
+
+It's recommended to add a 2nd controller to every DID document. That DID document MAY have more than 1 controller as well.
+The DID subject whose DID document only contains a single controller SHOULD keep their authentication keys offline.
+Since the controller field may not be altered, this would always allow the owner of the offline key to be in control.
+

@@ -45,11 +45,8 @@ Documents MUST be encoded as [RFC7515 JSON Web Signature](https://tools.ietf.org
 
 In addition to required header parameters as specified in RFC7515 the following requirements apply:
 
-* **x5c**: MUST be present and contain exactly one entry with the X.509 signing certificate associated with the private key.
-
-  The certificate MUST have the digitalSignature and contentCommitment key usages and must be valid at time of signing.
-
-  The certificate SHOULD conform to [RFC008 Certificate Structure](rfc008-certificate-structure.md) so other parties can validate it.
+* The signing key is indicated by **kid** or **jwk**. One of them MUST be present, but not both. If **kid** is present
+  the key must be known and looked up locally. Otherwise the key must be taken from the **jwk** header.
 
 * **alg**: MUST be one of the following algorithms: `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512`.
 
@@ -58,7 +55,7 @@ In addition to required header parameters as specified in RFC7515 the following 
 * **cty**: MUST contain the type of the payload indicating how to interpret the payload encoded as string.
 * **crit** MUST contain the **sigt**, **ver** and **prevs** headers.
 
-The **jku**, **jwk**, **kid** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
+The **jku**, **x5c** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
 
 In addition to the registered header parameters, the following headers MUST be present as protected headers:
 
@@ -75,7 +72,7 @@ The following headers MAY be present as protected headers \(see section 3.4 for 
 
   defaults to `0`.
 
-To aid performance of validating the DAG the JWS SHALL NOT contain the actual contents of the document. Instead, the JWS payload MUST contain the SHA-1 hash of the contents encoded as hexadecimal, lower case string, e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
+To aid performance of validating the DAG the JWS SHALL NOT contain the actual contents of the document. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
 
 The contents then MAY be stored next to or apart from the document itself \(but that's out of scope for this RFC\).
 
@@ -83,7 +80,7 @@ There SHOULD be only 1 signature on the JWS. If there are multiple signatures al
 
 #### 3.2. Document Reference
 
-The document reference uniquely identifies a document and is used to refer to it. It MUST be calculated by taking the bytes of the JWS EXACTLY as received and hashing it using SHA-1.
+The document reference uniquely identifies a document and is used to refer to it. It MUST be calculated by taking the bytes of the JWS EXACTLY as received and hashing it using SHA-256.
 
 When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase, e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
 
@@ -155,14 +152,9 @@ until queue empty; take document from queue
 
 #### 3.6. Signature verification
 
-Before interpreting a document's payload it SHOULD be validated according to the following rules:
-
-* Assert cryptographic signature; can it be validated with the public key in the signing certificate?
-* Assert the certificate is trusted.
-* Assert the certificate and chain was valid at signing time.
-* Assert the certificate is meant for signing; key usage MUST be `digitalSignature`.
-
-Note there's no need for certificate revocation status checking; certificates are generally short-lived \(as specified by [RFC008 Certificate Structure](rfc008-certificate-structure.md)\).
+Before interpreting a document's payload the JWS' signature MUST be validated. When **kid** is used to specify the
+signing key and the system knows additional usage restrictions (e.g. the key is valid from X to Y, to be checked against **sigt**),
+the system MUST assert the usage is compliant.
 
 ## 4. Example
 
