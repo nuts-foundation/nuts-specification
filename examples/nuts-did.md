@@ -84,10 +84,6 @@ The example below describes a generic Nuts DID to be used in the Nuts network:
       "type": "nuts:core:consent",
       "serviceEndpoint": "did:nuts:<vendor>#service-2"
     }
-  ],
-  // MUST contain the timestamp at which the DID document was first created
-  "created": "2019-03-23T06:35:22Z",
-  // MUST contain the timestamp at which the DID document was last updated
-  "updated": "2020-08-10T13:40:06Z"
+  ]
 }
 ```
