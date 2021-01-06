@@ -99,16 +99,16 @@ If the `controller` field is present, only the DID subjects from the `controller
 
 #### 3.2.1 Create (Register)
 
-A Create operation for a DID Document puts the following additional requirements on the Nuts document JOSE header:
+A Create operation for a DID Document puts the following additional requirements on the JWS header:
 
 - `cty` MUST contain the value `application/json+did-document`
 - `tiv` MUST be absent or `0`
 - `tid` MUST be absent
 
 A `jwk` MUST be provided. The `kid` field of the jwk MUST be prefixed by the id of the did document.
-The `jwk` field will make sure the Nuts document can be processed on the network layer. 
+The `jwk` field will make sure the JWS can be processed on the network layer. 
 In order for the contents to be accepted in the Nuts registry, the `jwk` MUST match the `authentication` key in the DID document with the same identifier. 
-The `kid` from the Nuts document `jwk` field MUST match the `id` from the verification key in the DID document.
+The `kid` from the JWS `jwk` field MUST match the `id` from the verification key in the DID document.
 
 Example JOSE header
 
@@ -155,8 +155,11 @@ Example DID document:
 ```json
 {
   "@context": [ "https://www.w3.org/ns/did/v1" ],
-  "id": "<nuts did id>",
-  "controller": [],
+  "id": "did:nuts:123",
+  "controller": [
+    "did:nuts:123",
+    "did:nuts:7368245"
+  ],
   "verificationMethod": [{
     "id": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
     "controller": "did:nuts:123",
@@ -168,48 +171,33 @@ Example DID document:
       "kty": "EC"
     }
   }],
-  "authentication": ["did:example:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
+  "authentication": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
   "service": []
 }
 ```
 
 #### 3.2.2 Read (Resolve)
 A Nuts DID can only be resolved locally. The concept of the Nuts registry is the state based upon all Create, Update and Delete operations received through the Nuts Network.
-Therefore, any DID SHOULD already be present in the local storage.
-
-```json
-{
-  "document": {
-    "@context": [ "https://www.w3.org/ns/did/v1" ],
-    "id": "did:nuts:a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
-    "controller": [],
-    "verificationMethod": [],
-    "authentication": [],
-    "service":[]
-  },
-  "metadata": {
-    "kid": "did:nuts:a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3#key1",
-    "created": "2021-01-04T12:15:06Z",
-    "updated": "2021-01-05T10:27:22Z"
-  }
-}
-```
+Therefore, any DID document SHOULD already be present in local storage.
 
 #### 3.2.3 Update (Replace)
-The complete document gets replaced with a newer version.
+The complete document gets replaced with a newer version. 
 
-Changes to DID documents can only be accepted if the update is signed with one of the following keys:
+Changes to DID documents can only be accepted if the update is signed with current controller authentication key:
 
 - a key referenced from the `authentication` section of the latest DID document version.
 - a key referenced from the `authentication` section of a controller. One of the entries in the `controller` field MAY refer to a different DID Document.
   The `authentication` keys of the latest version of that DID Document can be used as authorized key.
 - a key referenced from the `authentication` section of the given DID document if it is a `Create` action.
 
-Example JOSE header
+The `kid` will hold the reference to the correct key.
+The `tid` and `tiv` fields are filled according to RFC004.
+
+Example JWS
 ```json
 {
   "alg": "PS256",
-  "cty": "application/json+did-document",
+  "cty": "application/json+did-document`",
   "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
   "crit": ["sigt", "ver","prevs"],
   "sigt": "",
@@ -217,28 +205,6 @@ Example JOSE header
   "prevs": ["148b3f9b46787220b1eeb0fc483776beef0c2b3e"],
   "tid": "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
   "tiv": "1"
-}
-```
-
-Example payload:
-```json
-{
-  "id": "did:nuts:123",
-  "controller": [],
-  "verificationMethod": [{
-    "id": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
-    "type": "JsonWebKey2020",
-    "controller": "did:nuts:123",
-    "publicKeyJwk": {
-      "crv": "P-256",
-      "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
-      "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
-      "kty": "EC",
-      "kid": "_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
-    }
-  }],
-  "authentication": ["did:example:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
-  "service":[]
 }
 ```
 
@@ -252,6 +218,18 @@ To revoke the keys to prevent future updates;
 2. Remove all controllers from the document.
 
 Deletion can not be undone.
+
+Example DID document:
+
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:123",
+  "controller": [],
+  "verificationMethod": [],
+  "authentication": []
+}
+```
 
 ### 3.3 Security Considerations
 
@@ -287,12 +265,159 @@ When control over a DID document has been lost, the DID subject will have to hav
 Without Verifiable Credentials linked to the DID document, the DID document no longer has any value.
 The DID subject will have to go through the process of reacquiring all Verifiable Credentials for a new DID document.
 
+TODO Is this acceptable? A SaaS provider will have to re-add all care organizations as DID documents (including services). Then all care organizations must also re-add the VC that proves their name/address to the new DID document!
+
 ### 3.4 Privacy considerations
 
 All data is public knowledge. All considerations from [§10 of did-core](https://www.w3.org/TR/did-core/#privacy-considerations) apply.
 
-## 4. Additional registry requirements
+## 4. Services
+It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC. Both services with a `serviceEndpoint` URI and with a set of properties MUST be supported.
 
-### 4.1 Operation validations
+The service identifier MUST be constructed from the DID followed by a `#`, the service type, a `-` and an identifier unique to the DID document.
 
-Other stuff
+Below is an example of a service registered by a care organization that uses the endpoints from a SaaS provider:
+
+The SaaS provider defines the actual URL:
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:123",
+  ...
+  "service": [
+    {
+      "id": "did:nuts:123#NutsOAuth-1",
+      "type": "NutsOAuth",
+      "serviceEndpoint": "https://example.com/oauth"
+    },
+    {
+      "id": "did:nuts:123#NutsFHIR-1",
+      "type": "NutsFHIR",
+      "serviceEndpoint": "https://example.com/fhir"
+    }
+  ]
+}
+```
+
+The care organisation refers to it:
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:abc",
+  ...
+  "service": [
+    {
+      "id": "did:nuts:abc#NutsCompoundService-1",
+      "type": "NutsCompoundService",
+      "serviceEndpoint": {
+        "oauthEndpoint": "did:nuts:123#NutsOAuth-1",
+        "fhirEndpoint": "did:nuts:123#NutsFHIR-1"
+      }
+    }
+  ]
+}
+```
+
+## 5. Deployment scenarios
+
+The definition of the Nuts DID method enables a wide variety of usages.
+To better understand the usages, this chapter illustrates some example scenarios.
+
+This section is non-normative.
+
+### 5.1 SaaS provider
+
+This example consists of a SaaS provider that acts as enabler, controller and node operator for all of its customers. The SaaS provider has access to all the key material and the care organizations do not.
+
+The SaaS provider registers itself with:
+
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:1",
+  "verificationMethod": [
+    {
+      "id": "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "controller": "did:nuts:1",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    },
+    {
+      "id": "did:nuts:1#_kalsjdyurtnAa4895akljnjghl584B9lkEJHNLJKFGA",
+      "controller": "did:nuts:1",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    }],
+  "authentication": [
+    "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+    "did:nuts:1#_kalsjdyurtnAa4895akljnjghl584B9lkEJHNLJKFGA"
+  ],
+  "service": [
+    {
+      "id": "did:nuts:123#NutsOAuth-1",
+      "type": "NutsOAuth",
+      "serviceEndpoint": "https://example.com/oauth"
+    },
+    {
+      "id": "did:nuts:123#NutsFHIR-1",
+      "type": "NutsFHIR",
+      "serviceEndpoint": "https://example.com/fhir"
+    }
+  ]
+}
+```
+
+It registers two keys: one if kept offline as backup, and the other is available in the software of the SaaS provider.
+
+The SaaS provider registers a care organization as:
+
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:2",
+  "verificationMethod": [
+    {
+      "id": "did:nuts:2#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "controller": "did:nuts:2",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    }],
+  "authentication": [
+    "did:nuts:2#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
+  ],
+  "controller": [
+    "did:nuts:1"
+  ],
+  "service": [
+    {
+      "id": "did:nuts:abc#NutsCompoundService-1",
+      "type": "NutsCompoundService",
+      "serviceEndpoint": {
+        "oauthEndpoint": "did:nuts:1#NutsOAuth-1",
+        "fhirEndpoint": "did:nuts:1#NutsFHIR-1"
+      }
+    }
+  ]
+}
+```
+
+The care organization does have an `authentication` key, this is required for the generation of the `id`. The SaaS provider will most likely not store the key since that key is not in control of the DID document. The DID document of the SaaS provider is the controller of the DID document.
+
+### 5.2 Hospital
+
+### 5.3 Single person deployment
