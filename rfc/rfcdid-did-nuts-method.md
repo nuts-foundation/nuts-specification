@@ -42,7 +42,8 @@ This RFC describes how to create, update and resolve the data structures require
 * **Service**: a group of endpoints implementing a service required by a Bolt.
 
 ## 3. Nuts DID Method
-The Nuts DID scheme is defined as follows:
+
+The Nuts DID URI scheme is defined as follows:
 ```
 did = "did:nuts:" idstring
 idstring = 21*22(base58char)
@@ -54,27 +55,26 @@ base58char = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" / "
     
 ```
 
-Where the `idstring` is generated from taking the SHA-256 hash of the public key from an Ed25519 curve:
+Where the `idstring` is derived from the public key:
 
 `idstring = BASE-58(SHA-256(raw-public-key-bytes))`
 
-Example:
-Consider the following JWK encoded Ed25519.
+For example, consider the following Ed25519 key (as JWK):
 
-```javascript
-var key = {
+```json
+{
   "kty" : "OKP",
   "crv" : "Ed25519",
   "x"   : "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
-  "d"   : "nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A",
   "use" : "sig",
   "kid" : "FdFYFzERwC2uCBB46pZQi4GG85LujR8obt-KWRBICVQ"
 }
 ```
-Where the `x` parameter is the base64 encoded public key.
-`idString = Base58Encode(Sha256(Base64urlDecode(key.x)))`
 
-example:
+For this key type the `x` parameter is used to derive `idstring`:
+`idstring = BASE-59(SHA-256(BASE64URL-DECODE(key.x)))`
+
+Outputs:
 ```json
 {
   "id": "did:nuts:e3cacd5c2d931295a64f6c3bb3f6ea58c3a9b253b990e32c5abce43c2f94c564"
@@ -84,13 +84,13 @@ example:
 ### 3.1 Namespace Specific Identifier (NSI)
 
 Identifiers are derived from public keys that are valid at the moment of creating the DID document. 
-It MUST be the public key that corresponds to the private key that was used to sign the Nuts registry document (RFC004).
+It MUST be the public key that corresponds to the private key that was used to sign the Nuts registry document ([RFC004](rfc004-distributed-document-format.md)).
 The public key MUST also be present in the `verificationMethods`. When multiple keys are present, one MUST verify in this matter.
 
 ### 3.2 Method operations
 
 DID documents are enclosed in a message envelope to ensure consistency in the network.
-The envelope is in the form of a JWS as described in [RFC004].
+The envelope is in the form of a JWS as described in [RFC004](rfc004-distributed-document-format.md).
 Once the network layer has confirmed the signature of the JWS, the registry MUST validate if the submitter is authorized to create, update or delete the document.
 If the authorization fails, the document should be ignored.
 
@@ -99,23 +99,23 @@ If the `controller` field is present, only the DID subjects from the `controller
 
 #### 3.2.1 Create (Register)
 
-A Create operation for a DID Document puts the following additional requirements on the JWS header:
+A Create operation for a DID Document puts the following additional requirements on the JWS header parameters:
 
+- `jwk` MUST be present
 - `cty` MUST contain the value `application/json+did-document`
 - `tiv` MUST be absent or `0`
 - `tid` MUST be absent
 
-A `jwk` MUST be provided. The `kid` field of the jwk MUST be prefixed by the id of the did document.
-The `jwk` field will make sure the JWS can be processed on the network layer. 
-In order for the contents to be accepted in the Nuts registry, the `jwk` MUST match the `authentication` key in the DID document with the same identifier. 
-The `kid` from the JWS `jwk` field MUST match the `id` from the verification key in the DID document.
+The `kid` field of the `jwk` header parameter MUST be prefixed by the `id` of the DID document.
+In order for the contents to be accepted in the Nuts registry, the JWK MUST match the `authentication` key in the DID document with the same identifier. 
+The `kid` field from the JWK MUST match the `id` from the verification key in the DID document.
 
-Example JOSE header
+Example JWS header
 
 ```json
 {
   "alg": "PS256",
-  "cty": "application/json+did-document`",
+  "cty": "application/json+did-document",
   "jwk": {
     "crv": "P-256",
     "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
@@ -180,6 +180,25 @@ Example DID document:
 A Nuts DID can only be resolved locally. The concept of the Nuts registry is the state based upon all Create, Update and Delete operations received through the Nuts Network.
 Therefore, any DID document SHOULD already be present in local storage.
 
+##### 3.2.2.1 Resolution Input Metadata
+All historic versions of a DID Document SHOULD be stored and queryable. This allows clients to resolve the document
+for a specific moment in time (e.g. a previous version) instead of the last one. For this the resolution input metadata
+MAY contain the `timestamp` field indicating this moment in time. This field MUST be formatted according to [RFC3339](https://tools.iets.org/html/rfc3339).
+
+Example:
+```json
+{
+  "timestamp": "2020-01-06T15:00:00Z"
+}
+```
+
+If `timestamp` is not present the current date/time MUST be assumed.
+
+##### 3.2.2.2 Document Metadata
+The resolved DID Document Metadata contains the `created` and `updated` fields, in accordance with the [did-core-spec](https://www.w3.org/TR/did-core/#did-document-metadata-properties). They are
+derived from the underlying Nuts Documents. `created` MUST contain the `sigt` timestamp from the first version of the
+document. `updated` MUST contain the `sigt` timestamp of the last version of the DID Document.
+
 #### 3.2.3 Update (Replace)
 The complete document gets replaced with a newer version. 
 
@@ -190,17 +209,19 @@ Changes to DID documents can only be accepted if the update is signed with curre
   The `authentication` keys of the latest version of that DID Document can be used as authorized key.
 - a key referenced from the `authentication` section of the given DID document if it is a `Create` action.
 
-The `kid` will hold the reference to the correct key.
-The `tid` and `tiv` fields are filled according to RFC004.
+The following requirements on the JWS header parameter apply:
 
-Example JWS
+- `kid` MUST hold the reference to the correct key.
+- `tid` and `tiv` MUST be filled according to [RFC004](rfc004-distributed-document-format.md).
+
+Example JWS header:
 ```json
 {
   "alg": "PS256",
-  "cty": "application/json+did-document`",
+  "cty": "application/json+did-document",
   "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
   "crit": ["sigt", "ver","prevs"],
-  "sigt": "",
+  "sigt": "2020-01-06T15:00:00Z",
   "ver": "1",
   "prevs": ["148b3f9b46787220b1eeb0fc483776beef0c2b3e"],
   "tid": "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
@@ -233,21 +254,21 @@ Example DID document:
 
 ### 3.3 Security Considerations
 
-Almost all security considerations are covered by the mechanisms described in RFC004. An overview of countermeasures:
+Almost all security considerations are covered by the mechanisms described in [RFC004](rfc004-distributed-document-format.md). An overview of countermeasures:
 
 - **eavesdropping** - All communications is sent over two-way TLS. All data is public anyway.
-- **replay** - DID documents are identified and published by their hash (SHA256). Replaying will result in replaying the exact same content.
-- **message insertion** - RFC004 defines hashing and signing of published documents.
+- **replay** - DID documents are identified and published by their hash (SHA-256). Replaying will result in replaying the exact same content.
+- **message insertion** - [RFC004](rfc004-distributed-document-format.md) defines hashing and signing of published documents.
 - **deletion** - All DID documents are published and copied on a mesh network. Deletion of a single document will only occur locally and will not damage other nodes.
 - **modification** - DID documents can only be modified if they are published with a signature from one of the `authentication` keys.
 - **man-in-the-middle** - All communications is sent over two-way TLS and all documents are signed. A DID can not be hijacked since it is derived from the public key.
-- **denial of service** - This is out of scope and handled by RFC004.
+- **denial of service** - This is out of scope and handled by [RFC004](rfc004-distributed-document-format.md).
 
 #### 3.3.1 Protection against DID hijacking
 
 The Nuts network is a mesh network without central authority. This means that any party can generate a DID. 
 This DID must be protected against forgery and hijacking since duplicates are accepted in the Nuts network. 
-The duplicates are sorted and one will eventually be accepted (consistency rules of RFC004). This would open up a DID to hijacking. 
+The duplicates are sorted and one will eventually be accepted (consistency rules of [RFC004](rfc004-distributed-document-format.md)). This would open up a DID to hijacking. 
 Therefore, the DID MUST be a derivative of the public key used to sign the document as described in chapter 2. 
 
 #### 3.3.2 Protection against loss of private key
@@ -272,7 +293,12 @@ TODO Is this acceptable? A SaaS provider will have to re-add all care organizati
 All data is public knowledge. All considerations from [§10 of did-core](https://www.w3.org/TR/did-core/#privacy-considerations) apply.
 
 ## 4. Services
-It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC. Both services with a `serviceEndpoint` URI and with a set of properties MUST be supported.
+It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC.
+A service can define an absolute endpoint URI or be a compound service, referring to a set of services. This is often the case
+when a SaaS provider defines endpoints to be used for all clients.
+
+For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing the URI. For a compound service the
+`serviceEndpoint` MUST contain a map containing references to absolute endpoint URI services.
 
 The service identifier MUST be constructed from the DID followed by a `#`, the service type, a `-` and an identifier unique to the DID document.
 
@@ -283,7 +309,6 @@ The SaaS provider defines the actual URL:
 {
   "@context": [ "https://www.w3.org/ns/did/v1" ],
   "id": "did:nuts:123",
-  ...
   "service": [
     {
       "id": "did:nuts:123#NutsOAuth-1",
@@ -304,7 +329,6 @@ The care organisation refers to it:
 {
   "@context": [ "https://www.w3.org/ns/did/v1" ],
   "id": "did:nuts:abc",
-  ...
   "service": [
     {
       "id": "did:nuts:abc#NutsCompoundService-1",
@@ -327,7 +351,7 @@ This section is non-normative.
 
 ### 5.1 SaaS provider
 
-This example consists of a SaaS provider that acts as enabler, controller and node operator for all of its customers. The SaaS provider has access to all the key material and the care organizations do not.
+This example consists of a SaaS provider that acts as enabler, controller and node operator for all of its customers. The SaaS provider has access to all the key material, while the care organizations hasn't.
 
 The SaaS provider registers itself with:
 
@@ -416,8 +440,28 @@ The SaaS provider registers a care organization as:
 }
 ```
 
-The care organization does have an `authentication` key, this is required for the generation of the `id`. The SaaS provider will most likely not store the key since that key is not in control of the DID document. The DID document of the SaaS provider is the controller of the DID document.
+The care organization does have an `authentication` key, this is required for the generation of the `id`. The SaaS provider will most likely not store the key since that key is not in control of the DID document.
+Since this key isn't after initial creation of the document the SaaS provider SHOULD remove it from the authentication document afterwards to improve security and clarity.
+The DID document of the SaaS provider is the controller of the DID document.
 
 ### 5.2 Hospital
 
 ### 5.3 Single person deployment
+
+
+## Current issues
+
+### Key management and mitigating impact of key loss
+Considering the case a care provider has outsourced its key management to a service provider.
+When discussing deployment scenarios, we should consider the different roles at the service provider like:
+* Sales and support department who can create and delete DID documents
+* System administrators who alter serviceEndpoints
+
+It might not be desirable for these roles have access to the same key material. We can suggest configurations with different DID documents with different keys for services and for controller.
+
+### Management of VCs by a trusted service provider
+Considering the case a care provider has outsourced it key management to a service provider.
+When obtaining a VC from a trusted party, how does the care provider prove that it is the party represented by the DID without being able to provide private key material?
+
+### Resolvability of the DID document
+The fundamental idea of a DID document is that it should be resolvable by other parties. Section [7.2.2 of the did-core spec](https://w3c.github.io/did-core/#read-verify) requires a specification how a DID resolver could resolve and verify a DID document from the registry. Since the Nuts registry will be a local registry this is not yet a consideration but when federation with other registries will become relevant, a proper specification should be written.
