@@ -349,14 +349,24 @@ The care organisation refers to it:
 }
 ```
 
-## 5. Deployment scenarios
+## 5. Supported Cryptographic Algorithms and Key Types
+
+Since RSA algorithms are deemed to be insecure for medium to long term, only elliptic curve-type algorithms are supported.
+The library support for newer algorithms (e.g. `Ed25519`) and curves (`X25519`) however is limited, so for now only
+the `secp256r1` NIST curve is supported. This curve is considered to provide enough security for the next 10 years,
+according to the (Dutch Cyber Security Council)[https://www.ncsc.nl/].
+
+It is expected however, that as library support improves more (stronger) algorithms and key types will be supported,
+which should be taken in account by implementors.
+
+## 6. Deployment scenarios
 
 The definition of the Nuts DID method enables a wide variety of usages.
 To better understand the usages, this chapter illustrates some example scenarios.
 
 This section is non-normative.
 
-### 5.1 SaaS provider
+### 6.1 SaaS provider
 
 This example consists of a SaaS provider that acts as enabler, controller and node operator for all of its customers. The SaaS provider has access to all the key material, while the care organizations hasn't.
 
@@ -451,9 +461,9 @@ The care organization does have an `authentication` key, this is required for th
 Since this key isn't after initial creation of the document the SaaS provider SHOULD remove it from the authentication document afterwards to improve security and clarity.
 The DID document of the SaaS provider is the controller of the DID document.
 
-### 5.2 Hospital
+### 6.2 Hospital
 
-### 5.3 Single person deployment
+### 6.3 Single person deployment
 
 
 ## Current issues
