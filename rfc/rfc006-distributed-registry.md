@@ -1,378 +1,474 @@
-# RFC006 Distributed Registry
+# RFC006 Distributed Registry with Decentralized Identifiers (DID)
 
 |  |  |
 | :--- | :--- |
-| Nuts foundation | R.G. Krul |
+| Nuts foundation | W.M. Slakhorst |
 | Request for Comments: 006 | Nedap |
-|  | September 2020 |
+|  | S. van der Vegt |
+|  | Nedap |
+|  | R.G. Krul |
+|  | Nedap |
+|  | January 2021 |
 
-## Distributed Registry
-
+## Distributed Registry with Decentralized Identifiers (DID)
 ### Abstract
 
-This RFC describes a protocol to build a registry containing information required for care organizations to exchange data
-through their software vendors. The registry typically contains vendors, organizations, services and endpoints.
-It uses [RFC004](rfc004-distributed-document-format.md)'s documents as underlying data format.
+This RFC describes a protocol to build a registry containing information required for (care) organizations to exchange data.
+The registry typically contains organizations, software vendors acting on behalf of their client (organizations),
+data exchange services offered by organizations and their technical endpoints.
+It describes how these are mapped to [Decentralized Identifiers (DID)](https://www.w3.org/TR/did-core/) and how DID Documents
+are encapsulated in [RFC004 Distributed Documents](rfc004-distributed-document-format.md) to provide cryptographic
+integrity and consistent state across distributed networks.
 
-### Status of document
+### Status
 
 This document is currently a draft.
 
 ### Copyright Notice
-
 ![](../.gitbook/assets/license.png)
 
 This document is released under the [Attribution-ShareAlike 4.0 International \(CC BY-SA 4.0\) license](https://creativecommons.org/licenses/by-sa/4.0/).
 
-## 1.  Introduction
+## 1. Introduction
 
 When care organizations want to exchange data using Nuts they need to know where to find that data and how to authenticate it.
-This RFC describes the document types containing the information required to form this registry.
-It uses [RFC004](rfc004-distributed-document-format.md) as underlying data format. The origin and requirements of
-certificates are defined by RFC008.
+This knowledge is recorded in a distributed registry, writable and queryable by all network participants.
+This RFC describes how to create, update and resolve the data structures required to achieve that goal.
 
 ## 2. Terminology
 
 * **Bolt**: a use case built on top of the functionality Nuts provides.
-* **Document**: a distributed document as specified by [RFC004](rfc004-distributed-document-format.md).
+* **JWS**: JSON Web Signature as specified by [RFC004](rfc004-distributed-document-format.md).
 * **Organization**: a care organization exchanging data with other care organizations over a Nuts network.
-* **Vendor**: an object developing software for care organizations participating in a Nuts network.
-  Organizations access the Nuts network through their vendor's software.
-* **Endpoint**: a URI or URL exposed by a vendor which can be used by other vendors to pull data.
+  By giving other DIDs control over its DID Document organizations can delegate data exchange to another party,
+  e.g. a care software vendor or SaaS provider.
+* **Endpoint**: a URI or URL exposed by a network participant which can be used by other participants to pull data.
 * **Service**: a group of endpoints implementing a service required by a Bolt.
-* **Object**: an instance of a vendor, organization or endpoint.
 
-Other terminology comes from the [RFC001 Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
+## 3. Nuts DID Method
 
-## 3. Domain Model
-The following UML entity diagram displays how vendors, organizations, endpoints and services relate:
+The Nuts DID URI scheme is defined as follows:
+```
+did = "did:nuts:" idstring
+idstring = 21*22(base58char)
+base58char = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" / "C"
+    / "D" / "E" / "F" / "G" / "H" / "J" / "K" / "L" / "M" / "N" / "P" / "Q"
+    / "R" / "S" / "T" / "U" / "V" / "W" / "X" / "Y" / "Z" / "a" / "b" / "c"
+    / "d" / "e" / "f" / "g" / "h" / "i" / "j" / "k" / "m" / "n" / "o" / "p"
+    / "q" / "r" / "s" / "t" / "u" / "v" / "w" / "x" / "y" / "z"
+    
+```
 
-![RFC006 Domain Model](../.gitbook/assets/rfc006-registry-domain-model.svg)
+Where the `idstring` is derived from the public key:
 
-## 4. Format
-Entities MUST be represented as JSON document as the JWS payload defined by [RFC004](rfc004-distributed-document-format.md).
-The **cty** header parameter from [RFC004](rfc004-distributed-document-format.md)) MUST contain the type defined for
-that particular object type. The type parameter `o` MUST be used to indicate creation or an update, e.g:
+`idstring = BASE-58(SHA-256(raw-public-key-bytes))`
 
-`registry/vendor;o=update`
+For example, consider the following Ed25519 key (as JWK):
 
-Other values than `update` or `create` for the `o` parameter SHALL NOT be used.
-
-## 4.1. Creating and updating
-When creating entities its required fields MUST be specified as JSON document. The `o` parameter MUST be specified as `create`.
-
-To update an object's fields [JSON Patch (RFC6902)](https://tools.ietf.org/html/rfc6902) is used. The object to update
-MUST be specified by specifying the **tid** (*timeline ID*, see [RFC004](rfc004-distributed-document-format.md))
-The `o` parameter MUST be specified as `update`. An update document MUST contain the following fields:
-* **patch** MUST contain an array with patch operations according to [RFC6902](https://tools.ietf.org/html/rfc6902).
-
-If one of the operations fails the document MUST be rejected.
-
-Example for document type `registry/organization;o=update`:
 ```json
 {
-    "patch": [
-       { "op": "replace", "path": "/name", "value": "NoPlaceLikeHome Thuiszorg" }
-    ]
+  "kty" : "OKP",
+  "crv" : "Ed25519",
+  "x"   : "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+  "use" : "sig",
+  "kid" : "FdFYFzERwC2uCBB46pZQi4GG85LujR8obt-KWRBICVQ"
 }
 ```
 
-When using a destructive operation (especially when using `remove` or `replace` on arrays) vendors COULD use the
-`test` operation to make sure the intended values are removed.
+For this key type the `x` parameter is used to derive `idstring`:
+`idstring = BASE-59(SHA-256(BASE64URL-DECODE(key.x)))`
 
-## 4.2. Signing
-All documents (registration or update) MUST be signed by the vendor who owns the object (be it a vendor, organization or endpoint). The only
-exception is when registering a new vendor; in that case it MUST be another, already registered vendor. If a new CA certificate
-is registered for a vendor, signing certificate issued by that CA certificate can also be used for updating previously
-published documents from that point on the DAG (see [RFC004](rfc004-distributed-document-format.md)).
-
-In any case the signing certificate MUST conform to [RFC008](rfc008-certificate-structure.md).
-
-## 5. Object types
-This section describes each of the supported object types.
-
-### 5.1. Vendor
-This document registers a vendor on the registry. It's identified by the type `registry/vendor`.
-Since new vendors can't connect to other nodes in the network since their CA certificate isn't trusted yet,
-another vendor (**Alice**) SHOULD register the new vendor (**Bob**) through the following process:
-
-1. **Bob** generates his CA certificate (see [RFC008](rfc008-certificate-structure.md)) and creates the vendor proof (see section 6, "Vendor proof").
-2. **Bob** sends his CA certificate and vendor proof to **Alice** via an out-of-band mechanism (see below).
-3. **Alice** creates the vendor registration document with **Bob**'s CA certificate and vendor proof, then signs and publishes it.
-4. **Bob** adds **Alice**'s CA certificate to its truststore.
-5. **Bob** connects to **Alice** and starts receiving documents.
-
-Before **Alice** connects to **Bob** they communicate out-of-band. A (relatively) trusted means of communication SHOULD
-be used, like signed e-mail or authenticated chat.
-
-#### Fields
-The following fields MUST be present:
-* **certs** (certificates): MUST contain an array containing base64 encoded vendor CA certificates.
-* **prfs**: MUST contain an array of cryptographic proofs asserting the vendor being a real software company.
-
-Example:
+Outputs:
 ```json
 {
-    "certs": ["CA certificate as base64 ASN.1"],
-    "prfs": ["vendor proof"]
+  "id": "did:nuts:e3cacd5c2d931295a64f6c3bb3f6ea58c3a9b253b990e32c5abce43c2f94c564"
 }
 ```
 
-#### Duplicates
-Vendors COULD re-register their vendor e.g. in case of loss of CA and signing key. As long as the new proof is valid
-the new CA certificate MUST be deemed valid to authenticate that vendor. The original registration MUST be kept as well,
-essentially merging the two. 
+Nuts DID Documents are wrapped in a JWS (JSON Web Signature) to ensure cryptographic authenticity and integrity through
+([RFC004](rfc004-distributed-document-format.md)). Please refer to that RFC for how specifically create the JWS.
 
-#### Validation
-When processing a vendor registration or update it MUST be validated as follows:
+### 3.1 Namespace Specific Identifier (NSI)
 
-1. Assert all required fields are present.
-2. Assert all fields value formats are valid.
-3. For updates: assert only modifiable fields are updated (**certs**, **prfs** are modifiable).
-4. Validate **prfs**:
-   * Assert there is at least one proof.
-   * Assert proofs are valid at the time they're introduced.
-   * Assert all proofs authenticate the same vendor.
-5. Validate **certs**:
-   * Assert there is at least one certificate.
-   * Assert all certificates conform to the vendor CA certificate specification (see [RFC008](rfc008-certificate-structure.md)).
-   * Assert all certificates have the same MUST contain the same vendor ID.
+Identifiers are derived from public keys that are valid at the moment of creating the DID document. 
+It MUST be the public key that corresponds to the private key that was used to sign the JWS.
+The public key MUST also be present in the `verificationMethods`. When multiple keys are present, one MUST verify in this matter.
 
-If any of these steps fail the registration or update SHALL NOT be processed.
+### 3.2 Method operations
 
-#### Revoking CA certificates
-When a vendor loses or leaks its private key, the vendor SHOULD remove the certificate from its registration to avoid
-malicious parties exploiting it. However, other parties MUST regard signatures created before removal of the certificate
- as valid. How the vendor SHOULD change its CA certificate depends on the situation:
+DID documents are enclosed in a message envelope to ensure consistency in the network.
+The envelope is in the form of a JWS as described in [RFC004](rfc004-distributed-document-format.md).
+Once the network layer has confirmed the signature of the JWS, the registry MUST validate if the submitter is authorized to create, update or delete the document.
+If the authorization fails, the document should be ignored.
 
-##### CA certificate private key loss
-In case the vendor loses its CA private key it MUST register a new vendor CA certificate. This can be done in two ways,
-depending on what was lost:
+The `controller` field MAY be present. If no `controller` field is present, the DID subject itself is the controller.
+If the `controller` field is present, only the DID subjects from the `controller` field can change the DID document.
 
-1. If the vendor still has a valid signing certificate it COULD sign the update using that private key.
-2. Otherwise, when the signing certificate has expired or the private key is lost as well, the vendor MUST also provide
-new proof to authenticate ownership of the vendor. The new proof MUST be the first operation in the **patch** field.
+#### 3.2.1 Create (Register)
 
-Example update:
+A Create operation for a DID Document puts the following additional requirements on the JWS header parameters:
+
+- `jwk` MUST be present
+- `cty` MUST contain the value `application/json+did-document`
+- `tiv` MUST be absent or `0`
+- `tid` MUST be absent
+
+The `kid` field of the `jwk` header parameter MUST be prefixed by the `id` of the DID document.
+In order for the contents to be accepted in the Nuts registry, the JWK MUST match the `authentication` key in the DID document with the same identifier. 
+The `kid` field from the JWK MUST match the `id` from the verification key in the DID document.
+
+Example JWS header
+
 ```json
 {
-  "patch": [
-    { "op": "add", "path": "/prfs", "value": "some new proof" },
-    { "op": "replace", "path": "/crts", "value": ["CA certificate as base64 ASN.1"] }
+  "alg": "PS256",
+  "cty": "application/json+did-document",
+  "jwk": {
+    "crv": "P-256",
+    "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+    "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+    "kty": "EC",
+    "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
+  },
+  "crit": [
+    "sigt",
+    "ver",
+    "prevs"
+  ],
+  "sigt": "",
+  "ver": "1",
+  "prevs": [
+    "148b3f9b46787220b1eeb0fc483776beef0c2b3e"
   ]
 }
-``` 
+```
 
-##### CA certificate private key leakage
-In case the vendor leaks its CA private key (or it gets stolen), it MUST remove the associated certificate as soon as possible
-and register a new one.
-In the same update it MUST register new proof and CA certificate as in the key loss process.
-Example update:
+The DID document has the following basic requirements:
+
+- the `id` MUST be generated according to the method specified at the beginning of §3
+- at least 1 key MUST be present in the `verificationMethod` and `authentication`
+- all key references in `authentication` MUST refer to keys listed under `verificationMethods`
+
+Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` followed by XXXXX????
+Each key MUST be of type `JsonWebKey2020` (TODO: follow that spec) 
+TODO limit curve
+
+The `controller` field MAY be present. This RFC follows the [did-core-spec](https://www.w3.org/TR/did-core/#did-controller).
+
+TODO: `assertion` field
+
+Example DID document:
+
 ```json
 {
-  "patch": [
-    { "op": "add", "path": "/prfs", "value": "some new proof" },
-    { "op": "replace", "path": "/crts", "value": ["CA certificate as base64 ASN.1"] }
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:123",
+  "controller": [
+    "did:nuts:123",
+    "did:nuts:7368245"
+  ],
+  "verificationMethod": [{
+    "id": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+    "controller": "did:nuts:123",
+    "type": "JsonWebKey2020",
+    "publicKeyJwk": {
+      "crv": "P-256",
+      "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+      "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+      "kty": "EC"
+    }
+  }],
+  "authentication": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
+  "service": []
+}
+```
+
+#### 3.2.2 Read (Resolve)
+A Nuts DID can only be resolved locally. The concept of the Nuts registry is the state based upon all Create, Update and Delete operations received through the Nuts Network.
+Therefore, any DID document SHOULD already be present in local storage.
+
+##### 3.2.2.1 Resolution Input Metadata
+All historic versions of a DID Document SHOULD be stored and queryable. This allows clients to resolve the document
+for a specific moment in time (e.g. a previous version) instead of the last one. For this the resolution input metadata
+MAY contain the `timestamp` field indicating this moment in time. This field MUST be formatted according to [RFC3339](https://tools.iets.org/html/rfc3339).
+
+Example:
+```json
+{
+  "timestamp": "2020-01-06T15:00:00Z"
+}
+```
+
+If `timestamp` is not present the current date/time MUST be assumed.
+
+##### 3.2.2.2 Document Metadata
+The resolved DID Document Metadata contains the `created` and `updated` fields, in accordance with the [did-core-spec](https://www.w3.org/TR/did-core/#did-document-metadata-properties). They are
+derived from the underlying Nuts Documents. `created` MUST contain the `sigt` timestamp from the first version of the
+document. `updated` MUST contain the `sigt` timestamp of the last version of the DID Document.
+
+#### 3.2.3 Update (Replace)
+The complete document gets replaced with a newer version. 
+
+Changes to DID documents can only be accepted if the update is signed with current controller authentication key:
+
+- a key referenced from the `authentication` section of the latest DID document version.
+- a key referenced from the `authentication` section of a controller. One of the entries in the `controller` field MAY refer to a different DID Document.
+  The `authentication` keys of the latest version of that DID Document can be used as authorized key.
+- a key referenced from the `authentication` section of the given DID document if it is a `Create` action.
+
+The following requirements on the JWS header parameter apply:
+
+- `kid` MUST hold the reference to the correct key.
+- `tid` and `tiv` MUST be filled according to [RFC004](rfc004-distributed-document-format.md).
+
+Example JWS header:
+```json
+{
+  "alg": "PS256",
+  "cty": "application/json+did-document",
+  "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+  "crit": ["sigt", "ver","prevs"],
+  "sigt": "2020-01-06T15:00:00Z",
+  "ver": "1",
+  "prevs": ["148b3f9b46787220b1eeb0fc483776beef0c2b3e"],
+  "tid": "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+  "tiv": "1"
+}
+```
+
+#### 3.2.4 Delete (Revoke)
+
+DID Documents cannot be deleted as in being "erased", only its keys can be removed as to prevent future changes (revocation).
+To revoke the keys to prevent future updates;
+
+1. Remove all keys (specified by `verificationMethod`) and references (specified by e.g. `authentication`) to
+   these keys from the document. 
+2. Remove all controllers from the document.
+
+Deletion can not be undone.
+
+Example DID document:
+
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:123",
+  "controller": [],
+  "verificationMethod": [],
+  "authentication": []
+}
+```
+
+### 3.3 Security Considerations
+
+Almost all security considerations are covered by the mechanisms described in [RFC004](rfc004-distributed-document-format.md). An overview of countermeasures:
+
+- **eavesdropping** - All communications is sent over two-way TLS. All data is public anyway.
+- **replay** - DID documents are identified and published by their hash (SHA-256). Replaying will result in replaying the exact same content.
+- **message insertion** - [RFC004](rfc004-distributed-document-format.md) defines hashing and signing of published documents.
+- **deletion** - All DID documents are published and copied on a mesh network. Deletion of a single document will only occur locally and will not damage other nodes.
+- **modification** - DID documents can only be modified if they are published with a signature from one of the `authentication` keys.
+- **man-in-the-middle** - All communications is sent over two-way TLS and all documents are signed. A DID can not be hijacked since it is derived from the public key.
+- **denial of service** - This is out of scope and handled by [RFC004](rfc004-distributed-document-format.md).
+
+#### 3.3.1 Protection against DID hijacking
+
+The Nuts network is a mesh network without central authority. This means that any party can generate a DID. 
+This DID must be protected against forgery and hijacking since duplicates are accepted in the Nuts network. 
+The duplicates are sorted and one will eventually be accepted (consistency rules of [RFC004](rfc004-distributed-document-format.md)). This would open up a DID to hijacking. 
+Therefore, the DID MUST be a derivative of the public key used to sign the document as described in chapter 2. 
+
+#### 3.3.2 Protection against loss of private key
+
+The loss of a single private key can be countered by registering multiple keys. Keys can be kept offline, in a vault for example.
+Such a key can later be used to register new keys when needed. Another option is to add a second controller that acts as an emergency backup.
+The keys of that controller can be kept offline.
+
+#### 3.3.3 Protection against theft of private key
+
+A stolen key can alter the DID document in such a way that the attacker can get full control with a new key and can exclude the previous owner from making changes.
+Appropriate measures MUST be taken to keep authentication keys secure. 
+
+When control over a DID document has been lost, the DID subject will have to have all Verifiable Credentials revoked. 
+Without Verifiable Credentials linked to the DID document, the DID document no longer has any value.
+The DID subject will have to go through the process of reacquiring all Verifiable Credentials for a new DID document.
+
+TODO Is this acceptable? A SaaS provider will have to re-add all care organizations as DID documents (including services). Then all care organizations must also re-add the VC that proves their name/address to the new DID document!
+
+### 3.4 Privacy considerations
+
+All data is public knowledge. All considerations from [§10 of did-core](https://www.w3.org/TR/did-core/#privacy-considerations) apply.
+
+## 4. Services
+It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC.
+A service can define an absolute endpoint URI or be a compound service, referring to a set of services. This is often the case
+when a SaaS provider defines endpoints to be used for all clients.
+
+For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing the URI. For a compound service the
+`serviceEndpoint` MUST contain a map containing references to absolute endpoint URI services.
+
+The service identifier MUST be constructed from the DID followed by a `#`, the service type, a `-` and an identifier unique to the DID document.
+
+Below is an example of a service registered by a care organization that uses the endpoints from a SaaS provider:
+
+The SaaS provider defines the actual URL:
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:123",
+  "service": [
+    {
+      "id": "did:nuts:123#NutsOAuth-1",
+      "type": "NutsOAuth",
+      "serviceEndpoint": "https://example.com/oauth"
+    },
+    {
+      "id": "did:nuts:123#NutsFHIR-1",
+      "type": "NutsFHIR",
+      "serviceEndpoint": "https://example.com/fhir"
+    }
   ]
 }
-``` 
+```
 
-To avoid attackers re-adding the previously removed CA certificate, the application SHOULD allow administrators to
- register compromised X.509 certificate thumbprints with the date it was compromised. The application SHALL NOT accept
- certificates or signatures on or after this date. Communication of network participants regarding this compromised
- certificate list SHOULD happen out-of-band over an authenticated channel.
-
-### 5.2. Organization
-This document registers a care organization as a client of registered vendor (section 5.1). It's identified by the type `registry/organization`.
-
-#### Fields
-The following fields MUST be present:
-* **id**: MUST contain the organization's ID encoded as URN. This can be any valid URN, for instance an AGB-code or
-  KVK-number e.g.: `urn:oid:2.16.840.1.113883.2.4.6.1:06123456` (AGB-code). It is used to refer to the organization by the
-  vendor itself or other vendors. The organisation ID SHALL NOT be changed.
-* **vid** (vendor ID): MUST be the organization's software vendor's ID as URN (e.g. `urn:oid:1.3.6.1.4.1.54851.4:1234`).
-  The vendor ID SHALL NOT be changed; relation to a care organization SHALL NOT be transfered to another vendor. 
-* **name**: MUST contain the organization's commonly known name as string. Only alphanumeric, dashes (`-`) and space characters are allowed,
-  it SHALL NOT be empty or only contain spaces. It MUST conform to the following regex: `[a-zA-Z0-9 ]+`.
-* **prfs** (proofs): MUST contain an array with cryptographic proofs asserting the organization as being an actual care organization.
-  at the same it serves as commitment from the care organization that it uses the vendor's (identified by **vid**) software.
-  See section 7 for supported proof types.
-
-Example:
+The care organisation refers to it:
 ```json
 {
-    "id": "urn:oid:2.16.840.1.113883.2.4.6.1:06123456",
-    "vid": "urn:oid:1.3.6.1.4.1.54851.4:1234",
-    "name": "HomeSweetHome Thuiszorg",
-    "prfs": ["organisation proof"]
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:abc",
+  "service": [
+    {
+      "id": "did:nuts:abc#NutsCompoundService-1",
+      "type": "NutsCompoundService",
+      "serviceEndpoint": {
+        "oauthEndpoint": "did:nuts:123#NutsOAuth-1",
+        "fhirEndpoint": "did:nuts:123#NutsFHIR-1"
+      }
+    }
+  ]
 }
 ```
 
-#### Validation
-When processing an organization registration or update it MUST be validated as follows:
+## 5. Deployment scenarios
 
-1. Assert all required fields are present.
-2. Assert all fields value formats are valid.
-3. For updates: assert only modifiable fields are updated (**name**, **prfs** are modifiable).
-4. Assert the document is signed by the vendor identified by **vid**.
-5. Validate **prfs**:
-   * Assert there is at least one proof.
-   * Assert proofs are valid at the time they're introduced.
-   * Assert all proofs authenticate the same organisation.
+The definition of the Nuts DID method enables a wide variety of usages.
+To better understand the usages, this chapter illustrates some example scenarios.
 
-### 5.3. Endpoint
-This document registers an endpoint exposed by a vendor which CAN be used to exchange data with the vendor or its organizations.
-It's identified by the type `registry/endpoint`.
+This section is non-normative.
 
-#### Fields
-The following fields MUST be present:
-* **id**: MUST be a string identifying this endpoint. It must be unique for the vendor.
-* **vid** (vendor ID): MUST contain the ID of the vendor this endpoint belongs to.
-* **type**: MUST be a URN describing the type of this endpoint in the form of `urn:oid:1.3.6.1.4.1.54851.2:type`.
-  The actual type MUST be an ASCII alphanumeric (a-z, 0-9) lowercase string.
-* **loc** (location): MUST be a URL pointing to where the endpoint is exposed (e.g. `https://nuts.nl/some/path`)
-* **nbf** (not before): MUST contain an RFC 3339 timestamp indicating from what date/time the endpoint SHOULD be considered valid.
+### 5.1 SaaS provider
 
-The following fields MAY be present:
-* **exp** (expiration): MUST contain an RFC 3339 timestamp indicating when the endpoint expires and SHOULD NOT be considered valid anymore.
+This example consists of a SaaS provider that acts as enabler, controller and node operator for all of its customers. The SaaS provider has access to all the key material, while the care organizations hasn't.
 
-Example:
+The SaaS provider registers itself with:
+
 ```json
 {
-    "id": "de59b062-d783-4727-a05e-57ed6035f00d",
-    "vid": "urn:oid:2.16.840.1.113883.2.4.6.1:1234",
-    "type": "urn:oid:1.3.6.1.4.1.54851.2:fhir",
-    "loc": "https://nuts.nl/some/path",
-    "nbf": "2020-04-23T18:25:43.511Z"
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:1",
+  "verificationMethod": [
+    {
+      "id": "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "controller": "did:nuts:1",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    },
+    {
+      "id": "did:nuts:1#_kalsjdyurtnAa4895akljnjghl584B9lkEJHNLJKFGA",
+      "controller": "did:nuts:1",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    }],
+  "authentication": [
+    "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+    "did:nuts:1#_kalsjdyurtnAa4895akljnjghl584B9lkEJHNLJKFGA"
+  ],
+  "service": [
+    {
+      "id": "did:nuts:123#NutsOAuth-1",
+      "type": "NutsOAuth",
+      "serviceEndpoint": "https://example.com/oauth"
+    },
+    {
+      "id": "did:nuts:123#NutsFHIR-1",
+      "type": "NutsFHIR",
+      "serviceEndpoint": "https://example.com/fhir"
+    }
+  ]
 }
 ```
 
-### 5.4. Service
-A service groups a set of endpoints to be used for a specific use case (Bolt) for a specific organization. It's identified by the type `registry/service`.
-It MUST contain the following fields:
-* **oid** (organization ID): MUST contain the ID of the organization this service belongs to.
-* **vid** (vendor ID): MUST contain the ID of the vendor this endpoint belongs to.
-* **name**: MUST contain the service's case sensitive name. It MUST be unique within the organization and vendor combination.
-  It is used by other parties who want to execute a specific Bolt (with this organization) to look up the correct endpoints.
-* **eps** (endpoints): MUST contain an array of endpoint IDs to be used for this service. The endpoints MUST have the
-  same **vid** field as the service.
-* **nbf** (not before): MUST contain an RFC 3339 timestamp indicating from what date/time the service could be used.
+It registers two keys: one if kept offline as backup, and the other is available in the software of the SaaS provider.
 
-The following fields MAY be present:
-* **exp** (expiration): MUST contain an RFC 3339 timestamp indicating when the service expires and SHOULD NOT be used anymore.
+The SaaS provider registers a care organization as:
 
-Example:
 ```json
 {
-  "oid": "urn:oid:2.16.840.1.113883.2.4.6.1:06123456",
-  "vid": "urn:oid:1.3.6.1.4.1.54851.4:1234",
-  "name": "some-bolt",
-  "eps": ["1B5E2A91-5C19-41B6-9709-BC9050D193E5", "some-other-endpoint-ID"],
-  "nbf": "2020-10-20T20:30:50.52Z"
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:2",
+  "verificationMethod": [
+    {
+      "id": "did:nuts:2#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "controller": "did:nuts:2",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    }],
+  "authentication": [
+    "did:nuts:2#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
+  ],
+  "controller": [
+    "did:nuts:1"
+  ],
+  "service": [
+    {
+      "id": "did:nuts:abc#NutsCompoundService-1",
+      "type": "NutsCompoundService",
+      "serviceEndpoint": {
+        "oauthEndpoint": "did:nuts:1#NutsOAuth-1",
+        "fhirEndpoint": "did:nuts:1#NutsFHIR-1"
+      }
+    }
+  ]
 }
 ```
 
-#### Validation
-When processing a service registration or update it MUST be validated as follows:
+The care organization does have an `authentication` key, this is required for the generation of the `id`. The SaaS provider will most likely not store the key since that key is not in control of the DID document.
+Since this key isn't after initial creation of the document the SaaS provider SHOULD remove it from the authentication document afterwards to improve security and clarity.
+The DID document of the SaaS provider is the controller of the DID document.
 
-1. Assert all required fields are present.
-2. Assert all fields value formats are valid.
-3. For updates: assert only modifiable fields are updated (**eps**, **nbf** and **exp** are modifiable).
-4. Assert the vendor identified by **vid** is registered.
-5. Assert the organization identified by **oid** is registered.
-6. Assert the endpoints referenced in **eps** are registered. 
-7. Assert the document is signed by the vendor identified by **vid**.
-8. Assert the combination of **oid**, **vid** and **name** is not already registered.
+### 5.2 Hospital
 
-## 6. Vendor proof
-Vendor proof authenticates the registration of a vendor, assuring that it:
-1. represents a real company, registered at the (Dutch) Chamber of Commerce and,
-2. commits to an agreement if required by the network (optional).
-
-TODO: Include public key of vendor CA certificate
-
-Vendor proof MUST be a JSON Web Token (JWT) encoded as string. The JWT MUST be signed using the algorithm specified by
-the specific proof type.
- 
-The JWT SHALL NOT be encrypted.
-
-### 6.1. Fields
-The following claims MUST be present:
-* **sub** (subject): MUST contain the fully qualified vendor ID.
-* **iat** (issued at): MUST contain the time at which the proof was issued.
-* **x5c** (X.509 certificate chain): MUST contain an array of base64 encoded signing certificates.
-
-The following claims MAY be present:
-* **agrs** (agreements): MUST contain an array with network usage agreements (see Agreements section below) that the
-  signer commits to when signing the proof.
-  
-Other claims SHOULD NOT be present and MUST be ignored.
-  
-### 6.2. Agreements
-Networks COULD decide they want every vendor to sign an agreement when registering. In that case the vendor SHOULD specify
-the SHA-1 hash(es) of the agreement(s) that it commits to in the proof. The agreements SHOULD be published out of band
-on a well-known location. Other vendors SHOULD verify that the newly registered vendor specified an agreement they accept
-(accepted agreements COULD be configured in the vendor software).
-
-### 6.3. Accepted certificates
-This describes which certificates are accepted as vendor proof.
-
-#### 6.3.1. PKIoverheid Persoonlijk Organisatiegebonden Certificaat
-
-When using this proof type the certificate MUST be a trusted PKIoverheid TSP CA (Trust Service Provider Certificate Authority).
-The signature algorithm MUST be one of the following: PS256, PS384, PS512, ES256, ES384 or ES512. Other algorithms SHALL NOT be used.
-
-The **x5c** field MUST contain the end object certificate and all intermediate CA certificates except the *Staat der Nederlanden* Root CA certificate.
-The root CA certificate SHOULD NOT be included.
-
-TODO: KVK-nummer
-
-## 7. Organization proof
-TODO: Consider using DIF Verifyable Credentials instead of JWT/JWS
-
-Organization proof authenticates the registration of a care organization, assuring that it:
-1. represents a real care organization and,
-2. wants to exchange data using Nuts through the vendor's software.
-
-Organization proof MUST be a JSON Web Token (JWT) encoded as string. The JWT MUST be signed using the algorithm specified by
-the specific proof type.
- 
-The JWT SHALL NOT be encrypted.
-
-### 7.1. Accepted certificates
-This describes which certificates are accepted as vendor proof.
-
-### 7.1.1 UZI certificate signature
-TODO
-
-## 8. Trust
-
-There's no central authority controlling access to the network (see section 4.4 of [Nuts Start Architecture](rfc001-nuts-start-architecture.md));
-a new vendor gets access by asking another vendor, who already has access, to register it (the new vendor) to get access.
-This means there's a chain of trust: if vendor A and B form a network and vendor C joins through vendor B, new vendor C
-is trusted by vendor A because it (A) trusts vendor B. This is like vouching; you should only register other vendors you
-trust because if that vendor turns out to be malicious, it could backfire to you as well. In the worst case other vendors
-could blacklist your vendor as well, denying you from accessing the network.
-
-### 8.1. Network bootstrapping
-
-Having no central authority causes a bootstrapping problem: how to establish trust between the first two nodes which
-form a new network. This SHOULD be solved by exchanging the vendor CA certificate and proofs and registering the other
-vendor on the local node. After that one vendor can connect to the other vendor (or both, bi-directional) causing the
-registration documents to be exchanged, forming the network.
-
-### 8.2. Accepting invalid proof
-
-When implementing this RFC there might be no viable means to create vendor and/or organization proof. In that case
-implementations SHOULD allow node administrators to explicitly accept a document with missing or invalid proof.
-That way vendors can still start exchanging data when viable means of authenticating vendors and/or organizations
-are not available yet. However, when the proof means become available and common the vendors and organizations MUST
-update their registration so authenticated proof can be made mandatory.
-
-## 9. Security & Privacy
-
-All information published in the registry is public. Vendors MUST take care NOT to publish sensitive information.
-The distributed nature makes it very hard or even impossible to have information removed. The authenticity and integrity
-of the published information is protected by the [RFC004 Distributed Document Format](rfc004-distributed-document-format.md).
+### 5.3 Single person deployment
 
 
+## Current issues
+
+### Key management and mitigating impact of key loss
+Considering the case a care provider has outsourced its key management to a service provider.
+When discussing deployment scenarios, we should consider the different roles at the service provider like:
+* Sales and support department who can create and delete DID documents
+* System administrators who alter serviceEndpoints
+
+It might not be desirable for these roles have access to the same key material. We can suggest configurations with different DID documents with different keys for services and for controller.
+
+### Management of VCs by a trusted service provider
+Considering the case a care provider has outsourced it key management to a service provider.
+When obtaining a VC from a trusted party, how does the care provider prove that it is the party represented by the DID without being able to provide private key material?
+
+### Resolvability of the DID document
+The fundamental idea of a DID document is that it should be resolvable by other parties. Section [7.2.2 of the did-core spec](https://w3c.github.io/did-core/#read-verify) requires a specification how a DID resolver could resolve and verify a DID document from the registry. Since the Nuts registry will be a local registry this is not yet a consideration but when federation with other registries will become relevant, a proper specification should be written.
