@@ -86,13 +86,14 @@ Outputs:
 ```
 
 Nuts DID Documents are wrapped in a JWS (JSON Web Signature) to ensure cryptographic authenticity and integrity through
-([RFC004](rfc004-distributed-document-format.md)). Please refer to that RFC for how specifically create the JWS.
+([RFC004](rfc004-distributed-document-format.md)). Please refer to that RFC on how to create the JWS.
 
 ### 3.1 Namespace Specific Identifier (NSI)
 
 Identifiers are derived from public keys that are valid at the moment of creating the DID document. 
 It MUST be the public key that corresponds to the private key that was used to sign the JWS.
-The public key MUST also be present in the `verificationMethods`. When multiple keys are present, one MUST verify in this matter.
+The public key MUST also be present in the `verificationMethods` and referenced by the `authentication` field. 
+When multiple keys are present, one MUST verify in this matter.
 
 ### 3.2 Method operations
 
@@ -151,11 +152,11 @@ The DID document has the following basic requirements:
 
 Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` followed by XXXXX????
 Each key MUST be of type `JsonWebKey2020` (TODO: follow that spec) 
-TODO limit curve
 
 The `controller` field MAY be present. This RFC follows the [did-core-spec](https://www.w3.org/TR/did-core/#did-controller).
 
-TODO: `assertion` field
+The `assertion` field MAY be present. 
+Keys referenced from this field are used for signing Verifiable Credentials/Presentations and for signing JWTs in the OAuth flow.
 
 Example DID document:
 
@@ -209,7 +210,7 @@ document. `updated` MUST contain the `sigt` timestamp of the last version of the
 #### 3.2.3 Update (Replace)
 The complete document gets replaced with a newer version. 
 
-Changes to DID documents can only be accepted if the update is signed with current controller authentication key:
+Changes to DID documents can only be accepted if the update is signed with a current controller authentication key:
 
 - a key referenced from the `authentication` section of the latest DID document version.
 - a key referenced from the `authentication` section of a controller. One of the entries in the `controller` field MAY refer to a different DID Document.
@@ -276,7 +277,7 @@ Almost all security considerations are covered by the mechanisms described in [R
 The Nuts network is a mesh network without central authority. This means that any party can generate a DID. 
 This DID must be protected against forgery and hijacking since duplicates are accepted in the Nuts network. 
 The duplicates are sorted and one will eventually be accepted (consistency rules of [RFC004](rfc004-distributed-document-format.md)). This would open up a DID to hijacking. 
-Therefore, the DID MUST be a derivative of the public key used to sign the document as described in chapter 2. 
+Therefore, the DID MUST be a derivative of the public key used to sign the document as described in §3. 
 
 #### 3.3.2 Protection against loss of private key
 
@@ -292,8 +293,6 @@ Appropriate measures MUST be taken to keep authentication keys secure.
 When control over a DID document has been lost, the DID subject will have to have all Verifiable Credentials revoked. 
 Without Verifiable Credentials linked to the DID document, the DID document no longer has any value.
 The DID subject will have to go through the process of reacquiring all Verifiable Credentials for a new DID document.
-
-TODO Is this acceptable? A SaaS provider will have to re-add all care organizations as DID documents (including services). Then all care organizations must also re-add the VC that proves their name/address to the new DID document!
 
 ### 3.4 Privacy considerations
 
@@ -353,7 +352,7 @@ The care organisation refers to it:
 
 Since RSA algorithms are deemed to be insecure for medium to long term, only elliptic curve-type algorithms are supported.
 The library support for newer algorithms (e.g. `Ed25519`) and curves (`X25519`) however is limited, so for now only
-the `secp256r1` NIST curve is supported. This curve is considered to provide enough security for the next 10 years,
+the `secp256r1`, `secp384r1` and `secp521r1` NIST curves MUST be supported. This curve is considered to provide enough security for the next 10 years,
 according to the (Dutch Cyber Security Council)[https://www.ncsc.nl/].
 
 It is expected however, that as library support improves more (stronger) algorithms and key types will be supported,
@@ -473,12 +472,15 @@ Considering the case a care provider has outsourced its key management to a serv
 When discussing deployment scenarios, we should consider the different roles at the service provider like:
 * Sales and support department who can create and delete DID documents
 * System administrators who alter serviceEndpoints
+> how is this an issue if they all use the same software that selects the key?
 
 It might not be desirable for these roles have access to the same key material. We can suggest configurations with different DID documents with different keys for services and for controller.
 
 ### Management of VCs by a trusted service provider
 Considering the case a care provider has outsourced it key management to a service provider.
 When obtaining a VC from a trusted party, how does the care provider prove that it is the party represented by the DID without being able to provide private key material?
+> They must initiate a session from the portal of the software vendor using the protocol specified to obtain a VC
+> A mobile only VC won't suffice, a server has to be authorized not a single device
 
 ### Resolvability of the DID document
 The fundamental idea of a DID document is that it should be resolvable by other parties. Section [7.2.2 of the did-core spec](https://w3c.github.io/did-core/#read-verify) requires a specification how a DID resolver could resolve and verify a DID document from the registry. Since the Nuts registry will be a local registry this is not yet a consideration but when federation with other registries will become relevant, a proper specification should be written.
