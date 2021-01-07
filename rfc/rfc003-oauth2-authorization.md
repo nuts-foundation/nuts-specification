@@ -65,11 +65,61 @@ When requesting data, the client application MUST add the access token to the Au
 
 ### 4.1. Registration
 
-In common OAuth2 flows a client application must be registered by an authorization server with a client id and client secret. In a network of trust with many OAuth servers, this approach is difficult because it would mean every node needs to exchange secrets with every other node. Instead, the JWT signing public key needs to be approved by the client applications vendor. A client application needs to generate a key pair. The vendor should sign a certificate for the client application with its vendor CA certificate. The vendor CA certificate MUST be known by both client application and authorization server. The resulting certificate and the vendor CA MUST be added to the x5c header field. The certificate MUST not be valid for longer than 4 days. A vendor SHOULD generate a key-pair and certificate per deployment to reduce the exposure of the private key. The vendor is left with the choice to generate a certificate per actor, this is not required.
+#### 4.1.1 Client registration
+In common OAuth2 flows an OAuth client must be registered with the authorization server with its client id and client secret. This way the authorization server knows which requests are made by which party. The registration normally involves manual steps of registering and approving. 
+In a network of trust with countless combinations of authorization servers and clients, this approach does not scale well.
 
-To protect the access token endpoint better, a client certificate is required to establish the TLS connection. This allows for vendors to use proven technologies such as reverse proxies. The client certificate to use will be self issued by the vendor and signed with the Vendor CA \[[Certificate structure RFC](rfc008-certificate-structure.md)\].
+So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its siganture to a known care provider. The key used to sign the JWT is identified by a provided key identifier (`kid`) which can be resolved from the Nuts registry as defined in [RFC006].
+The key should be listed in the `assertion` section of the actors DID document.
 
-Every service requiring authentication MUST refer to an OAuth endpoint in the registry. The OAuth endpoint MUST have the type: `urn:oid:1.3.6.1.4.1.54851.2:oauth`. Its **loc** MUST point to the complete URL of the authorization server. The [Distributed Registry RFC](rfc006-distributed-registry.md) describes the registration format of an endpoint and service.
+
+Example of the actors DID document:
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:123",
+  "verificationMethod": [
+    {
+      "id": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "controller": "did:nuts:123",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    }
+  ],
+  "assertion": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"]  
+}
+```
+
+#### 4.1.2 Server registration
+
+In order for the client to resolve the server endpoint it should look up the services in the custodians DID document under the `service` section. Endpoints there can be URLs or DIDs which resolve to other DID documents which the correct URL. A service COULD contain multiple named endpoints and MUST contain a single endpoint listed as `auth` .
+
+Example of the custodians DID document:
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:456",
+  "service": [
+    {
+      "id": "did:nuts:456#oauth-1",
+      "type": "OAuthService",
+      "serviceEndpoint": "https://example.com/oauth"
+    },{
+      "id": "did:nuts:456#ExampleService-1",
+      "type": "ExampleService",
+      "serviceEndpoint": {
+        "auth": "did:nuts:456#oauth-1",
+        "service": "https://example.com/fhir"
+      }
+    }
+  ]
+}
+```
 
 ### 4.2. Constructing the JWT
 
@@ -77,14 +127,14 @@ Every service requiring authentication MUST refer to an OAuth endpoint in the re
 
 * **typ**: MUST be `JWT`
 * **alg**: one of `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `PS512` \([RFC7518](https://tools.ietf.org/html/rfc7518)\)
-* **x5c**: MUST contain the signing certificate. \([RFC7515](https://tools.ietf.org/html/rfc7515)\) 
+* **kid**: MUST contain the identifier of a key published in the care providers DID document, listed in the `assertion` section.  
 
 #### 4.2.2. Payload
 
-* **iss**: The issuer in the JWT is always the actor, thus the care organization doing the request.
-* **sub**: The subject contains the urn of the custodian. The custodian information could be used to find the relevant consent \(together with actor and subject\).
+* **iss**: The issuer in the JWT is always the DID of the actor, thus the care organization making the request.
+* **sub**: The subject contains the DID of the custodian. The custodian information could be used to find the relevant consent \(together with actor and subject\).
 * **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional
-* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the token endpoint reference. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
+* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the DID listed under the `auth` key of the services serviceEndpoint.
 * **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
 * **exp**: Expiration, MUST NOT be later than 5 seconds after issueing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
@@ -94,20 +144,20 @@ All other claims may be ignored.
 
 #### 4.2.3. Example JWT
 
-```yaml
+```json
 {
   "alg": "RS256",
   "typ": "JWT",
-  "X5c": ["MIIE+zCCBGSgAwIBAgICAQ0wDQYJKoZIh...abbrevated...9saWNkr09VZw="]
+  "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
 }
 ```
 
 ```yaml
 {
-  "iss": "urn:oid:2.16.840.1.113883.2.4.6.1:48000000",
-  "sub": "urn:oid:2.16.840.1.113883.2.4.6.1:12481248",
+  "iss": "did:nuts:123",
+  "sub": "did:nuts:456",
   "sid": "urn:oid:2.16.840.1.113883.2.4.6.3:9999990",
-  "aud": "8agAwIBAgICAwEwDQYJKoZIh",
+  "aud": "did:nuts:456#ExampleService-1",
   "usi": {...Base64 encoded token container...},
   "osi": {...hardware token sig...},
   "exp": 1578915481,
@@ -176,15 +226,15 @@ The following steps MUST all succeed. The order of execution is not relevant alt
 
 **5.2.1.1. JWT signature validation**
 
-The first step is to validate the JWT, the **x5c** field in the JWT header holds the public key that is used to sign the JWT. If the signature is invalid, an **invalid\_signature** error is returned.
+The first step is to validate the JWT, the DID in the **kid** field in the JWT header refers to the public key that is used to sign the JWT. If the signature is invalid, an **invalid\_signature** error is returned.
 
-**5.2.1.2. Client certificate validation**
+**5.2.1.2. TLS Client certificate validation**
 
-The client certificate used in the TLS connection must come from the same Vendor CA as the certificate present in the **x5c** header. This can be checked by comparing the public keys.
+The client certificate used in the TLS connection must conform the requirements as stated in [RFC008].
 
 **5.2.1.3. Issuer validation**
 
-The actor from the **iss** field must be known to the authorization server, a vendor must have registered it using a signing certificate signed by the same vendor CA as the CA that signed the certificate in the **x5c** field. It MAY be the case that the vendor CA has been renewed, in that case a previous valid certificate from the same vendor MAY have been used to register the actor. It that case the vendor CA MUST have been valid at the time the signing certificate had been signed.
+To validate the identity of the issuer, the signature of the JWT must be signed with a key present in the actors DID document under the `assertion` section.
 
 **5.2.1.4. JWT validity**
 
