@@ -69,7 +69,7 @@ When requesting data, the client application MUST add the access token to the Au
 In common OAuth2 flows an OAuth client must be registered with the authorization server with its client id and client secret. This way the authorization server knows which requests are made by which party. The registration normally involves manual steps of registering and approving. 
 In a network of trust with countless combinations of authorization servers and clients, this approach does not scale well.
 
-So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its signature to a known care provider. The key used to sign the JWT is identified by a key identifier (`kid`) which can be resolved from the Nuts registry as defined in [RFC006].
+So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its signature to a known care provider. The key used to sign the JWT is identified by a key identifier (`kid`) which can be resolved from the Nuts registry as defined in [RFC006](rfc006-distributed-registry.md).
 The key MUST be listed in the `assertion` section of the actor DID document. The actor is identified by the `iss` field.
 
 Example of the actors DID document:
@@ -229,7 +229,7 @@ The first step is to validate the JWT, the DID in the **kid** field in the JWT h
 
 **5.2.1.2. TLS Client certificate validation**
 
-The client certificate used in the TLS connection must conform the requirements as stated in [RFC008].
+The client certificate used in the TLS connection must conform the requirements as stated in [RFC008](rfc008-certificate-structure.md).
 
 **5.2.1.3. Issuer validation**
 
@@ -241,7 +241,7 @@ The JWT **iat** and **exp** fields MUST be validated. The timestamp of validatio
 
 **5.2.1.5. Login contract validation**
 
-The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the name of the actor. TODO: match with VC issued for `iss`.
+The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the name of the actor.
 
 **5.2.1.6. Endpoint validation**
 
@@ -305,9 +305,14 @@ The resource server MUST validate the validity of the access token. It MAY conta
 
 1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
 2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify if a known legal base is present for the combination of custodian, actor, subject and resource.
-3. **The actor and custodian are the same.** It may be the case that a care organisation is using multiple service providers. In that case each service provider acts on behalf of the care organisation. Therefore it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organisation. To match the actor and custodian, the resource server MUST check if the proof in the registry that has been provided by the care organisation is the same. See RFC00X for the details.
+3. **The actor and custodian are the same.** It may be the case that a care organisation is using multiple service providers. In that case each service provider acts on behalf of the care organisation. Therefore, it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organisation.
 
 ### 6.3. Error codes
 
 Different protocols return different types of error messages. The format will most likely also differ. This means that error messages have to be specified per use-case. If an error message supports a text-based error code, then it should support the illegal\_access\_token code. If a client receives this error code then it MUST NOT reuse the access token.
 
+## 7 Current issues
+
+### Matching of actor name to login contract
+The login contract contains the name of the actor (care provider). The custodian must check if the name matches the issuers name in the registry. The registration of names is not yet a part of the registry spec.
+The registration of a care providers name will probably be done by the use of [W3C Verifiable Credentials](https://www.w3.org/TR/vc-data-model/)

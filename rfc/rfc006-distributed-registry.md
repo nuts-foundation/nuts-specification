@@ -127,7 +127,6 @@ Example JWS header
   "jwk": {
     "crv": "P-256",
     "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
-    "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
     "kty": "EC",
     "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
   },
@@ -175,7 +174,6 @@ Example DID document:
     "publicKeyJwk": {
       "crv": "P-256",
       "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
-      "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
       "kty": "EC"
     }
   }],
@@ -189,18 +187,7 @@ A Nuts DID can only be resolved locally. The concept of the Nuts registry is the
 Therefore, any DID document SHOULD already be present in local storage.
 
 ##### 3.2.2.1 Resolution Input Metadata
-All historic versions of a DID Document SHOULD be stored and queryable. This allows clients to resolve the document
-for a specific moment in time (e.g. a previous version) instead of the last one. For this the resolution input metadata
-MAY contain the `timestamp` field indicating this moment in time. This field MUST be formatted according to [RFC3339](https://tools.iets.org/html/rfc3339).
-
-Example:
-```json
-{
-  "timestamp": "2020-01-06T15:00:00Z"
-}
-```
-
-If `timestamp` is not present the current date/time MUST be assumed.
+All historic versions of a DID Document SHOULD be stored and queryable. This allows clients to resolve the document for a specific moment in time (e.g. a previous version) instead of the last one. This allows for resolving keys and services at a given moment
 
 ##### 3.2.2.2 Document Metadata
 The resolved DID Document Metadata contains the `created` and `updated` fields, in accordance with the [did-core-spec](https://www.w3.org/TR/did-core/#did-document-metadata-properties). They are
