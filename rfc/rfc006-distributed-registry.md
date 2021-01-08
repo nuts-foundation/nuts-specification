@@ -150,8 +150,8 @@ The DID document has the following basic requirements:
 - at least 1 key MUST be present in the `verificationMethod` and `authentication`
 - all key references in `authentication` MUST refer to keys listed under `verificationMethods`
 
-Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` followed by XXXXX????
-Each key MUST be of type `JsonWebKey2020` (TODO: follow that spec) 
+Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` and the public key fingerprint according to [rfc7638](https://tools.ietf.org/html/rfc7638)
+Each key MUST be of type `JsonWebKey2020` according to §5.3.1 of the [did-core-spec](https://www.w3.org/TR/did-core/#key-types-and-formats)
 
 The `controller` field MAY be present. This RFC follows the [did-core-spec](https://www.w3.org/TR/did-core/#did-controller).
 
