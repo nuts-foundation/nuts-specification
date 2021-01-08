@@ -286,7 +286,7 @@ The DID subject will have to go through the process of reacquiring all Verifiabl
 All data is public knowledge. All considerations from [§10 of did-core](https://www.w3.org/TR/did-core/#privacy-considerations) apply.
 
 ## 4. Services
-It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC.
+It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC or Bold specification.
 A service can define an absolute endpoint URI or be a compound service, referring to a set of services. This is often the case
 when a SaaS provider defines endpoints to be used for all clients.
 
@@ -340,7 +340,7 @@ The care organisation refers to it:
 Since RSA algorithms are deemed to be insecure for medium to long term, only elliptic curve-type algorithms are supported.
 The library support for newer algorithms (e.g. `Ed25519`) and curves (`X25519`) however is limited, so for now only
 the `secp256r1`, `secp384r1` and `secp521r1` NIST curves MUST be supported. This curve is considered to provide enough security for the next 10 years,
-according to the (Dutch Cyber Security Council)[https://www.ncsc.nl/].
+according to the [Dutch Cyber Security Council](https://www.ncsc.nl/).
 
 It is expected however, that as library support improves more (stronger) algorithms and key types will be supported,
 which should be taken in account by implementors.
@@ -550,20 +550,9 @@ This example is the most simple, there's one key and it's used for all cases.
 
 ## Current issues
 
-### Key management and mitigating impact of key loss
-Considering the case a care provider has outsourced its key management to a service provider.
-When discussing deployment scenarios, we should consider the different roles at the service provider like:
-* Sales and support department who can create and delete DID documents
-* System administrators who alter serviceEndpoints
-> how is this an issue if they all use the same software that selects the key?
-
-It might not be desirable for these roles have access to the same key material. We can suggest configurations with different DID documents with different keys for services and for controller.
-
 ### Management of VCs by a trusted service provider
 Considering the case a care provider has outsourced it key management to a service provider.
 When obtaining a VC from a trusted party, how does the care provider prove that it is the party represented by the DID without being able to provide private key material?
-> They must initiate a session from the portal of the software vendor using the protocol specified to obtain a VC
-> A mobile only VC won't suffice, a server has to be authorized not a single device
 
 ### Resolvability of the DID document
 The fundamental idea of a DID document is that it should be resolvable by other parties. Section [7.2.2 of the did-core spec](https://w3c.github.io/did-core/#read-verify) requires a specification how a DID resolver could resolve and verify a DID document from the registry. Since the Nuts registry will be a local registry this is not yet a consideration but when federation with other registries will become relevant, a proper specification should be written.
