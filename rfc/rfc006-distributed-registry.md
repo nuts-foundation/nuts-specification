@@ -462,8 +462,104 @@ The DID document of the SaaS provider is the controller of the DID document.
 
 ### 6.2 Hospital
 
+We assume that a hospital has its own data centre and therefore, runs its own node. 
+This means that the DID document of the hospital doesn't need an additional controller. The hospital is in control of its own private keys. It does however, need to take precautions for private key loss/theft.
+
+The hospital would be able to register a single DID document:
+
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:1",
+  "verificationMethod": [
+    {
+      "id": "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "controller": "did:nuts:1",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    },
+    {
+      "id": "did:nuts:1#_kalsjdyurtnAa4895akljnjghl584B9lkEJHNLJKFGA",
+      "controller": "did:nuts:1",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    }],
+  "authentication": [
+    "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
+  ],
+  "assertion": [
+    "did:nuts:1#_kalsjdyurtnAa4895akljnjghl584B9lkEJHNLJKFGA"
+  ],
+  "service": [
+    {
+      "id": "did:nuts:1#NutsOAuth-1",
+      "type": "NutsOAuth",
+      "serviceEndpoint": "https://example.com/oauth"
+    },
+    {
+      "id": "did:nuts:1#NutsFHIR-1",
+      "type": "NutsFHIR",
+      "serviceEndpoint": "https://example.com/fhir"
+    },
+    {
+      "id": "did:nuts:abc#NutsCompoundService-1",
+      "type": "NutsCompoundService",
+      "serviceEndpoint": {
+        "oauthEndpoint": "did:nuts:1#NutsOAuth-1",
+        "fhirEndpoint": "did:nuts:1#NutsFHIR-1"
+      }
+    }
+  ]
+}
+```
+
+The hospital registered 2 keys, one if used for assertions and one for authentication. 
+The authentication key is kept offline, meaning that any change to the DID document will require an administrator to sign the changes manually.
+The assertion key is available online and used within the defined services.
+All services are registered directly on the DID document.
+
 ### 6.3 Single person deployment
 
+It is possible to deploy a node as a person. You'll probably not offer any services, but you'll still be able to consume them.
+Also losing key material is less of a problem since you only have to restore it for yourself.
+
+This example is the most simple, there's one key and it's used for all cases.
+
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:1",
+  "verificationMethod": [
+    {
+      "id": "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "controller": "did:nuts:1",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    }],
+  "authentication": [
+    "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
+  ],
+  "assertion": [
+    "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
+  ],
+  "service": []
+}
+```
 
 ## Current issues
 
