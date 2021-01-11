@@ -69,10 +69,10 @@ When requesting data, the client application MUST add the access token to the Au
 In common OAuth2 flows an OAuth client must be registered with the authorization server with its client id and client secret. This way the authorization server knows which requests are made by which party. The registration normally involves manual steps of registering and approving. 
 In a network of trust with countless combinations of authorization servers and clients, this approach does not scale well.
 
-So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its signature to a known care provider. The key used to sign the JWT is identified by a key identifier (`kid`) which can be resolved from the Nuts registry as defined in [RFC006](rfc006-distributed-registry.md).
-The key MUST be listed in the `assertion` section of the actor DID document. The actor is identified by the `iss` field.
+So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its signature to a known care provider. The key used to sign the JWT is identified by a key identifier (`kid`) which can be resolved through the Nuts registry as defined in [RFC006](rfc006-distributed-registry.md).
+The key MUST be listed in the `assertionMethod` section of the actor's DID document. The actor is identified by the `iss` field of the JWT.
 
-Example of the actors DID document:
+Example of the actor's DID document:
 ```json
 {
   "@context": [ "https://www.w3.org/ns/did/v1" ],
@@ -90,35 +90,14 @@ Example of the actors DID document:
       }
     }
   ],
-  "assertion": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"]  
+  "assertionMethod": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"]  
 }
 ```
 
 #### 4.1.2 Server registration
 
-In order for the client to resolve the server endpoint it should look up the services in the custodians DID document under the `service` section. Endpoints there can be URLs or DID identifiers which resolve to other DID documents which the correct URL. A service COULD contain multiple named endpoints and MUST contain a single endpoint that refers to a service with type `auth`.
-
-Example of the custodians DID document:
-```json
-{
-  "@context": [ "https://www.w3.org/ns/did/v1" ],
-  "id": "did:nuts:456",
-  "service": [
-    {
-      "id": "did:nuts:456#oauth-1",
-      "type": "auth",
-      "serviceEndpoint": "https://example.com/oauth"
-    },{
-      "id": "did:nuts:456#ExampleService-1",
-      "type": "ExampleService",
-      "serviceEndpoint": {
-        "auth": "did:nuts:456#oauth-1",
-        "service": "https://example.com/fhir"
-      }
-    }
-  ]
-}
-```
+Each service MUST define an `oauth` serviceEndpoint. This endpoint is either the URL of the authorization server, or in case of a compound service an URI which resolves to another service.
+In order for the client to resolve the authorization server endpoint it MUST look up the `auth` service endpoint of the service.
 
 ### 4.2. Constructing the JWT
 
@@ -126,13 +105,13 @@ Example of the custodians DID document:
 
 * **typ**: MUST be `JWT`
 * **alg**: one of `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512` \([RFC7518](https://tools.ietf.org/html/rfc7518)\)
-* **kid**: MUST contain the identifier of a key published in the actors DID document, listed in the `assertion` section.  
+* **kid**: MUST contain the identifier of a key published in the actor's DID document, listed in the `assertionMethod` section.  
 
 #### 4.2.2. Payload
 
-* **iss**: The issuer in the JWT is always the DID of the actor, thus the care organization making the request.
-* **sub**: The subject contains the DID of the custodian. The custodian information could be used to find the relevant consent \(together with actor and subject\).
-* **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional
+* **iss**: The issuer MUST contain the DID of the actor, thus the care organization making the request.
+* **sub**: The subject MUST contain the DID of the custodian. The custodian's DID could be used to find the relevant consent \(together with the actor and subject\).
+* **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional.
 * **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the DID listed under the `auth` key of the services serviceEndpoint.
 * **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
@@ -233,7 +212,7 @@ The client certificate used in the TLS connection must conform the requirements 
 
 **5.2.1.3. Issuer validation**
 
-To validate the identity of the issuer, the signature of the JWT must be signed with a key present in the issuers DID document under the `assertion` section.
+To validate the identity of the issuer, the value of the `kid` MUST be present in the issuer's DID document under the `assertionMethod` section.
 
 **5.2.1.4. JWT validity**
 
@@ -314,5 +293,5 @@ Different protocols return different types of error messages. The format will mo
 ## 7 Current issues
 
 ### Matching of actor name to login contract
-The login contract contains the name of the actor (care provider). The custodian must check if the name matches the issuers name in the registry. The registration of names is not yet a part of the registry spec.
+The login contract contains the name of the actor (care provider). The custodian must check if the name matches the issuer's name in the registry. The registration of names is not yet a part of the registry spec.
 The registration of a care providers name will probably be done by the use of [W3C Verifiable Credentials](https://www.w3.org/TR/vc-data-model/)

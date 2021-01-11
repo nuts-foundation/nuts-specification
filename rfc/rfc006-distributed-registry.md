@@ -47,6 +47,8 @@ This RFC describes how to create, update and resolve the data structures require
 
 ## 3. Nuts DID Method
 
+### 3.1 Namespace Specific Identifier (NSI)
+
 The Nuts DID URI scheme is defined as follows:
 ```
 did = "did:nuts:" idstring
@@ -59,7 +61,7 @@ base58char = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" / "
     
 ```
 
-Where the `idstring` is derived from the public key:
+The `idstring` is derived from the public part of a key pair that was valid at the moment of creating the corresponding DID document.
 
 `idstring = BASE-58(SHA-256(raw-public-key-bytes))`
 
@@ -86,14 +88,10 @@ Outputs:
 ```
 
 Nuts DID Documents are wrapped in a JWS (JSON Web Signature) to ensure cryptographic authenticity and integrity through
-([RFC004](rfc004-distributed-document-format.md)). Please refer to that RFC on how to create the JWS.
+[RFC004](rfc004-distributed-document-format.md). Please refer to that RFC on how to create the JWS.
 
-### 3.1 Namespace Specific Identifier (NSI)
-
-Identifiers are derived from public keys that are valid at the moment of creating the DID document. 
-It MUST be the public key that corresponds to the private key that was used to sign the JWS.
-The public key MUST also be present in the `verificationMethods` and referenced by the `authentication` field. 
-When multiple keys are present, one MUST verify in this matter.
+The JWS MUST be signed by the private part of the key pair.
+The public key MUST also be present in the `verificationMethods` and referenced by the `authentication` field.
 
 ### 3.2 Method operations
 
@@ -154,7 +152,7 @@ Each key MUST be of type `JsonWebKey2020` according to §5.3.1 of the [did-core-
 
 The `controller` field MAY be present. This RFC follows the [did-core-spec](https://www.w3.org/TR/did-core/#did-controller).
 
-The `assertion` field MAY be present. 
+The `assertionMethod` field MAY be present. 
 Keys referenced from this field are used for signing Verifiable Credentials/Presentations and for signing JWTs in the OAuth flow.
 
 Example DID document:
@@ -187,7 +185,7 @@ A Nuts DID can only be resolved locally. The concept of the Nuts registry is the
 Therefore, any DID document SHOULD already be present in local storage.
 
 ##### 3.2.2.1 Resolution Input Metadata
-All historic versions of a DID Document SHOULD be stored and queryable. This allows clients to resolve the document for a specific moment in time (e.g. a previous version) instead of the last one. This allows for resolving keys and services at a given moment
+All historic versions of a DID Document SHOULD be stored and queryable. This allows clients to resolve the document for a specific moment in time (e.g. a previous version) instead of the last one. This allows for resolving keys and services at a given moment.
 
 ##### 3.2.2.2 Document Metadata
 The resolved DID Document Metadata contains the `created` and `updated` fields, in accordance with the [did-core-spec](https://www.w3.org/TR/did-core/#did-document-metadata-properties). They are
@@ -327,7 +325,7 @@ The care organisation refers to it:
       "id": "did:nuts:abc#NutsCompoundService-1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:123#NutsOAuth-1",
+        "oauth": "did:nuts:123#NutsOAuth-1",
         "fhirEndpoint": "did:nuts:123#NutsFHIR-1"
       }
     }

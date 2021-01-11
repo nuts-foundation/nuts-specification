@@ -46,7 +46,7 @@ Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-
 
 The PKIoverheid CA tree is the choice of CA to trust for production use. It's widely trusted and supported. 
 There are multiple vendors that can issue a certificate. 
-A PKIo certificate MUST be used to secure inter-node connections as well as the peer-to-peer connections used to exchange data.
+A PKIo TLS certificate MUST be used to secure inter-node connections as well as the peer-to-peer connections used to exchange data.
 Production nodes MUST not accept any other certificate than a PKIoverheid certificate.
 The certificate MUST be used as both server as client certificate in a mutual TLS connection.
 
@@ -69,8 +69,9 @@ The Certificate Revocation Lists for PKIoverheid certificates are maintained by 
 The time between signing of a CRL differs per TSP. A node MUST at least update all CRLs every hour.
 
 ## 4. Test and development
-PKIoverheid certificates are not cheap and the associated private key should not be shared amongst developers or test servers.
-Therefore, any node MUST be able to support any set of certificates. This will allow anyone to setup their own test/development network.
+The use of PKIoverheid might be less suitable for test and development. 
+The PKIoverheid certificates might be relatively expensive for small organizations and private key should not be shared amongst developers or test servers.
+Therefore, a node MUST be able to support any set of CAs. This will allow anyone to setup their own test/development network.
 
 ## 5. Private key management
 A PKIo certificate is costly and it's associated with a single private key. 
