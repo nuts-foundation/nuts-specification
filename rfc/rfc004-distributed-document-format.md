@@ -1,55 +1,50 @@
 # RFC004 Distributed Document Format
 
-## RFC004 Distributed Document Format
-
 |  |  |
 | :--- | :--- |
 | Nuts foundation | R.G. Krul |
 | Request for Comments: 004 | Nedap |
 |  | September 2020 |
 
-### Distributed Document Format
+## Distributed Document Format
 
-#### Abstract
+### Abstract
 
 This RFC describes an interoperable, content agnostic data format for distributed networks which provides cryptographic authentication and verification of its contents, guaranteed ordering and access control.
 
-#### Status of document
+### Status of document
 
 This document is currently a draft.
 
-#### Copyright Notice
+### Copyright Notice
 
 ![](../.gitbook/assets/license.png)
 
 This document is released under the [Attribution-ShareAlike 4.0 International \(CC BY-SA 4.0\) license](https://creativecommons.org/licenses/by-sa/4.0/).
 
-### 1.  Introduction
+## 1.  Introduction
 
 Because Nuts is a decentralized network there needs to be a standardized format for structuring public information \(like where to find another care organization's data\) in a way that allows each party to independently verify the authenticity and integrity of that information. This document proposes such a format. Systems can use the format to build their application on top of it making it suitable for publishing on a distributed network.
 
 This document does not define how to transport data to other participants in a distributed network.
 
-### 2. Terminology
+## 2. Terminology
 
 * **Document**: piece of application data enveloped with metadata like signatures and references to other documents published on a distributed network.
 * **Root document** the first document published on a network.
 
 Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
-### 3. Document Format
+## 3. Document Format
 
 Documents MUST be encoded as [RFC7515 JSON Web Signature](https://tools.ietf.org/html/rfc7515). It can be serialized in either compact \([RFC7515 section 7.1](https://tools.ietf.org/html/rfc7515#section-7.1)\) or JSON \([RFC7515 section 7.2](https://tools.ietf.org/html/rfc7515#section-7.2)\) form. When the document data starts with an accolade \(`{`\) it MUST be assumed the document is serialized in JSON format, otherwise compact format MUST be assumed.
 
-#### 3.1. JWS implementation
+### 3.1. JWS implementation
 
 In addition to required header parameters as specified in RFC7515 the following requirements apply:
 
-* **x5c**: MUST be present and contain exactly one entry with the X.509 signing certificate associated with the private key.
-
-  The certificate MUST have the digitalSignature and contentCommitment key usages and must be valid at time of signing.
-
-  The certificate SHOULD conform to [RFC008 Certificate Structure](rfc008-certificate-structure.md) so other parties can validate it.
+* The signing key is indicated by **kid** or **jwk**. One of them MUST be present, but not both. If **kid** is present
+  the key must be known and looked up locally. Otherwise the key must be taken from the **jwk** header.
 
 * **alg**: MUST be one of the following algorithms: `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512`.
 
@@ -58,7 +53,7 @@ In addition to required header parameters as specified in RFC7515 the following 
 * **cty**: MUST contain the type of the payload indicating how to interpret the payload encoded as string.
 * **crit** MUST contain the **sigt**, **ver** and **prevs** headers.
 
-The **jku**, **jwk**, **kid** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
+The **jku**, **x5c** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the document.
 
 In addition to the registered header parameters, the following headers MUST be present as protected headers:
 
@@ -75,19 +70,19 @@ The following headers MAY be present as protected headers \(see section 3.4 for 
 
   defaults to `0`.
 
-To aid performance of validating the DAG the JWS SHALL NOT contain the actual contents of the document. Instead, the JWS payload MUST contain the SHA-1 hash of the contents encoded as hexadecimal, lower case string, e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
+To aid performance of validating the DAG the JWS SHALL NOT contain the actual contents of the document. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
 The contents then MAY be stored next to or apart from the document itself \(but that's out of scope for this RFC\).
 
 There SHOULD be only 1 signature on the JWS. If there are multiple signatures all signatures except the first one MUST be ignored.
 
-#### 3.2. Document Reference
+### 3.2. Document Reference
 
-The document reference uniquely identifies a document and is used to refer to it. It MUST be calculated by taking the bytes of the JWS EXACTLY as received and hashing it using SHA-1.
+The document reference uniquely identifies a document and is used to refer to it. It MUST be calculated by taking the bytes of the JWS EXACTLY as received and hashing it using SHA-256.
 
-When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase, e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
+When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
-#### 3.3. Ordering, branching and merging
+### 3.3. Ordering, branching and merging
 
 Documents MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to the previous document. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor. A new document MUST be appended to the end of the DAG by referring to the last document of the DAG \(_leaf_\) by including its reference in the **prevs** field.
 
@@ -111,7 +106,7 @@ The following orders are invalid:
 * `A -> B -> D -> F -> C -> E` \(merger processed before all previous were processed\)
 * `A -> B -> D -> E -> C -> F` \(branch C is processed out-of-order\)
 
-#### 3.4. Timelines
+### 3.4. Timelines
 
 Since documents are immutable, the only way to update them it by creating a new document. Subsequent versions of a document SHOULD be tracked by creating a _timeline_ using the optional **tid** and **tiv** fields. These fields SHALL NOT be used on the first document in the timeline, only on updates. The **tid** field identifies the timeline and MUST contain the reference to the first document. The **tid** field MUST be present when **tiv** is specified.
 
@@ -119,7 +114,7 @@ For signalling updates based on out-of-date state **tiv** \(timeline version\) i
 
 Incorrect state due to incorrect updates \(e.g. duplicate **tiv**, see below\) SHOULD be fixed by issuing a new update with incremented **tiv**.
 
-**3.4.1. Timeline validation**
+#### 3.4.1. Timeline validation
 
 It's up to the processing application to validate the timeline, but the following points SHOULD be taken into consideration:
 
@@ -131,7 +126,7 @@ It's up to the processing application to validate the timeline, but the followin
 
     If **iat**s are equal the document with the lowest hash should be applied first.
 
-#### 3.5. Processing the DAG
+### 3.5. Processing the DAG
 
 Processing the DAG can be seen as planning tasks required for construction: some tasks can happen in parallel \(laying floors and installing electricity\), some tasks must happen sequentially \(foundation must be poured before building the walls\). This is the same for documents on the DAG: documents on a branch MUST be processed sequentially but processing order of parallel branches is unspecified, and before processing a merging document all **prevs** \(branches\) must have been processed.
 
@@ -153,16 +148,14 @@ until queue empty; take document from queue
     process document
 ```
 
-#### 3.6. Signature verification
+### 3.6. Signature and payload verification
 
-Before interpreting a document's payload it SHOULD be validated according to the following rules:
+Before interpreting a document's payload the JWS' signature MUST be validated. When **kid** is used to specify the
+signing key and the system knows additional usage restrictions (e.g. the key is valid from X to Y, to be checked against **sigt**),
+the system MUST assert the usage is compliant.
 
-* Assert cryptographic signature; can it be validated with the public key in the signing certificate?
-* Assert the certificate is trusted.
-* Assert the certificate and chain was valid at signing time.
-* Assert the certificate is meant for signing; key usage MUST be `digitalSignature`.
-
-Note there's no need for certificate revocation status checking; certificates are generally short-lived \(as specified by [RFC008 Certificate Structure](rfc008-certificate-structure.md)\).
+Furthermore, since the payload is detached from the document itself and referred to by hash, the payload MUST be hashed
+and compared to the hash specified in the document, to assert that the retrieved payload is actually the expected payload.
 
 ## 4. Example
 

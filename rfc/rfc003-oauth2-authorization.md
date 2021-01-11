@@ -65,49 +65,77 @@ When requesting data, the client application MUST add the access token to the Au
 
 ### 4.1. Registration
 
-In common OAuth2 flows a client application must be registered by an authorization server with a client id and client secret. In a network of trust with many OAuth servers, this approach is difficult because it would mean every node needs to exchange secrets with every other node. Instead, the JWT signing public key needs to be approved by the client applications vendor. A client application needs to generate a key pair. The vendor should sign a certificate for the client application with its vendor CA certificate. The vendor CA certificate MUST be known by both client application and authorization server. The resulting certificate and the vendor CA MUST be added to the x5c header field. The certificate MUST not be valid for longer than 4 days. A vendor SHOULD generate a key-pair and certificate per deployment to reduce the exposure of the private key. The vendor is left with the choice to generate a certificate per actor, this is not required.
+#### 4.1.1 Client registration
+In common OAuth2 flows an OAuth client must be registered with the authorization server with its client id and client secret. This way the authorization server knows which requests are made by which party. The registration normally involves manual steps of registering and approving. 
+In a network of trust with countless combinations of authorization servers and clients, this approach does not scale well.
 
-To protect the access token endpoint better, a client certificate is required to establish the TLS connection. This allows for vendors to use proven technologies such as reverse proxies. The client certificate to use will be self issued by the vendor and signed with the Vendor CA \[[Certificate structure RFC](rfc008-certificate-structure.md)\].
+So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its signature to a known care provider. The key used to sign the JWT is identified by a key identifier (`kid`) which can be resolved through the Nuts registry as defined in [RFC006](rfc006-distributed-registry.md).
+The key MUST be listed in the `assertionMethod` section of the actor's DID document. The actor is identified by the `iss` field of the JWT.
 
-Every service requiring authentication MUST refer to an OAuth endpoint in the registry. The OAuth endpoint MUST have the type: `urn:oid:1.3.6.1.4.1.54851.2:oauth`. Its **loc** MUST point to the complete URL of the authorization server. The [Distributed Registry RFC](rfc006-distributed-registry.md) describes the registration format of an endpoint and service.
+Example of the actor's DID document:
+```json
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:123",
+  "verificationMethod": [
+    {
+      "id": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "controller": "did:nuts:123",
+      "type": "JsonWebKey2020",
+      "publicKeyJwk": {
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
+        "kty": "EC"
+      }
+    }
+  ],
+  "assertionMethod": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"]  
+}
+```
+
+#### 4.1.2 Server registration
+
+Each service MUST define an `oauth` serviceEndpoint. This endpoint is either the URL of the authorization server, or in case of a compound service an URI which resolves to another service.
+In order for the client to resolve the authorization server endpoint it MUST look up the `auth` service endpoint of the service.
 
 ### 4.2. Constructing the JWT
 
 #### 4.2.1. Header
 
 * **typ**: MUST be `JWT`
-* **alg**: one of `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `PS512` \([RFC7518](https://tools.ietf.org/html/rfc7518)\)
-* **x5c**: MUST contain the signing certificate. \([RFC7515](https://tools.ietf.org/html/rfc7515)\) 
+* **alg**: one of `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512` \([RFC7518](https://tools.ietf.org/html/rfc7518)\)
+* **kid**: MUST contain the identifier of a key published in the actor's DID document, listed in the `assertionMethod` section.  
 
 #### 4.2.2. Payload
 
-* **iss**: The issuer in the JWT is always the actor, thus the care organization doing the request.
-* **sub**: The subject contains the urn of the custodian. The custodian information could be used to find the relevant consent \(together with actor and subject\).
-* **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional
-* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the token endpoint reference. This can be taken from the Nuts registry. This is very important to prevent relay attacks.
+* **iss**: The issuer MUST contain the DID of the actor, thus the care organization making the request.
+* **sub**: The subject MUST contain the DID of the custodian. The custodian's DID could be used to find the relevant consent \(together with the actor and subject\).
+* **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional.
+* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the DID listed under the `auth` key of the services serviceEndpoint.
 * **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
-* **exp**: Expiration, MUST NOT be later than 5 seconds after issueing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
+* **exp**: Expiration, MUST NOT be later than 5 seconds after issuing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
 * **iat**: Issued at. NumericDate value of the time at which the JWT was issued.
 
 All other claims may be ignored.
 
 #### 4.2.3. Example JWT
 
-```yaml
+```json
 {
   "alg": "RS256",
   "typ": "JWT",
-  "X5c": ["MIIE+zCCBGSgAwIBAgICAQ0wDQYJKoZIh...abbrevated...9saWNkr09VZw="]
+  "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
 }
 ```
 
 ```yaml
 {
-  "iss": "urn:oid:2.16.840.1.113883.2.4.6.1:48000000",
-  "sub": "urn:oid:2.16.840.1.113883.2.4.6.1:12481248",
+  "iss": "did:nuts:123",
+  "sub": "did:nuts:456",
   "sid": "urn:oid:2.16.840.1.113883.2.4.6.3:9999990",
-  "aud": "8agAwIBAgICAwEwDQYJKoZIh",
+  "aud": "did:nuts:456#oauth-1",
   "usi": {...Base64 encoded token container...},
   "osi": {...hardware token sig...},
   "exp": 1578915481,
@@ -166,7 +194,7 @@ HTTP/1.1 200 OK
 
 ### 5.1. Registration
 
-The authorization server endpoint needs to be registered for each vendor/care organisation combination.
+The authorization server endpoint needs to be registered for each service that requires authentication in the care organisation DID document.
 
 ### 5.2. Validation
 
@@ -176,15 +204,15 @@ The following steps MUST all succeed. The order of execution is not relevant alt
 
 **5.2.1.1. JWT signature validation**
 
-The first step is to validate the JWT, the **x5c** field in the JWT header holds the public key that is used to sign the JWT. If the signature is invalid, an **invalid\_signature** error is returned.
+The first step is to validate the JWT, the DID in the **kid** field in the JWT header refers to the public key that is used to sign the JWT. If the signature is invalid, an **invalid\_signature** error is returned.
 
-**5.2.1.2. Client certificate validation**
+**5.2.1.2. TLS Client certificate validation**
 
-The client certificate used in the TLS connection must come from the same Vendor CA as the certificate present in the **x5c** header. This can be checked by comparing the public keys.
+The client certificate used in the TLS connection must conform the requirements as stated in [RFC008](rfc008-certificate-structure.md).
 
 **5.2.1.3. Issuer validation**
 
-The actor from the **iss** field must be known to the authorization server, a vendor must have registered it using a signing certificate signed by the same vendor CA as the CA that signed the certificate in the **x5c** field. It MAY be the case that the vendor CA has been renewed, in that case a previous valid certificate from the same vendor MAY have been used to register the actor. It that case the vendor CA MUST have been valid at the time the signing certificate had been signed.
+To validate the identity of the issuer, the value of the `kid` MUST be present in the issuer's DID document under the `assertionMethod` section.
 
 **5.2.1.4. JWT validity**
 
@@ -192,7 +220,7 @@ The JWT **iat** and **exp** fields MUST be validated. The timestamp of validatio
 
 **5.2.1.5. Login contract validation**
 
-The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the name of the actor. This name MUST match the name in the registry identified by the **iss** field.
+The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the name of the actor.
 
 **5.2.1.6. Endpoint validation**
 
@@ -204,7 +232,7 @@ The **iss** fields contains the identifier of the actor, the **sub** field conta
 
 **5.2.1.8. Subject validation**
 
-The **sub** field in the JWT MUST be a known organisation. It MUST have been registered by the vendor of the authorization server and it MUST be valid at the time indicated by the **iat** field.
+The **sub** field in the JWT MUST be a known organisation. It MUST have been registered by the node operator of the authorization server and it MUST be valid at the time indicated by the **iat** field.
 
 #### 5.2.2. Error responses
 
@@ -256,9 +284,14 @@ The resource server MUST validate the validity of the access token. It MAY conta
 
 1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
 2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify if a known legal base is present for the combination of custodian, actor, subject and resource.
-3. **The actor and custodian are the same.** It may be the case that a care organisation is using multiple service providers. In that case each service provider acts on behalf of the care organisation. Therefore it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organisation. To match the actor and custodian, the resource server MUST check if the proof in the registry that has been provided by the care organisation is the same. See RFC00X for the details. In short: A care organisation can only be published if it signs a challenge from the service provider.
+3. **The actor and custodian are the same.** It may be the case that a care organisation is using multiple service providers. In that case each service provider acts on behalf of the care organisation. Therefore, it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organisation.
 
 ### 6.3. Error codes
 
 Different protocols return different types of error messages. The format will most likely also differ. This means that error messages have to be specified per use-case. If an error message supports a text-based error code, then it should support the illegal\_access\_token code. If a client receives this error code then it MUST NOT reuse the access token.
 
+## 7 Current issues
+
+### Matching of actor name to login contract
+The login contract contains the name of the actor (care provider). The custodian must check if the name matches the issuer's name in the registry. The registration of names is not yet a part of the registry spec.
+The registration of a care providers name will probably be done by the use of [W3C Verifiable Credentials](https://www.w3.org/TR/vc-data-model/)
