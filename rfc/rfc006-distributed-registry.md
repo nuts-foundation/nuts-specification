@@ -546,11 +546,3 @@ This example is the most simple, there's one key and it's used for all cases.
 }
 ```
 
-## Current issues
-
-### Management of VCs by a trusted service provider
-Considering the case a care provider has outsourced it key management to a service provider.
-When obtaining a VC from a trusted party, how does the care provider prove that it is the party represented by the DID without being able to provide private key material?
-
-### Resolvability of the DID document
-The fundamental idea of a DID document is that it should be resolvable by other parties. Section [7.2.2 of the did-core spec](https://w3c.github.io/did-core/#read-verify) requires a specification how a DID resolver could resolve and verify a DID document from the registry. Since the Nuts registry will be a local registry this is not yet a consideration but when federation with other registries will become relevant, a proper specification should be written.

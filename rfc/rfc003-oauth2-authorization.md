@@ -194,7 +194,7 @@ HTTP/1.1 200 OK
 
 ### 5.1. Registration
 
-The authorization server endpoint needs to be registered for each service in the care organisation DID document.
+The authorization server endpoint needs to be registered for each service that requires authentication in the care organisation DID document.
 
 ### 5.2. Validation
 

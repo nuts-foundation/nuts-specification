@@ -47,8 +47,8 @@ Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-
 The PKIoverheid CA tree is the choice of CA to trust for production use. It's widely trusted and supported. 
 There are multiple vendors that can issue a certificate. 
 A PKIo TLS certificate MUST be used to secure inter-node connections as well as the peer-to-peer connections used to exchange data.
-Production nodes MUST not accept any other certificate than a PKIoverheid certificate.
-The certificate MUST be used as both server as client certificate in a mutual TLS connection.
+Production nodes SHOULD not accept any other certificate than a PKIoverheid certificate.
+The certificate SHOULD be used as both server as client certificate in a mutual TLS connection.
 
 ### 3.1 Certificate Authority trust chain
 A node will need to configure the correct CA-tree so other nodes can connect. 
