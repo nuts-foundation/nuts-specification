@@ -70,7 +70,7 @@ The following headers MAY be present as protected headers \(see section 3.4 for 
 
   defaults to `0`.
 
-To aid performance of validating the DAG the JWS SHALL NOT contain the actual contents of the document. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
+To aid performance of validating the DAG the JWS SHALL NOT contain the actual contents of the document. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
 The contents then MAY be stored next to or apart from the document itself \(but that's out of scope for this RFC\).
 
@@ -80,7 +80,7 @@ There SHOULD be only 1 signature on the JWS. If there are multiple signatures al
 
 The document reference uniquely identifies a document and is used to refer to it. It MUST be calculated by taking the bytes of the JWS EXACTLY as received and hashing it using SHA-256.
 
-When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase, e.g.: `148b3f9b46787220b1eeb0fc483776beef0c2b3e`
+When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
 ### 3.3. Ordering, branching and merging
 

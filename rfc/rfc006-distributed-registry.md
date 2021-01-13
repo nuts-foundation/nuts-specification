@@ -47,6 +47,8 @@ This RFC describes how to create, update and resolve the data structures require
 
 ## 3. Nuts DID Method
 
+### 3.1 Namespace Specific Identifier (NSI)
+
 The Nuts DID URI scheme is defined as follows:
 ```
 did = "did:nuts:" idstring
@@ -59,7 +61,7 @@ base58char = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" / "
     
 ```
 
-Where the `idstring` is derived from the public key:
+The `idstring` is derived from the public part of a key pair that was valid at the moment of creating the corresponding DID document.
 
 `idstring = BASE-58(SHA-256(raw-public-key-bytes))`
 
@@ -86,14 +88,10 @@ Outputs:
 ```
 
 Nuts DID Documents are wrapped in a JWS (JSON Web Signature) to ensure cryptographic authenticity and integrity through
-([RFC004](rfc004-distributed-document-format.md)). Please refer to that RFC on how to create the JWS.
+[RFC004](rfc004-distributed-document-format.md). Please refer to that RFC on how to create the JWS.
 
-### 3.1 Namespace Specific Identifier (NSI)
-
-Identifiers are derived from public keys that are valid at the moment of creating the DID document. 
-It MUST be the public key that corresponds to the private key that was used to sign the JWS.
-The public key MUST also be present in the `verificationMethods` and referenced by the `authentication` field. 
-When multiple keys are present, one MUST verify in this matter.
+The JWS MUST be signed by the private part of the key pair.
+The public key MUST also be present in the `verificationMethods` and referenced by the `authentication` field.
 
 ### 3.2 Method operations
 
@@ -127,7 +125,6 @@ Example JWS header
   "jwk": {
     "crv": "P-256",
     "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
-    "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
     "kty": "EC",
     "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
   },
@@ -155,7 +152,7 @@ Each key MUST be of type `JsonWebKey2020` according to §5.3.1 of the [did-core-
 
 The `controller` field MAY be present. This RFC follows the [did-core-spec](https://www.w3.org/TR/did-core/#did-controller).
 
-The `assertion` field MAY be present. 
+The `assertionMethod` field MAY be present. 
 Keys referenced from this field are used for signing Verifiable Credentials/Presentations and for signing JWTs in the OAuth flow.
 
 Example DID document:
@@ -175,7 +172,6 @@ Example DID document:
     "publicKeyJwk": {
       "crv": "P-256",
       "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
-      "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4",
       "kty": "EC"
     }
   }],
@@ -189,18 +185,7 @@ A Nuts DID can only be resolved locally. The concept of the Nuts registry is the
 Therefore, any DID document SHOULD already be present in local storage.
 
 ##### 3.2.2.1 Resolution Input Metadata
-All historic versions of a DID Document SHOULD be stored and queryable. This allows clients to resolve the document
-for a specific moment in time (e.g. a previous version) instead of the last one. For this the resolution input metadata
-MAY contain the `timestamp` field indicating this moment in time. This field MUST be formatted according to [RFC3339](https://tools.iets.org/html/rfc3339).
-
-Example:
-```json
-{
-  "timestamp": "2020-01-06T15:00:00Z"
-}
-```
-
-If `timestamp` is not present the current date/time MUST be assumed.
+All historic versions of a DID Document SHOULD be stored and queryable. This allows clients to resolve the document for a specific moment in time (e.g. a previous version) instead of the last one. This allows for resolving keys and services at a given moment.
 
 ##### 3.2.2.2 Document Metadata
 The resolved DID Document Metadata contains the `created` and `updated` fields, in accordance with the [did-core-spec](https://www.w3.org/TR/did-core/#did-document-metadata-properties). They are
@@ -299,7 +284,7 @@ The DID subject will have to go through the process of reacquiring all Verifiabl
 All data is public knowledge. All considerations from [§10 of did-core](https://www.w3.org/TR/did-core/#privacy-considerations) apply.
 
 ## 4. Services
-It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC.
+It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC or Bold specification.
 A service can define an absolute endpoint URI or be a compound service, referring to a set of services. This is often the case
 when a SaaS provider defines endpoints to be used for all clients.
 
@@ -340,7 +325,7 @@ The care organisation refers to it:
       "id": "did:nuts:abc#NutsCompoundService-1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:123#NutsOAuth-1",
+        "oauth": "did:nuts:123#NutsOAuth-1",
         "fhirEndpoint": "did:nuts:123#NutsFHIR-1"
       }
     }
@@ -353,7 +338,7 @@ The care organisation refers to it:
 Since RSA algorithms are deemed to be insecure for medium to long term, only elliptic curve-type algorithms are supported.
 The library support for newer algorithms (e.g. `Ed25519`) and curves (`X25519`) however is limited, so for now only
 the `secp256r1`, `secp384r1` and `secp521r1` NIST curves MUST be supported. This curve is considered to provide enough security for the next 10 years,
-according to the (Dutch Cyber Security Council)[https://www.ncsc.nl/].
+according to the [Dutch Cyber Security Council](https://www.ncsc.nl/).
 
 It is expected however, that as library support improves more (stronger) algorithms and key types will be supported,
 which should be taken in account by implementors.
@@ -560,23 +545,6 @@ This example is the most simple, there's one key and it's used for all cases.
   "service": []
 }
 ```
-
-## Current issues
-
-### Key management and mitigating impact of key loss
-Considering the case a care provider has outsourced its key management to a service provider.
-When discussing deployment scenarios, we should consider the different roles at the service provider like:
-* Sales and support department who can create and delete DID documents
-* System administrators who alter serviceEndpoints
-> how is this an issue if they all use the same software that selects the key?
-
-It might not be desirable for these roles have access to the same key material. We can suggest configurations with different DID documents with different keys for services and for controller.
-
-### Management of VCs by a trusted service provider
-Considering the case a care provider has outsourced it key management to a service provider.
-When obtaining a VC from a trusted party, how does the care provider prove that it is the party represented by the DID without being able to provide private key material?
-> They must initiate a session from the portal of the software vendor using the protocol specified to obtain a VC
-> A mobile only VC won't suffice, a server has to be authorized not a single device
 
 ### Resolvability of the DID document
 The fundamental idea of a DID document is that it should be resolvable by other parties. Section [7.2.2 of the did-core spec](https://w3c.github.io/did-core/#read-verify) requires a specification how a DID resolver could resolve and verify a DID document from the registry. Since the Nuts registry will be a local registry this is not yet a consideration but when federation with other registries will become relevant, a proper specification should be written.
