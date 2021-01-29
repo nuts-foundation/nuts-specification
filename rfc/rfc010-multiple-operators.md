@@ -9,7 +9,15 @@
 ## Multiple operator service access
 ### Abstract
 
-This RFC describes an addition to [RFC003](rfc003-oauth2-auithorization.md) and [RFC006](rfc006-distributed-registry.md) on how to handle resource access when a legal party has multiple SaaS providers. A SaaS provider can alter the care organization DID document so the DID document of the other provider is added as synonym. This is done by using the *also-known-as* property.
+This RFC describes an addition to [RFC003](rfc003-oauth2-auithorization.md) and [RFC006](rfc006-distributed-registry.md) on how to handle resource access when a DID Subject has multiple DID Documents. 
+A controller of the DID Document can add DIDs as synonyms. This is done by using the *also-known-as* property. 
+DIDs under the *also-known-as* property represent the same DID Subject. 
+When DID Subjects define the same legal entity, they should be able to transfer data freely.
+
+For example: a care organization may use the services of two different SaaS providers. 
+Both SaaS providers have signed a data processing agreement with the care organization.
+Both SaaS providers are allowed to process data for the care organization within the DPA context.
+The DPA forms the legal base on which data may be transfered between the SaaS providers.  
 
 ### Status
 
