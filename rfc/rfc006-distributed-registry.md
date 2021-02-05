@@ -17,7 +17,7 @@ This RFC describes a protocol to build a registry containing information require
 The registry typically contains organizations, software vendors acting on behalf of their client (organizations),
 data exchange services offered by organizations and their technical endpoints.
 It describes how these are mapped to [Decentralized Identifiers (DID)](https://www.w3.org/TR/did-core/) and how DID Documents
-are encapsulated in [RFC004 Distributed Documents](rfc004-distributed-document-format.md) to provide cryptographic
+are encapsulated in transactions ([RFC004 Verifiable Transactional Graph](rfc004-verifiable-transactional-graph.md)) to provide cryptographic
 integrity and consistent state across distributed networks.
 
 ### Status
@@ -38,7 +38,7 @@ This RFC describes how to create, update and resolve the data structures require
 ## 2. Terminology
 
 * **Bolt**: a use case built on top of the functionality Nuts provides.
-* **JWS**: JSON Web Signature as specified by [RFC004](rfc004-distributed-document-format.md).
+* **JWS**: JSON Web Signature as specified by [RFC004](rfc004-verifiable-transactional-graph.md).
 * **Organization**: a care organization exchanging data with other care organizations over a Nuts network.
   By giving other DIDs control over its DID Document organizations can delegate data exchange to another party,
   e.g. a care software vendor or SaaS provider.
@@ -88,7 +88,7 @@ Outputs:
 ```
 
 Nuts DID Documents are wrapped in a JWS (JSON Web Signature) to ensure cryptographic authenticity and integrity through
-[RFC004](rfc004-distributed-document-format.md). Please refer to that RFC on how to create the JWS.
+[RFC004](rfc004-verifiable-transactional-graph.md). Please refer to that RFC on how to create the JWS.
 
 The JWS MUST be signed by the private part of the key pair.
 The public key MUST also be present in the `verificationMethods` and referenced by the `authentication` field.
@@ -96,7 +96,7 @@ The public key MUST also be present in the `verificationMethods` and referenced 
 ### 3.2 Method operations
 
 DID documents are enclosed in a message envelope to ensure consistency in the network.
-The envelope is in the form of a JWS as described in [RFC004](rfc004-distributed-document-format.md).
+The envelope is in the form of a JWS as described in [RFC004](rfc004-verifiable-transactional-graph.md).
 Once the network layer has confirmed the signature of the JWS, the registry MUST validate if the submitter is authorized to create, update or delete the document.
 If the authorization fails, the document should be ignored.
 
@@ -205,7 +205,7 @@ Changes to DID documents can only be accepted if the update is signed with a cur
 The following requirements on the JWS header parameter apply:
 
 - `kid` MUST hold the reference to the correct key.
-- `tid` and `tiv` MUST be filled according to [RFC004](rfc004-distributed-document-format.md).
+- `tid` and `tiv` MUST be filled according to [RFC004](rfc004-verifiable-transactional-graph.md).
 
 Example JWS header:
 ```json
@@ -247,21 +247,21 @@ Example DID document:
 
 ### 3.3 Security Considerations
 
-Almost all security considerations are covered by the mechanisms described in [RFC004](rfc004-distributed-document-format.md). An overview of countermeasures:
+Almost all security considerations are covered by the mechanisms described in [RFC004](rfc004-verifiable-transactional-graph.md). An overview of countermeasures:
 
 - **eavesdropping** - All communications is sent over two-way TLS. All data is public anyway.
 - **replay** - DID documents are identified and published by their hash (SHA-256). Replaying will result in replaying the exact same content.
-- **message insertion** - [RFC004](rfc004-distributed-document-format.md) defines hashing and signing of published documents.
+- **message insertion** - [RFC004](rfc004-verifiable-transactional-graph.md) defines hashing and signing of published documents.
 - **deletion** - All DID documents are published and copied on a mesh network. Deletion of a single document will only occur locally and will not damage other nodes.
 - **modification** - DID documents can only be modified if they are published with a signature from one of the `authentication` keys.
 - **man-in-the-middle** - All communications is sent over two-way TLS and all documents are signed. A DID can not be hijacked since it is derived from the public key.
-- **denial of service** - This is out of scope and handled by [RFC004](rfc004-distributed-document-format.md).
+- **denial of service** - This is out of scope and handled by [RFC004](rfc004-verifiable-transactional-graph.md).
 
 #### 3.3.1 Protection against DID hijacking
 
 The Nuts network is a mesh network without central authority. This means that any party can generate a DID. 
 This DID must be protected against forgery and hijacking since duplicates are accepted in the Nuts network. 
-The duplicates are sorted and one will eventually be accepted (consistency rules of [RFC004](rfc004-distributed-document-format.md)). This would open up a DID to hijacking. 
+The duplicates are sorted and one will eventually be accepted (consistency rules of [RFC004](rfc004-verifiable-transactional-graph.md)). This would open up a DID to hijacking. 
 Therefore, the DID MUST be a derivative of the public key used to sign the document as described in §3. 
 
 #### 3.3.2 Protection against loss of private key
