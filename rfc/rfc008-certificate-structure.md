@@ -3,7 +3,7 @@
 |  |  |
 | :--- | :--- |
 | Nuts foundation | W.M. Slakhorst |
-| Request for Comments: 003 | Nedap |
+| Request for Comments: 008 | Nedap |
 |  | October 2020 |
 
 ## Certificate Structure
