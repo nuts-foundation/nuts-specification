@@ -262,7 +262,7 @@ Almost all security considerations are covered by the mechanisms described in [R
 The Nuts network is a mesh network without central authority. This means that any party can generate a DID. 
 This DID must be protected against forgery and hijacking since duplicates are accepted in the Nuts network. 
 The duplicates are sorted and one will eventually be accepted (consistency rules of [RFC004](rfc004-verifiable-transactional-graph.md)). This would open up a DID to hijacking. 
-Therefore, the DID MUST be a derivative of the public key used to sign the document as described in §3. 
+Therefore, the DID MUST be a derivative of the public key used to sign the transaction as described in §3. 
 
 #### 3.3.2 Protection against loss of private key
 
