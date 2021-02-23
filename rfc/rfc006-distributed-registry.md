@@ -113,7 +113,7 @@ A Create operation for a DID Document puts the following additional requirements
 - `tid` MUST be absent
 
 The `kid` field of the `jwk` header parameter MUST be prefixed by the `id` of the DID document.
-In order for the contents to be accepted in the Nuts registry, the JWK MUST match the `authentication` key in the DID document with the same identifier. 
+In order for the contents to be accepted in the Verifiable Data Registry, the JWK MUST match the `authentication` key in the DID document with the same identifier. 
 The `kid` field from the JWK MUST match the `id` from the verification key in the DID document.
 
 Example JWS header
@@ -181,7 +181,7 @@ Example DID document:
 ```
 
 #### 3.2.2 Read (Resolve)
-A Nuts DID can only be resolved locally. The concept of the Nuts registry is the state based upon all Create, Update and Delete operations received through the Nuts Network.
+A Nuts DID can only be resolved locally. The concept of the Verifiable Data Registry is the state based upon all Create, Update and Delete operations received through the Nuts Network.
 Therefore, any DID document SHOULD already be present in local storage.
 
 ##### 3.2.2.1 Resolution Input Metadata
