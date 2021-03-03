@@ -335,10 +335,22 @@ The care organisation refers to it:
 
 ### 4.1. Network Endpoint Service
 
-The underlying peer-to-peer network does not automatically discover new peers but it relies on the system to tell
-which peers to connect to instead. Nodes SHOULD publish their Nuts Network endpoint(s) as a service in their DID Document(s).
-The `type` of this service MUST be `nuts-network-grpc`. The `serviceEndpoint` MUST be a single gRPC endpoint other
-nodes can use to connect to the node. In MUST be in the format of `<host>:<port>`. A node MAY publish multiple network endpoints.
+The underlying peer-to-peer network does not automatically discover new peers, but it relies on the system to tell
+to which peers to connect. Nodes SHOULD publish their Nuts Network endpoint(s) as a service in their DID Document(s).
+The `type` of this service MUST be `NutsNetworkGRPCService`. The `serviceEndpoint` MUST be a single gRPC endpoint other
+nodes can use to connect to the node. It MUST be in the format of `<host>:<port>`. A node MAY publish multiple network endpoints
+through multiple services with the `NutsNetworkGRPCService` type.
+
+Example:
+
+```json
+{
+  "id": "did:nuts:abc#NutsNetworkGRPCService-1",
+  "type": "NutsNetworkGRPCService",
+  "serviceEndpoint": "nuts.carevendor.nl:5555"
+}
+```
+
 
 ## 5. Supported Cryptographic Algorithms and Key Types
 
