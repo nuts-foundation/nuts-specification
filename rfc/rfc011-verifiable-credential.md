@@ -48,7 +48,43 @@ All VCs MUST use DIDs as specified in [RFC004](rfc004-distributed-document-forma
 
 The following proof types must be supported:
 
-* JsonWebSignature2020 (https://w3c-ccg.github.io/ld-proofs/ and https://tools.ietf.org/html/rfc7797)
+#### 3.1.1 JsonWebSignature2020
+
+resources:
+
+* https://w3c-ccg.github.io/ld-proofs/ 
+* https://tools.ietf.org/html/rfc7797
+* https://w3c-ccg.github.io/lds-jws2020
+
+The *JsonWebSignature2020* refers to https://w3id.org/rdf#URDNA2015 canonicalization but it's unclear how this is to be implemented for json, therefore it's skipped for now.
+It's quite hard to decipher those specifications and they seem to be very drafty as well. The algorithm used to create the signature is as follows:
+
+- compose a `proof` json object:
+
+```json
+{
+  "type": "JsonWebSignature2020",
+  "proofPurpose": "assertionMethod",
+  "verificationMethod": "<<kid>>",
+  "created": "<<RFC3339>>"
+}
+```
+where `<<kid>>` is replaced with an assertionMethod ID from the DID Document and `<<RFC3339>>` is replaced with a RFC3339 compliant time string.
+
+- take the sha256 of the `proof` and concatenate with the sha256 of the input verifiable credential (without the proof)
+- sign the bytes from the previous step with the private key corresponding to the `kid`
+- Base64 encode (url encoding) the following headers: `{"alg":"ES256","b64":false,"crit":["b64"]}` giving `eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19`
+- concat the base64 encoded headers with `..` and the base64 encoded signature
+- place the result in the `jws` field of the `proof`:
+```json
+{
+  "type": "JsonWebSignature2020",
+  "proofPurpose": "assertionMethod",
+  "verificationMethod": "<<kid>>",
+  "created": "<<RFC3339>>",
+  "jws": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..ZXlKaGJHY2lPaUpGVXpJMU5pSjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2hoZEktUkZPSzdlbnZJTTdLN1E5SzBSeHhRSzNIVWJPTUJyLVlZX1g0eW1YR0pXOHF4UkEuN0F4a3lZekNXTElPZ2Q5TlpnR3p2aHd2UzZZQ3FpRTRPX3FwWGVOSEN6X091S1c0TmJsWkJueTBkZVhXT0lXZ3JNczF4OTZlNmtnaGZGYTRNd0J3TlE="
+}
+```
 
 ### 3.2 Content-type
 
