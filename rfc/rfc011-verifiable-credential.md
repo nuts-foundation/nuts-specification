@@ -48,7 +48,7 @@ All VCs MUST use DIDs as specified in [RFC004](rfc004-distributed-document-forma
 
 The following proof types must be supported:
 
-* EcdsaSecp256r1Signature2019 (https://w3c-ccg.github.io/ld-proofs/ and https://tools.ietf.org/html/rfc7797)
+* JsonWebSignature2020 (https://w3c-ccg.github.io/ld-proofs/ and https://tools.ietf.org/html/rfc7797)
 
 ### 3.2 Content-type
 
@@ -122,7 +122,7 @@ VCs that are issued by a Nuts DID can be revoked by publishing the following tra
   "statusReason": "Disciplinary action",
   "statusDate": "2010-02-01T19:73:24Z",
   "proof": {
-    "type": "EcdsaSecp256r1Signature2019",
+    "type": "JsonWebSignature2020",
     "created": "2017-06-18T21:19:10Z",
     "proofPurpose": "assertionMethod",
     "verificationMethod": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467#qjHYrzaJjpEstmDATng4-cGmR4t-_V3ipbDVYZrVe4A",
@@ -141,7 +141,7 @@ Such a revocation transaction has the following requirements:
 * the **currentStatus** MUST be changed to `Revoked`.
 * the **statusReason** MAY be filled with a revocation reason.
 * the **statusDate** MUST provide the date in rfc3339 format. From this moment in time the VC is revoked.
-* the **proof** MUST be a `EcdsaSecp256r1Signature2019` proof.
+* the **proof** MUST be a `JsonWebSignature2020` proof.
 
 The transaction MUST be published on the Nuts network. It MAY use the `verificationMethod` for the transaction.
 The content-type is `application/vc+json;type=revocation`

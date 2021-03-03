@@ -101,7 +101,7 @@ No additional services than the Nuts network are required.
   "credentialSubject": {
     "id": "did:nuts:8jx6GU9JipE6TXY2nak8RgFXMk3zaoPWsCb53N1Zjw9R",
     "company": {
-      "tradeName": "De Nootjes",
+      "name": "De Nootjes",
       "city": "Eibergen"
     }
   },
