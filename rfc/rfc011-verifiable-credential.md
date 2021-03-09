@@ -88,7 +88,7 @@ where `<<kid>>` is replaced with an assertionMethod ID from the DID Document and
 
 ### 3.2 Content-type
 
-All VCs have a content-type equal to `application/vc+json;type=<vc>` when published on the network. `<vc>` MUST be defined more specifically. 
+All VCs have a content-type equal to `application/vc+json` when published on the network.
 All VCs MUST be handled as normal JSON. All issued VCs MUST add the `https://nuts.nl/credentials/v1` context.
 VCs within Nuts MAY NOT specify more than one additional type next to `VerifiableCredential`.
 
