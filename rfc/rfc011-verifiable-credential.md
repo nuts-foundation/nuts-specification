@@ -25,7 +25,7 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 It's to be expected that multiple sources must be supported that can claim certain information about a subject. 
 These claims have to be structured in such a way, that they are verifiable and searchable. 
-Examples of claims are a company name, and it's chamber of commerce number. Users will search on the name of an organization to find out whuch services are supported.
+Examples of claims are a company name, and it's chamber of commerce number. Users will search on the name of an organization to find out which services are supported.
 This will directly influence the interaction the user can have with the system of that organization. 
 Making sure this information is correct and that it can be trusted is therefore extremely important.
 
