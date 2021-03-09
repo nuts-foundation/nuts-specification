@@ -56,10 +56,11 @@ resources:
 * https://tools.ietf.org/html/rfc7797
 * https://w3c-ccg.github.io/lds-jws2020
 
-The *JsonWebSignature2020* refers to https://w3id.org/rdf#URDNA2015 canonicalization but it's unclear how this is to be implemented for json, therefore it's skipped for now.
-It's quite hard to decipher those specifications and they seem to be very drafty as well. The algorithm used to create the signature is as follows:
+The algorithm used to create the signature is as follows:
 
-- compose a `proof` json object:
+- take the input Verifiable Credential and remove the `proof` field. Store as `raw_vc`.
+- compute the sha256 of the `raw_vc`, store as `hash_vc`: `hash_vc = sha256(raw_vc)`.  
+- compose a `raw_proof` json object without the `jws` field:
 
 ```json
 {
@@ -71,10 +72,12 @@ It's quite hard to decipher those specifications and they seem to be very drafty
 ```
 where `<<kid>>` is replaced with an assertionMethod ID from the DID Document and `<<RFC3339>>` is replaced with a RFC3339 compliant time string.
 
-- take the sha256 of the `proof` and concatenate with the sha256 of the input verifiable credential (without the proof)
-- sign the bytes from the previous step with the private key corresponding to the `kid`
-- Base64 encode (url encoding) the following headers: `{"alg":"ES256","b64":false,"crit":["b64"]}` giving `eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19`
-- concat the base64 encoded headers with `..` and the base64 encoded signature
+- compute the sha256 of the `raw_proof`, store as `hash_proof`: `hash_proof = sha256(raw_proof)`.
+- concatenate  `hash_proof` with `raw_proof` and store as `payload`.
+- construct the JWS `header` as `{"alg":"ES256","b64":false,"crit":["b64"]}` where the `alg` SHOULD be replaced with a valid algorithm.
+- construct a challenge by base64 encode the header and payload and join with a `.`: `challenge = base64_rawurlencode(header) + '.' + base64_rawurlencode(challenge)`  
+- sign the bytes from the previous step with the private key corresponding to the `kid`: `sig = sign(challenge, pkey(kid))`
+- create `jws` as `header + ".." + base64_rawurlencode(sig)`
 - place the result in the `jws` field of the `proof`:
 ```json
 {
