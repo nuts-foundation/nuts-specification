@@ -66,8 +66,8 @@ The algorithm used to create the signature is as follows:
 {
   "type": "JsonWebSignature2020",
   "proofPurpose": "assertionMethod",
-  "verificationMethod": "<<kid>>",
-  "created": "<<RFC3339>>"
+  "verificationMethod": "did:nuts:EgFjg8zqN6eN3oiKtSvmUucao4VF18m2Q9fftAeANTBd#twlH6rB8ArZrknmBRWLXhao3FutZtvOm0hnNhcruenI",
+  "created": "2021-03-09T11:44:56.382202+01:00"
 }
 ```
 where `<<kid>>` is replaced with an assertionMethod ID from the DID Document and `<<RFC3339>>` is replaced with a RFC3339 compliant time string.
@@ -79,12 +79,13 @@ where `<<kid>>` is replaced with an assertionMethod ID from the DID Document and
 - sign the bytes from the previous step with the private key corresponding to the `kid`: `sig = sign(challenge, pkey(kid))`
 - create `jws` as `header + ".." + base64_rawurlencode(sig)`
 - place the result in the `jws` field of the `proof`:
+
 ```json
 {
   "type": "JsonWebSignature2020",
   "proofPurpose": "assertionMethod",
-  "verificationMethod": "<<kid>>",
-  "created": "<<RFC3339>>",
+  "verificationMethod": "did:nuts:EgFjg8zqN6eN3oiKtSvmUucao4VF18m2Q9fftAeANTBd#twlH6rB8ArZrknmBRWLXhao3FutZtvOm0hnNhcruenI",
+  "created": "2021-03-09T11:44:56.382202+01:00",
   "jws": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..ZXlKaGJHY2lPaUpGVXpJMU5pSjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2hoZEktUkZPSzdlbnZJTTdLN1E5SzBSeHhRSzNIVWJPTUJyLVlZX1g0eW1YR0pXOHF4UkEuN0F4a3lZekNXTElPZ2Q5TlpnR3p2aHd2UzZZQ3FpRTRPX3FwWGVOSEN6X091S1c0TmJsWkJueTBkZVhXT0lXZ3JNczF4OTZlNmtnaGZGYTRNd0J3TlE="
 }
 ```
@@ -97,7 +98,7 @@ VCs within Nuts MAY NOT specify more than one additional type next to `Verifiabl
 
 ### 3.3 Updates
 
-VCs are not updatable, an update can be performed by revoking the current and issuing a new vc.
+VCs are not updatable, an update can be performed by revoking the current and issuing a new VC.
 
 ### 3.4 Identifiers
 
