@@ -39,7 +39,7 @@ VCs can add information (claims) to a DID. This RFC builds upon [RFC011](rfc011-
 The `credentialSubject` field contains the following:
 
 ```json
-"credentialSubject": {
+{
     "id": "did:nuts:8jx6GU9JipE6TXY2nak8RgFXMk3zaoPWsCb53N1Zjw9R",
     "company": {
         "tradeName": "De Nootjes",
