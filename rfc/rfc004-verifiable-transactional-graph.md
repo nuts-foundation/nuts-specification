@@ -64,13 +64,6 @@ In addition to the registered header parameters, the following headers MUST be p
 
   When it's a root transaction the field SHALL NOT have any entries.
 
-The following headers MAY be present as protected headers \(see section 3.4 for details\):
-
-* **tid**: \(timeline ID\) MUST contain the reference to the transaction that started the timeline.
-* **tiv**: \(timeline version\) MUST contain a numeric version indicating the version of the transaction on the timeline,
-
-  defaults to `0`.
-
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
 The contents then MAY be stored next to or apart from the transaction itself \(but that's out of scope for this RFC\).
@@ -91,7 +84,7 @@ As the name implies the DAG MUST be acyclic, transactions that introduce a cycle
 
 Since it takes some time for the transactions to be synced to all network peers \(eventual consistency\) there COULD be multiple transactions referring to the previous transactions in the **prevs** field, a phenomenon called _branching_. Since branches \(especially old and/or long ones\) may cause transactions to be reordered which hurts performance they MUST be merged as soon as possible. Branches are merged by specifying their leafs in the **prevs** field:
 
-![RFC structure](../.gitbook/assets/rfc004-branching.svg)
+![DAG structure](../.gitbook/assets/rfc004-branching.svg)
 
 The first transaction in the DAG is the _root transaction_ and SHALL NOT have any **prevs** entries. There MUST only be one root transaction for a network and subsequent root transactions MUST be ignored.
 
@@ -107,25 +100,18 @@ The following orders are invalid:
 * `A -> B -> D -> F -> C -> E` \(merger processed before all previous were processed\)
 * `A -> B -> D -> E -> C -> F` \(branch C is processed out-of-order\)
 
-### 3.4. Timelines
+### 3.4. Updates & Ordering
 
-Since transactions are immutable, the only way to update the application data they contain is by creating a new transaction. Subsequent versions of the transaction's application data SHOULD be tracked by creating a _timeline_ using the optional **tid** and **tiv** fields. These fields SHALL NOT be used on the first transaction in the timeline, only on updates. The **tid** field identifies the timeline and MUST contain the reference to the first transaction. The **tid** field MUST be present when **tiv** is specified.
+Since transactions are immutable, the only way to update the application data they contain is by creating a new transaction. 
+All updates are considered as full updates, partial updates are not supported. 
+Parallel updates of the same application data, in the form of branches, MUST be processed the same way by all nodes.
 
-For signalling updates based on out-of-date state **tiv** \(timeline version\) incrementing integer CAN be used to indicate the version of the application data. The first transaction in the timeline MUST have a **tiv** of `0`, but since this is the default value it CAN be omitted. The first update in the timeline MUST have a **tiv** of `1`, the second `2` and so on.
+Consider the DAG from the previous chapter. If transaction `C` and  `D` where to update the same application data, nodes could process the transaction in a different order.
+This would create an inconsistency in the network. To fix this the following rules MUST be taken into account:
 
-Incorrect state due to incorrect updates \(e.g. duplicate **tiv**, see below\) SHOULD be fixed by issuing a new update with incremented **tiv**.
-
-#### 3.4.1. Timeline validation
-
-It's up to the processing application to validate the timeline, but the following points SHOULD be taken into consideration:
-
-* Assert that the update has been issued by the owner \(signer\) of the original transaction.
-* Gaps in timeline versioning MAY indicate the consumer is missing a \(branching\) transaction.
-* Duplicates in timeline versioning MAY indicate a race condition in which the producer updated the application data based on out-of-date state.
-  * When the payloads are equal one of the updates COULD be applied and the other one ignored.
-  * When the payloads differ the transaction with the lowest **iat** SHOULD be applied first.
-
-    If **iat**s are equal the transaction with the lowest hash should be applied first.
+* If the payloads are equal, mark both transactions as processed and apply one of the payloads.
+* If the payloads are not equal, apply the payload with the highest *iat*.
+* Else apply the payload with the highest hash.
 
 ### 3.5. Processing the DAG
 
