@@ -141,20 +141,28 @@ TODO: Limit number of connections from a certain certificate?
 
 #### Threat: Memory Exhaustion due to Large Messages
 
-To prevent a (malicious) peer from exhausting up the node's memory with (many) large messages, nodes SHOULD NOT accept incoming
-messages larger than 5mb (5242880 bytes). Nodes SHALL NOT send larger messages.
+A (malicious) peer could exhaust the node's memory with (many) large messages.
 
-#### Threat: File Descriptor Exhaustion due to Many Connections
+Countermeasures:
+- Nodes SHOULD NOT accept incoming messages larger than 5mb (5242880 bytes).
 
-Although multiple peers might share the same IP address in clustering or cloud environments nodes COULD limit
-the number of active connections from/to a single IP address to e.g. 5 connections. This makes it harder for malicious
-parties to exhaust the node's resources which could deny other peers from connecting to it.
+#### Threat: Resource Exhaustion through Connection Flooding
+
+Multiple peers might share the same IP address and certificate in clustering or cloud environments. However, it can also
+be used by attackers to trying to flood the node with a very large number of connections exhausting resources like 
+file descriptors, connection pools or thread pools.
+ 
+Countermeasures:
+- Nodes SHOULD limit the number of active connections from/to a single IP address (e.g. 5 connections).
+- Nodes SHOULD limit the number of active connections from/to a single certificate subject (e.g. 5 connections).
 
 #### Threat: Resource Exhaustion through Message Flooding
 
 A peer that floods the node with many messages threatens the stability of a node, and the network in general: resources
-for processing incoming messages often have hard limits in the form connection pools, thread pools or backlogs. Nodes
-SHOULD avoid having these resources exhausted by limiting the number of messages received from a peer.
+for processing incoming messages often have hard limits in the form connection pools, thread pools or backlogs.
+
+Countermeasures:
+- Nodes SHOULD limit the number of messages received from a peer.
 
 TODO: What would be a good number? 5/second?
 
@@ -166,9 +174,15 @@ transactions without a meaningful payload.
 
 TODO: How to mitigate this?
 
-### 9.2. Data manipulation
+### 9.2. Data Manipulation
 
-Check transaction signature.
+#### Threat: Manipulating Transaction Payload
+
+By altering a transaction's payload when responding to a payload query an attacker can hamper nodes or even
+steal identities (e.g. DIDs).
+
+Countermeasures:
+- Nodes MUST verify the payload hash when receiving transaction payload.
 
 ## 8. Issues
 
