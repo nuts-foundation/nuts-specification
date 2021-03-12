@@ -255,7 +255,7 @@ Almost all security considerations are covered by the mechanisms described in [R
 - **deletion** - All DID documents are published and copied on a mesh network. Deletion of a single document will only occur locally and will not damage other nodes.
 - **modification** - DID documents can only be modified if they are published with a signature from one of the `authentication` keys.
 - **man-in-the-middle** - All communications is sent over two-way TLS and all documents are signed. A DID can not be hijacked since it is derived from the public key.
-- **denial of service** - This is out of scope and handled by [RFC004](rfc004-verifiable-transactional-graph.md).
+- **denial of service** - This is mostly out of scope and handled by [RFC004](rfc004-verifiable-transactional-graph.md), unless it can only be handled by this RFC.
 
 #### 3.3.1 Protection against DID hijacking
 
@@ -278,6 +278,16 @@ Appropriate measures MUST be taken to keep authentication keys secure.
 When control over a DID document has been lost, the DID subject will have to have all Verifiable Credentials revoked. 
 Without Verifiable Credentials linked to the DID document, the DID document no longer has any value.
 The DID subject will have to go through the process of reacquiring all Verifiable Credentials for a new DID document.
+
+#### 3.3.4 Protection against public key zerging
+
+By registering a very large number of public keys in a DID Document an attacker can exhaust resources used for storing public keys.
+
+To prevent this from happening a DID Document MUST contain no more than 50 keys.
+
+TODO: What if the attacker just creates 100.000 versions of a document with in each 50 new keys?
+
+#### Threat: Resource Exhaustion through Very large number of keys within DID (max. 50 keys)
 
 ### 3.4 Privacy considerations
 
