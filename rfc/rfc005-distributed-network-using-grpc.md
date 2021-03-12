@@ -63,18 +63,43 @@ The protocol operates as follows;
 The sections below specify the details of the protocol operation and maps it to the gRPC messages. See the section
 "Protobuf Definition" for a full specification of the protobuf/gRPC contract.
 
-### 5.1. Broadcasting
+### 5.1. Blocks
+
+Many distributed ledgers (DLT) group transactions into blocks for optimization and consensus. This protocol uses blocks as well,
+as optimization for:
+
+- DAG comparison by deriving a single hash from (potentially) many transactions, which can be shared with peers, and
+- consensus about up to which point the DAG is immutable (no new transactions can be added by branching).
+
+In most block-based DLTs blocks are immutable, preventing new transactions from being added once the block is created
+("mined" in Bitcoin terms). This protocol differs in that Nuts' DAG transactions don't hold transferable value
+(in contrast to e.g. Bitcoin or Ethereum) and thus doesn't need consensus about recent transactions, and thus can have
+mutable blocks (up to some point).
+
+In this protocol each day considered a block and a new block is started at midnight (UTC). The signing time of a transaction
+determines which block it belongs to. As such the signing time of the DAG's root transaction determines the first block.
+
+### 5.1.1. 
+It can be problematic when peers add new transactions from old branches, because 
+
+
+Parameters:
+ - Maximum age of new transactions, in blocks: 3 days
+ - Block size: 1 day
+ - A new block is started at 00:00 UTC
+
+### 5.2. Broadcasting
 
 The local node's DAG heads MUST be broadcast at an interval using the `AdvertHashes` message, by default every 2 seconds. The interval MAY be adjusted
 by the node operator but SHALL NOT be so short that it clutters the network. It is advised to keep it relatively short
 because it directly influences the speed by which new transactions are propagated to peers.  
 
-### 5.2. Querying Peer's DAG
+### 5.3. Querying Peer's DAG
 
 When the local node decides to query a peer's DAG because it differs from its own, it uses the `TransactionListQuery` message.
 The receiving peer MUST respond with the `TransactionList` message containing all transactions (without payload) from its DAG.
 
-### 5.3. Resolving Transaction Payload
+### 5.4. Resolving Transaction Payload
 
 When the local node is missing a transaction's payload, it SHOULD query the peer that provided the transaction
 for the payload using the `TransactionPayloadQuery` message. The peer MUST respond with the `TransactionPayload` message,
