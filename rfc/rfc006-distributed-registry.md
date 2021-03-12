@@ -285,8 +285,6 @@ By registering a very large number of public keys in a DID Document an attacker 
 
 To prevent this from happening a DID Document MUST contain no more than 50 keys.
 
-TODO: What if the attacker just creates 100.000 versions of a document with in each 50 new keys?
-
 #### Threat: Resource Exhaustion through Very large number of keys within DID (max. 50 keys)
 
 ### 3.4 Privacy considerations
