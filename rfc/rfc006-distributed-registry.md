@@ -291,7 +291,8 @@ when a SaaS provider defines endpoints to be used for all clients.
 For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing the URI. For a compound service the
 `serviceEndpoint` MUST contain a map containing references to absolute endpoint URI services.
 
-The service identifier MUST be constructed from the DID followed by a `#`, the service type, a `-` and an identifier unique to the DID document.
+The service identifier MUST be constructed from the DID followed by a `#` and an identifier.
+The service identifier MUST be unique to the DID document.
 
 Below is an example of a service registered by a care organization that uses the endpoints from a SaaS provider:
 
@@ -302,12 +303,12 @@ The SaaS provider defines the actual URL:
   "id": "did:nuts:123",
   "service": [
     {
-      "id": "did:nuts:123#NutsOAuth-1",
+      "id": "did:nuts:123#NutsOAuth",
       "type": "NutsOAuth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:123#NutsFHIR-1",
+      "id": "did:nuts:123#NutsFHIR",
       "type": "NutsFHIR",
       "serviceEndpoint": "https://example.com/fhir"
     }
@@ -325,8 +326,8 @@ The care organisation refers to it:
       "id": "did:nuts:abc#NutsCompoundService-1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauth": "did:nuts:123#NutsOAuth-1",
-        "fhirEndpoint": "did:nuts:123#NutsFHIR-1"
+        "oauth": "did:nuts:123#NutsOAuth",
+        "fhirEndpoint": "did:nuts:123#NutsFHIR"
       }
     }
   ]
@@ -389,12 +390,12 @@ The SaaS provider registers itself with:
   ],
   "service": [
     {
-      "id": "did:nuts:123#NutsOAuth-1",
+      "id": "did:nuts:123#NutsOAuth",
       "type": "NutsOAuth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:123#NutsFHIR-1",
+      "id": "did:nuts:123#NutsFHIR",
       "type": "NutsFHIR",
       "serviceEndpoint": "https://example.com/fhir"
     }
@@ -433,8 +434,8 @@ The SaaS provider registers a care organization as:
       "id": "did:nuts:abc#NutsCompoundService-1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:1#NutsOAuth-1",
-        "fhirEndpoint": "did:nuts:1#NutsFHIR-1"
+        "oauthEndpoint": "did:nuts:1#NutsOAuth",
+        "fhirEndpoint": "did:nuts:1#NutsFHIR"
       }
     }
   ]
@@ -487,12 +488,12 @@ The hospital would be able to register a single DID document:
   ],
   "service": [
     {
-      "id": "did:nuts:1#NutsOAuth-1",
+      "id": "did:nuts:1#NutsOAuth",
       "type": "NutsOAuth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:1#NutsFHIR-1",
+      "id": "did:nuts:1#NutsFHIR",
       "type": "NutsFHIR",
       "serviceEndpoint": "https://example.com/fhir"
     },
@@ -500,8 +501,8 @@ The hospital would be able to register a single DID document:
       "id": "did:nuts:abc#NutsCompoundService-1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:1#NutsOAuth-1",
-        "fhirEndpoint": "did:nuts:1#NutsFHIR-1"
+        "oauthEndpoint": "did:nuts:1#NutsOAuth",
+        "fhirEndpoint": "did:nuts:1#NutsFHIR"
       }
     }
   ]
