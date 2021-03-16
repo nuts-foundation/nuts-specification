@@ -49,16 +49,26 @@ maximum number of peer. For instance, a IPFS node tries to connect to 10 other n
 
 ## 5. Operation
 
-The protocol operates as follows;
+The protocol generally operates as follows:
 
-1. The local node broadcasts the node's DAG heads at a set interval.
-2. Compare the node's DAG heads with those broadcast by our peers.
-3. If a peer has a head which is not present on the node's DAG, the node queries the peer's transactions.
-4. The peer responds to the query with all transactions on its DAG.
-5. The node checks each peer transaction on its local DAG.
-   - Verify its signature is correct.
-   - Add it to the local DAG if not present yet.
-   - If the transaction's payload is missing, query it from the peer. The peer responds with the payload. 
+1. The local node broadcasts their DAG state at a set interval:
+   - the references of the current day's (`T`) DAG head transactions.
+   - the block (see "Blocks") hashes of the previous 3 days (`T-1`, `T-2`, `T-3`). The hash of `T-3` is special because it also includes
+     all blocks leading up to the block.
+2. When receiving a peer's broadcast, compare it to the local DAG:
+   - All hashes are equal: peer DAG is equal to the local DAG, no action required.
+   - Peer has unknown head in today's block: peer DAG has unknown transactions, query the current block's transactions to find out
+     which transactions are missing.
+   - Peer has head known as a non-head in the local DAG: peer isn't up to date, no action required. It's up to the peer
+     to query the local node's DAG.
+   - Peer's previous (`T-1` or `T-2`) block hashes differ: peer or local node might not be up to date, query that block's
+     transactions to find out which transactions are missing. When no transactions are missing, the peer is missing transactions
+     which are present on the local node.
+   - Peer's `T-3` block hash differs: DAGs have diverted severely which might indicate a network split, or a peer that
+     tries to attack the network by injecting transactions with old timestamps. Ignore the peer's broadcast and report
+     to the local node operator.
+3. After adding a new transaction to the DAG (making sure its cryptographic signature is valid), query the payload from the
+   peer if it's missing. 
 
 The sections below specify the details of the protocol operation and maps it to the gRPC messages. See the section
 "Protobuf Definition" for a full specification of the protobuf/gRPC contract.
@@ -76,17 +86,24 @@ In most block-based DLTs blocks are immutable, preventing new transactions from 
 (in contrast to e.g. Bitcoin or Ethereum) and thus doesn't need consensus about recent transactions, and thus can have
 mutable blocks (up to some point).
 
-In this protocol each day considered a block and a new block is started at midnight (UTC). The signing time of a transaction
-determines which block it belongs to. As such the signing time of the DAG's root transaction determines the first block.
+In this protocol each day is a block. Every day at midnight (UTC timezone) a new block starts.
+The signing time of a transaction determines which block it belongs to. As such the signing time of the DAG's root transaction determines the first block.
 
-### 5.1.1. 
-It can be problematic when peers add new transactions from old branches, because 
+### 5.1.1. Block Hash
 
+The _block hash_ is a hash over all transactions in a block used for quickly comparing a peer's block for determining consistency.
+It is calculated by sorting the transaction references (ascending, so low-high order) and XOR-ing them. For example, if
+there are 3 transactions in a block:
 
-Parameters:
- - Maximum age of new transactions, in blocks: 3 days
- - Block size: 1 day
- - A new block is started at 00:00 UTC
+```
+T1=a5b7485b33d485cc4744a63e3273e581e0e7d0fd1b3f020b19c3b913bd5465dc
+T2=c0dc584345da8a0e1e7a584aa4a36c30ebdb79d907aff96fe0e90ee972f58a17
+T3=f81228d88006ea4949cd6d1c8cbeaf9e51d37df15e9e4b2064f06155b9af4ae3
+
+blockHash = xor(xor(T1, T2), T3) 
+blockHash = 9d7938c0f608e58b10f393681a6e262f5aefd4d5420eb0449ddad6af760ea528
+```
+
 
 ### 5.2. Broadcasting
 
@@ -215,18 +232,8 @@ The following issues must be either be solved in this RFC or acknowledged being 
 
 - Peers attempt to build a full mesh, which might break down with many nodes
   - Nodes broadcast their last hash to sync (every 2 secs), lots of chatter
-- Most semi-public DLTs are block-based and have 'proof' (of work, of stake, voting, etc). We don't, which allows parties to easily add data (the good) but that also goes for malicious parties (the bad).
-  - Possible solution: introduce time-based blocks (compare hash of all transactions up until last midnight UTC)
-  - Additionally, we could require transactions to have a timestamp that's relatively actual (using Bitcoin's network-adjusted-time, https://en.bitcoin.it/wiki/Block_timestamp)
 - Fast replay (from another node) when starting a new node
 - We need some kind of flooding detection and prevention
-- Fast comparison of remote node's graph vs own graph (current implementation just requests whole DAG and compares it).
-  This might will become slower and slower when the DAG grows.
-  - Possible solution: use the time-based blocks, which can be used as Merkle tree.
-    - Problem: what if a party produces 100.000s of transactions on a single day?
-      If a SHA-256 hash takes 32 bytes it would be 3mb worth of hashes. Not a problem to transfer
-      once or twice, but becomes problematic when parties keep appending and it must be exchanged
-      over and over again to compare DAGs   
 - Maybe; more authorisation than just "you need to have a PKIOverheid certificate"?
 	- What if a malicious node produces lots (e.g. gigabytes) of crap that clutters the DAG?
 - Detect dead nodes
@@ -239,4 +246,14 @@ The following issues must be either be solved in this RFC or acknowledged being 
   - Possible solution: peer ID MUST be created by generating a P-256 elliptic curve key pair, taking the public key and signing it with the private key.
     - Option 1: signing challenge (downside: requires a handshake, which is complicated).
     - Option 2: signing a nonce (downside: peer needs to track the nonce to make sure it's not used more than once).
-
+- Querying a peer when the local node receives a local hash now works by just querying all transactions for that block,
+  which might become too slow when there are many transactions in a block. Possible optimizations:
+  - Pathfinding: let peer find a path from the block's first hash to the unknown head and return all transactions.
+    Pro: sure way to find all transactions leading up to an unknown head.
+    Con: Pathfinding might be even more expensive on the peer's side than just returning all tx's for that block?
+    Con: When DAGs just differ a little, this protocol has lots of overhead (CPU)
+  - Query previous transactions of the unknown head, until all unknown transactions are resolved
+    Pro: sure way to find all transactions
+    Pro: works well when DAGs differ a little
+    Con: When DAGs differ a lot (peer has produced lots of transactions leading up to the unknown head) this protocol
+         has lots of overhead (network traffic)
