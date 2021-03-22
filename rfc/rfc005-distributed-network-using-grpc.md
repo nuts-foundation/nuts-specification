@@ -9,6 +9,10 @@
 ## Distributed Network using gRPC
 ### Abstract
 
+This RFC describes a protocol to build a distributed network for creating a shared Directed Acyclic Graph as described by
+[RFC004 Verifiable Transactional Graph](rfc004-verifiable-transactional-graph.md) over [gRPC](https://grpc.io/),
+which is an RPC framework that uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers).
+
 ### Status
 
 This document is currently a draft.
@@ -28,9 +32,9 @@ This RFC describes a protocol for building such a distributed network using gRPC
 
 * **Node**: local Nuts software system acting (a.k.a. _Nuts Node_).
 * **Peer**: remote software system connected to the local node using the protocol described here.
-* **Transaction**: ...
-* **DAG** (Directed Acyclic Graph): ... 
-* **Heads**: Latest transactions of the DAG with no succeeding transactions that refer to it as previous transaction,
+* **Transaction**: self-contained unit of application data on the DAG. 
+* **DAG** (Directed Acyclic Graph): graph formed of all transactions that. It provides casual ordering for transactions and means to efficiently compare the local DAG with those of peers. 
+* **Heads**: latest transactions of the DAG with no succeeding transactions that refer to it as previous transaction,
 
 ## 3. Goals
 
@@ -45,7 +49,7 @@ The network is a full mesh peer-to-peer network: all participants in the network
 
 The full mesh topology is expected to be performant up to ca. 20 nodes (source?). When a production network is expected
 surpass that number of nodes, the protocol should be adjusted to form a partial mesh where nodes only connect to a
-maximum number of peer. For instance, a IPFS node tries to connect to 10 other nodes which are randomly distributed.
+maximum number of peer. For instance, an IPFS node tries to connect to 10 other nodes which are randomly distributed.
 
 ## 5. Operation
 
@@ -53,8 +57,8 @@ The protocol generally operates as follows:
 
 1. The local node broadcasts their DAG state at a set interval:
    - the references of the current day's (`T`) DAG head transactions.
-   - the block (see "Blocks") hashes of the previous 3 days (`T-1`, `T-2`, `T-3`). The hash of `T-3` is special because it also includes
-     all blocks leading up to the block.
+   - the block (see "Blocks") hashes of the previous 3 days (`T-1`, `T-2`, `T-3`). The hash of `T-3` is special because
+     it is calculated from all transactions from the root transaction up to (but not including) `T-2`.
 2. When receiving a peer's broadcast, compare it to the local DAG:
    - All hashes are equal: peer DAG is equal to the local DAG, no action required.
    - Peer has unknown head in today's block: peer DAG has unknown transactions, query the current block's transactions to find out
@@ -107,14 +111,15 @@ blockHash = 9d7938c0f608e58b10f393681a6e262f5aefd4d5420eb0449ddad6af760ea528
 
 ### 5.2. Broadcasting
 
-The local node's DAG heads MUST be broadcast at an interval using the `AdvertHashes` message, by default every 2 seconds. The interval MAY be adjusted
-by the node operator but SHALL NOT be so short that it clutters the network. It is advised to keep it relatively short
-because it directly influences the speed by which new transactions are propagated to peers.  
+The local node's DAG heads MUST be broadcast at an interval using the `AdvertHashes` message, by default every 2 seconds.
+The interval MAY be adjusted by the node operator but MUST conform to the limits (min/max interval) defined by the network.
+It is advised to keep it relatively short because it directly influences the speed by which new transactions are propagated to peers.  
 
 ### 5.3. Querying Peer's DAG
 
 When the local node decides to query a peer's DAG because it differs from its own, it uses the `TransactionListQuery` message.
-The receiving peer MUST respond with the `TransactionList` message containing all transactions (without payload) from its DAG.
+It MUST specify the block for which to retrieve the transactions using a Unix timestamp that falls within the requested
+block. The receiving peer MUST respond with the `TransactionList` message containing all transactions (without payload) from its DAG.
 
 ### 5.4. Resolving Transaction Payload
 
@@ -136,26 +141,23 @@ identify a peer that's not dependent on the remote host/port of the connection. 
 unique identifier (the node's _peer ID_) and provide it as gRPC connection metadata on incoming or outgoing connections.
 A peer ID MAY be changed every time a node (re)starts but MUST be the same for all connections of that node. 
 
-### 6.3. Peer Discovery
+### 6.2. Peer Discovery
 
 The protocol doesn't provide a way to discover new peers automatically and is relying on the system to provide it with
 new peers to connect to.
 
-### 6.4. Unresponsive Peers
+### 6.3. Unresponsive Peers
 
 When (re)connecting to a peer that's unresponsive the node MUST take measures to avoid flooding it, since that only
 adds more load to a system possibly under stress. A back-off strategy SHOULD be used which only reconnects after an
 every increasing waiting period.
 
-In future versions we can add the concept of "dead nodes", but due to the anticipated size of the network it's not
-a feature at this moment.
-
-### 6.5. Protocol Version
+### 6.4. Protocol Version
 
 When connecting, the node and peer MUST exchange their protocol version as `version` metadata header. When either side
 received a version that's not equal to `1` it MUST close the connection.
 
-### 6.6. Security
+### 6.5. Security
 
 Connections MUST be secured using TLS v1.2 (or higher) with both client- and server X.509 certificates.
 Refer to [RFC008 Certificate Structure](rfc008-certificate-structure.md) for requirements regarding these certificates
@@ -167,19 +169,19 @@ and which Certificate Authorities should be accepted.
 {% include "../.gitbook/assets/rfc005/network.proto" %}
 ```
 
-## 9. Attack Vectors
+## 8. Security Considerations
 
 This section describes anticipated attacks vectors and (non malicious) situations that may threat a node, and how they're mitigated.
 
 When a peer performs an action which is identified as a threat, nodes SHOULD immediately close the connection and
 inform the peer of the rule that was violated. That way the operator of the peer can identify what should be fixed
 on their node. However, when offences are repeated the node SHOULD apply "Three Strikes Out"; after 3 violations the node
-SHOULD deny further connections with that peer, until the ban is lifted by an operator.
+SHOULD deny further connections using the peer's certificate (identified by certificate issuer DN and serial number),
+until the ban is lifted by an operator.
 
-TODO: Close and deny connections from a certain certificate?
 TODO: Limit number of connections from a certain certificate?
 
-### 9.1. Denial of Service
+### 8.1. Denial of Service
 
 #### Threat: Memory Exhaustion due to Large Messages
 
@@ -216,7 +218,7 @@ transactions without a meaningful payload.
 
 TODO: How to mitigate this?
 
-### 9.2. Data Manipulation
+### 8.2. Data Manipulation
 
 #### Threat: Manipulating Transaction Payload
 
@@ -224,9 +226,9 @@ By altering a transaction's payload when responding to a payload query an attack
 steal identities (e.g. DIDs).
 
 Countermeasures:
-- Nodes MUST verify the payload hash when receiving transaction payload.
+- Nodes MUST verify the payload hash when receiving transaction payload as specified by [RFC004 section 3.6 (Signature and payload verification)](rfc004-verifiable-transactional-graph.md)
 
-## 8. Issues
+## 9. Issues
 
 The following issues must be either be solved in this RFC or acknowledged being acceptable:
 
