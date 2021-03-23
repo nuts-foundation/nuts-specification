@@ -57,8 +57,8 @@ The protocol generally operates as follows:
 
 1. The local node broadcasts their DAG state at a set interval:
    - the references of the current day's (`T`) DAG head transactions.
-   - the block (see "Blocks") hashes of the previous 3 days (`T-1`, `T-2`, `T-3`). The hash of `T-3` is special because
-     it is calculated from all transactions from the root transaction up to (but not including) `T-2`.
+   - the block (see "Blocks") hashes of the previous 2 days (`T-1`, `T-2`),
+   - a historical block hash calculated from all transactions, starting at the root transaction, leading up to but not including `T-2`.
 2. When receiving a peer's broadcast, compare it to the local DAG:
    - All hashes are equal: peer DAG is equal to the local DAG, no action required.
    - Peer has unknown head in today's block: peer DAG has unknown transactions, query the current block's transactions to find out
@@ -68,7 +68,7 @@ The protocol generally operates as follows:
    - Peer's previous (`T-1` or `T-2`) block hashes differ: peer or local node might not be up to date, query that block's
      transactions to find out which transactions are missing. When no transactions are missing, the peer is missing transactions
      which are present on the local node.
-   - Peer's `T-3` block hash differs: DAGs have diverted severely which might indicate a network split, or a peer that
+   - Peer's historical block hash differs: DAGs have diverted severely which might indicate a network split, or a peer that
      tries to attack the network by injecting transactions with old timestamps. Ignore the peer's broadcast and report
      to the local node operator.
 3. After adding a new transaction to the DAG (making sure its cryptographic signature is valid), query the payload from the
