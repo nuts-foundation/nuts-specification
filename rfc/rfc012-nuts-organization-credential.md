@@ -86,4 +86,33 @@ No additional services than the Nuts network are required.
 
 ## 11. Example
 
-{% github_embed "https://github.com/nuts-foundation/nuts-node/blob/85119376bb17cf09ee70a251dfa8f9f58374589d/vcr/test/vc.json" %}{% endgithub_embed %}
+```json
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://nuts.nl/credentials/v1"
+  ],
+  "id": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467",
+  "type": ["VerifiableCredential", "NutsOrganizationCredential"],
+  "issuer": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY",
+  "issuanceDate": "2010-01-01T19:73:24Z",
+  "expirationDate": "2010-02-01T19:73:24Z",
+  "credentialSubject": {
+    "id": "did:nuts:8jx6GU9JipE6TXY2nak8RgFXMk3zaoPWsCb53N1Zjw9R",
+    "organization": {
+      "name": "De Nootjes",
+      "city": "Eibergen"
+    }
+  },
+  "proof": {
+    "type": "EcdsaSecp256r1Signature2019",
+    "created": "2017-06-18T21:19:10Z",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467#qjHYrzaJjpEstmDATng4-cGmR4t-_V3ipbDVYZrVe4A",
+    "jws": "eyJhbGciOiJSUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..TCYt5X
+      sITJX1CxPCT8yAV-TVkIEq_PbChOMqsLfRoPsnsgw5WEuts01mq-pQy7UJiN5mgRxD-WUc
+      X16dUEMGlv50aqzpqh4Qktb3rk-BuQy72IFLOqV0G_zS245-kronKb78cPN25DGlcTwLtj
+      PAYuNzVBAh4vGHSrQyHUdBBPM"
+  }
+}
+```

@@ -110,7 +110,35 @@ VC identifiers MUST be constructed as `DID#id` where `id` is unique for the give
 
 Below is an example of a credential. The `credentialSubject` is omitted since it's custom per VC.
 
-{% github_embed "https://github.com/nuts-foundation/nuts-node/blob/85119376bb17cf09ee70a251dfa8f9f58374589d/vcr/test/vc.json" %}{% endgithub_embed %}
+```json
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://nuts.nl/credentials/v1"
+  ],
+  "type": [
+    "NutsOrganizationCredential",
+    "VerifiableCredential"
+  ],
+  "id": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv#6f91673b-afa9-4d26-9e0f-00d989943275",
+  "issuanceDate": "2021-03-15T16:34:17.687862+01:00",
+  "issuer": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv",
+  "credentialSubject": {
+    "id": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv",
+    "organization": {
+      "city": "IJbergen",
+      "name": "Because we care B.V."
+    }
+  },
+  "proof": {
+    "type": "JsonWebSignature2020",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv#h22vbXHX7-lRd1qAJnU63liaehb9sAoBS7RavhvfgR8",
+    "created": "2021-03-15T16:34:17.687862+01:00",
+    "jws": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..hKcboC8m6YnZPi6ReJAYs0J0Ztn5nxcx2EavoXdtrkWxmE1JZmImW89_8IIgjvfI8XtGeDlEnGywAuY2u7y9Bw"
+  }
+}
+```
 
 ## 4. Required chapters for a Verifiable Credential type
 
@@ -143,7 +171,20 @@ It MUST specify how a VC can be revoked by the issuer, or it MUST specify an exp
 
 VCs that are issued by a Nuts DID can be revoked by publishing the following transaction on the network:
 
-{% github_embed "https://github.com/nuts-foundation/nuts-node/blob/85119376bb17cf09ee70a251dfa8f9f58374589d/vcr/test/revocation.json" %}{% endgithub_embed %}
+```json
+{
+  "issuer": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv",
+  "subject": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv#6f91673b-afa9-4d26-9e0f-00d989943275",
+  "date": "2021-03-15T16:34:47.422436+01:00",
+  "proof": {
+    "type": "JsonWebSignature2020",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv#h22vbXHX7-lRd1qAJnU63liaehb9sAoBS7RavhvfgR8",
+    "created": "2021-03-15T16:34:47.422436+01:00",
+    "jws": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..Rc7iK7wXabMx24ZNAFJIwxqpYGCdye0EmdOYwu5CO54pwEPNIQt-9qIvqEZ7ZBFcFUdhnNCvYkR8IDtFAM18Rw"
+  }
+}
+```
 
 Such a revocation transaction has the following requirements:
 
