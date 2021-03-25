@@ -10,7 +10,7 @@
 ### Abstract
 
 This RFC describes the generic requirements for [Verifiable Credentials (VC)](https://www.w3.org/TR/vc-data-model/) within the Nuts specification. 
-It also lists all required chapters for a specific VC RFC.
+It also lists all required chapters for a specific VC RFC. This RFC uses the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/) specification.
 
 ### Status
 
@@ -41,7 +41,8 @@ Making sure this information is correct and that it can be trusted is therefore 
 ## 3. W3C Verifiable Credential
 
 To support a variety of claims, the [W3C Verifiable Credential specification](https://www.w3.org/TR/vc-data-model/) is used. 
-Every Nuts specific VC and proof type must follow the W3C specification. If the W3C specification offers options, then the specific VP must specify which option is to be used.
+Every Nuts specific VC and proof type must follow the W3C specification. 
+If the W3C specification offers options, then the specific VP must specify which option is to be used.
 All VCs MUST use DIDs as specified in [RFC004](rfc004-distributed-document-format.md) for the issuer. 
 
 ### 3.1 Supported proofs
@@ -59,7 +60,7 @@ resources:
 The algorithm used to create the signature is as follows:
 
 - take the input Verifiable Credential and remove the `proof` field. Store as `raw_vc`.
-- compute the sha256 of the `raw_vc`, store as `hash_vc`: `hash_vc = sha256(raw_vc)`.  
+- compute the sha256 of the `raw_vc`, store as `hash_vc = sha256(raw_vc)`.  
 - compose a `raw_proof` json object without the `jws` field:
 
 ```json
@@ -70,12 +71,13 @@ The algorithm used to create the signature is as follows:
   "created": "2021-03-09T11:44:56.382202+01:00"
 }
 ```
-where `<<kid>>` is replaced with an assertionMethod ID from the DID Document and `<<RFC3339>>` is replaced with a RFC3339 compliant time string.
+where the `verificationMethod` must be a valid assertionMethod ID from the DID Document. `created` MUST be a RFC3339 compliant time string.
+`type` and `proofPurpose` MUST be entered as above.
 
-- compute the sha256 of the `raw_proof`, store as `hash_proof`: `hash_proof = sha256(raw_proof)`.
+- compute the sha256 of the `raw_proof`, store as `hash_proof = sha256(raw_proof)`.
 - concatenate  `hash_proof` with `raw_proof` and store as `payload`.
 - construct the JWS `header` as `{"alg":"ES256","b64":false,"crit":["b64"]}` where the `alg` SHOULD be replaced with a valid algorithm.
-- construct a challenge by base64 encode the header and payload and join with a `.`: `challenge = base64_rawurlencode(header) + '.' + base64_rawurlencode(challenge)`  
+- construct a challenge by base64 encoding the header and payload and join with a `.`: `challenge = base64_rawurlencode(header) + '.' + base64_rawurlencode(challenge)`  
 - sign the bytes from the previous step with the private key corresponding to the `kid`: `sig = sign(challenge, pkey(kid))`
 - create `jws` as `header + ".." + base64_rawurlencode(sig)`
 - place the result in the `jws` field of the `proof`:
@@ -106,23 +108,9 @@ VC identifiers MUST be constructed as `DID#id` where `id` is unique for the give
 
 ### 3.5 VC Example
 
-Below is an example of a credential. The `proof` and `credentialSubject` are omitted as they are custom per VC.
+Below is an example of a credential. The `credentialSubject` is omitted since it's custom per VC.
 
-```json
-{
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-    "https://nuts.nl/credentials/v1"
-  ],
-  "id": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467",
-  "type": ["VerifiableCredential", "NutsCredential"],
-  "issuer": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY",
-  "issuanceDate": "2010-01-01T19:73:24Z",
-  "expirationDate": "2010-02-01T19:73:24Z",
-  "credentialSubject": {...},
-  "proof": {...}
-}
-```
+{% github_embed "https://github.com/nuts-foundation/nuts-node/blob/85119376bb17cf09ee70a251dfa8f9f58374589d/vcr/test/vc.json" %}{% endgithub_embed %}
 
 ## 4. Required chapters for a Verifiable Credential type
 
@@ -136,7 +124,7 @@ It MUST specify the contents of the `credentialSubject` JSON field. It MUST spec
 
 A VC specification MUST specify how a VC is issued and who may issue it. It MUST specify which protocols and standards are used in obtaining the VC. 
 It MUST specify where it MAY be stored and if it's distributed to others in some way. It MUST specify any requirements for the holder.
-It MUST specify if VCs or other credentials are required in order to obtain the VC. It MUST specify the content-type `type` selector
+It MUST specify if VCs or other credentials are required in order to obtain the VC. It MUST specify the content-type `type` selector.
 
 ### 4.3 Supported proofs
 
@@ -155,37 +143,20 @@ It MUST specify how a VC can be revoked by the issuer, or it MUST specify an exp
 
 VCs that are issued by a Nuts DID can be revoked by publishing the following transaction on the network:
 
-```json
-{
-  "issuer": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY",
-  "subject": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467",
-  "currentStatus": "Revoked",
-  "statusReason": "Disciplinary action",
-  "statusDate": "2010-02-01T19:73:24Z",
-  "proof": {
-    "type": "JsonWebSignature2020",
-    "created": "2017-06-18T21:19:10Z",
-    "proofPurpose": "assertionMethod",
-    "verificationMethod": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467#qjHYrzaJjpEstmDATng4-cGmR4t-_V3ipbDVYZrVe4A",
-    "jws": "eyJhbGciOiJSUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..TCYt5X
-    sITJX1CxPCT8yAV-TVkIEq_PbChOMqsLfRoPsnsgw5WEuts01mq-pQy7UJiN5mgRxD-WUc
-    X16dUEMGlv50aqzpqh4Qktb3rk-BuQy72IFLOqV0G_zS245-kronKb78cPN25DGlcTwLtj
-    PAYuNzVBAh4vGHSrQyHUdBBPM"
-  }
-}
-```
+{% github_embed "https://github.com/nuts-foundation/nuts-node/blob/85119376bb17cf09ee70a251dfa8f9f58374589d/vcr/test/revocation.json" %}{% endgithub_embed %}
 
 Such a revocation transaction has the following requirements:
 
 * the **issuer** MUST match the DID as the `issuer` field of the VC.
 * the **subject** MUST match the `id` field of the VC.
-* the **currentStatus** MUST be changed to `Revoked`.
-* the **statusReason** MAY be filled with a revocation reason.
-* the **statusDate** MUST provide the date in rfc3339 format. From this moment in time the VC is revoked.
+* a **reason** MAY be filled with a revocation reason.
+* the **date** MUST provide the date in rfc3339 format. From this moment in time the VC is revoked.
 * the **proof** MUST be a `JsonWebSignature2020` proof.
 
 The transaction MUST be published on the Nuts network. It MAY use the `verificationMethod` for the transaction.
 The content-type is `application/vc+json;type=revocation`
+
+The signature is calculated as stated in §3.1.1.
 
 ### 4.6 Use cases
 

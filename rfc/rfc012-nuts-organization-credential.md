@@ -1,4 +1,4 @@
-# RFC012 Nuts Company Credential
+# RFC012 Nuts Organization Credential
 
 |  |  |
 | :--- | :--- |
@@ -13,7 +13,7 @@ Creating a network with trusted Verified Credentials is victim of the chicken-an
 Issuers are not yet convinced they should support VCs until the network is mature enough and nobody is willing to use the network without official credentials/identities.
 The **Nuts company credential** offers a temporary solution. It allows for any DID subject to issue a VC. 
 Trust is established manually by adding the DID to a trusted list of issuers. 
-For development use-cases and as bootstrap for a production network, the `Nuts Company Credential` is a way to add the required information to the network.
+For development use-cases and as bootstrap for a production network, the `Nuts Organization Credential` is a way to add the required information to the network.
 
 ### Status
 
@@ -27,7 +27,7 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 ## 1. Introduction
 
 Users that want to interact with another system want to use real-world names when they search for organizations. DIDs do not solve this problem.
-VCs can add information (claims) to a DID. This RFC builds upon [RFC011](rfc011-verifiable-credential.md). 
+VCs can add this information (claims) to a DID. This RFC builds upon [RFC011](rfc011-verifiable-credential.md). 
 
 ## 2. Terminology
 
@@ -41,8 +41,8 @@ The `credentialSubject` field contains the following:
 ```json
 {
     "id": "did:nuts:8jx6GU9JipE6TXY2nak8RgFXMk3zaoPWsCb53N1Zjw9R",
-    "company": {
-        "tradeName": "De Nootjes",
+    "organization": {
+        "name": "De Nootjes",
         "city": "Eibergen"
     }
 }
@@ -56,9 +56,8 @@ and has the following requirements:
 
 ## 4 Issuance & distribution
 
-A Nuts Company Credential is public and MUST be published over the Nuts network. Every DID MAY issue the credential.
+A Nuts Organization Credential is public and MUST be published over the Nuts network. Every DID MAY issue the credential.
 The VC does not have any other requirements nor does it add requirements to other VCs.
-The content-type is `application/vc+json;type=NutsCompanyCredential`
 
 ## 5 Supported proofs
 
@@ -66,15 +65,15 @@ Only default proofs from [RFC011](rfc011-verifiable-credential.md) are supported
 
 ## 6 Trust
 
-The Nuts Company Credential MUST be trusted manually. The mechanism for this is up to the implementation.
+The Nuts Organization Credential MUST be trusted manually. The mechanism for this is up to the implementation.
 
 ## 7 Revocation
 
-The Nuts Company Credential uses the default revocation mechanism as stated by [RFC011](rfc011-verifiable-credential.md).
+The Nuts Organization Credential uses the default revocation mechanism as stated by [RFC011](rfc011-verifiable-credential.md).
 
 ## 8 Use cases
 
-The Nuts Company Credential MAY be used as credential in the Nuts OAuth flow as stated in [RFC003](rfc003-oauth2-authorization.md).
+The Nuts Organization Credential MAY be used as credential in the Nuts OAuth flow as stated in [RFC003](rfc003-oauth2-authorization.md).
 The credential MAY also be used as a way to find the correct DID and its services.
 
 ## 9 Privacy considerations
@@ -87,33 +86,4 @@ No additional services than the Nuts network are required.
 
 ## 11. Example
 
-```json
-{
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-    "https://nuts.nl/credentials/v1"
-  ],
-  "id": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467",
-  "type": ["VerifiableCredential", "NutsCompanyCredential"],
-  "issuer": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY",
-  "issuanceDate": "2010-01-01T19:73:24Z",
-  "expirationDate": "2010-02-01T19:73:24Z",
-  "credentialSubject": {
-    "id": "did:nuts:8jx6GU9JipE6TXY2nak8RgFXMk3zaoPWsCb53N1Zjw9R",
-    "company": {
-      "name": "De Nootjes",
-      "city": "Eibergen"
-    }
-  },
-  "proof": {
-    "type": "EcdsaSecp256r1Signature2019",
-    "created": "2017-06-18T21:19:10Z",
-    "proofPurpose": "assertionMethod",
-    "verificationMethod": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467#qjHYrzaJjpEstmDATng4-cGmR4t-_V3ipbDVYZrVe4A",
-    "jws": "eyJhbGciOiJSUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..TCYt5X
-      sITJX1CxPCT8yAV-TVkIEq_PbChOMqsLfRoPsnsgw5WEuts01mq-pQy7UJiN5mgRxD-WUc
-      X16dUEMGlv50aqzpqh4Qktb3rk-BuQy72IFLOqV0G_zS245-kronKb78cPN25DGlcTwLtj
-      PAYuNzVBAh4vGHSrQyHUdBBPM"
-  }
-}
-```
+{% github_embed "https://github.com/nuts-foundation/nuts-node/blob/85119376bb17cf09ee70a251dfa8f9f58374589d/vcr/test/vc.json" %}{% endgithub_embed %}
