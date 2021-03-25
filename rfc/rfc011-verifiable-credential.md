@@ -108,7 +108,7 @@ VC identifiers MUST be constructed as `DID#id` where `id` is unique for the give
 
 ### 3.5 VC Example
 
-Below is an example of a credential. The `credentialSubject` is omitted since it's custom per VC.
+Below is an example of a credential.
 
 ```json
 {
