@@ -110,8 +110,9 @@ Consider the DAG from the previous chapter. If transaction `C` and  `D` where to
 This would create an inconsistency in the network. To fix this the following rules MUST be taken into account:
 
 * If the payloads are equal, mark both transactions as processed and apply one of the payloads.
-* If the payloads are not equal, apply the payload with the highest *iat*.
-* Else apply the payload with the highest hash.
+* If the payloads are not equal, merge payload according to rules for the specific payload.
+
+The last rule requires the payload to be immutable or conform to its contents MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)  
 
 ### 3.5. Processing the DAG
 
