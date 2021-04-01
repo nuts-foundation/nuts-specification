@@ -97,11 +97,17 @@ The public key MUST also be present in the `verificationMethods` and referenced 
 
 DID documents are enclosed in a message envelope to ensure consistency in the network.
 The envelope is in the form of a JWS as described in [RFC004](rfc004-verifiable-transactional-graph.md).
-Once the network layer has confirmed the signature of the JWS, the registry MUST validate if the submitter is authorized to create, update or delete the document.
-If the authorization fails, the document should be ignored.
+Once the network layer has confirmed the correctness of the signature of the JWS, the verifiable data registry MUST validate if the 
+submitter was authorized to create, update or deactivate the document. If the authorization fails, the document MUST NOT be processed by the registry.
 
-The `controller` field MAY be present. If no `controller` field is present, the DID subject itself is the controller.
-If the `controller` field is present, only the DID subjects from the `controller` field can change the DID document.
+A DID document can ony be created by its subject. To prove ownership of the private key, the JWS MUST be signed by a new private key.
+The corresponding public key MUST be listed as a `capabilityInvocation` verification relationship in the form of a reference.
+
+A DID document can only be updated or deactivated by one of its controllers. The `controller` field MAY list the controllers of a document.
+If no controllers are listed, the DID subject itself is the only controller. If the DID document is not one of the listed controllers, the subject is NOT its own controller.
+There can only be one level of controllers, i.e. controllers of controllers MUST NOT be able to update or deactivate a DID document.
+
+Controllers sign the JWS with the private key of which the public key MUST be included as a `capabilityInvocation` in the controllers DID document.
 
 #### 3.2.1 Create (Register)
 
