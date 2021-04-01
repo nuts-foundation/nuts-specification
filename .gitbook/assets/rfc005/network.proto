@@ -49,13 +49,18 @@ message Header {
 
 // AdvertHashes is a message broadcast for inform peers of the node's DAG state.
 message AdvertHashes {
-    // currentBlockHeadRefs contains the references of current block's the node's DAG head transactions.
-    repeated bytes currentBlockHeadRefs = 1;
     // currentBlockDate contains a Unix timestamp at which the current block started (UTC).
-    uint32 currentBlockDate = 2;
-    // previousBlockHashes contains the hashes of the previous blocks. The first hash is current_block - 1, the second
-    // hash current_block - 2, etc. The last hash contains also includes all hashes leading up to that block.
-    repeated bytes previousBlockHashes = 3;
+    uint32 currentBlockDate = 1;
+    // blocks contains the the current block and the previous blocks. The first entry is the current block.
+    repeated BlockHashes blocks = 2;
+    // historicHash contains the XOR of all head hashes leading up to the last block.
+    bytes historicHash = 3;
+}
+
+// BlockHashes contains the head's hashes of a block.
+message BlockHashes {
+    // hashes contains the hashes of the heads in this block.
+    repeated bytes hashes = 1;
 }
 
 // TransactionListQuery is a message used to query a peer's TransactionList.

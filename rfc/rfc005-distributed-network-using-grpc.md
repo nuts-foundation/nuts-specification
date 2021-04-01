@@ -55,23 +55,19 @@ maximum number of peer. For instance, an IPFS node tries to connect to 10 other 
 
 The protocol generally operates as follows:
 
-1. The local node broadcasts their DAG state at a set interval:
-   - the references of the current day's (`T`) DAG head transactions.
-   - the block (see "Blocks") hashes of the previous 2 days (`T-1`, `T-2`),
-   - a historical block hash calculated from all transactions, starting at the root transaction, leading up to but not including `T-2`.
-2. When receiving a peer's broadcast, compare it to the local DAG:
-   - All hashes are equal: peer DAG is equal to the local DAG, no action required.
-   - Peer has unknown head in today's block: peer DAG has unknown transactions, query the current block's transactions to find out
-     which transactions are missing.
-   - Peer has head known as a non-head in the local DAG: peer isn't up to date, no action required. It's up to the peer
-     to query the local node's DAG.
-   - Peer's previous (`T-1` or `T-2`) block hashes differ: peer or local node might not be up to date, query that block's
-     transactions to find out which transactions are missing. When no transactions are missing, the peer is missing transactions
-     which are present on the local node.
-   - Peer's historical block hash differs: DAGs have diverted severely which might indicate a network split, or a peer that
+1. The local node broadcasts at a set interval:
+   - the heads of the current block (today) `T`,
+   - the heads of the 2 previous blocks `T-1` and `T-2`,
+   - XOR of the heads of historic blocks leading up to `T-2`.
+   Heads of a block are either transactions that have to other transactions referring to it as `prev` or the last
+   transaction of the block before midnight (the next transaction in the branch falls in the next day).
+2. When receiving a peer's broadcast, compare it to the local DAG and add missing transaction's to the local DAG:
+   - When all head hashes are known in the local DAG and the historic hash equals: no action required.
+   - Peer has unknown head: query the block's transactions to find out which transactions are missing.
+   - Peer's historic hash differs: DAGs have diverted severely which might indicate a network split, or a peer that
      tries to attack the network by injecting transactions with old timestamps. Ignore the peer's broadcast and report
      to the local node operator.
-3. After adding a new transaction to the DAG (making sure its cryptographic signature is valid), query the payload from the
+3. After adding a peer's transaction to the DAG (making sure its cryptographic signature is valid), query the payload from the
    peer if it's missing. 
 
 The sections below specify the details of the protocol operation and maps it to the gRPC messages. See the section
@@ -93,11 +89,11 @@ mutable blocks (up to some point).
 In this protocol each day is a block. Every day at midnight (UTC timezone) a new block starts.
 The signing time of a transaction determines which block it belongs to. As such the signing time of the DAG's root transaction determines the first block.
 
-### 5.1.1. Block Hash
+### 5.1.1. History hash
 
-The _block hash_ is a hash over all transactions in a block used for quickly comparing a peer's block for determining consistency.
-It is calculated by sorting the transaction references (ascending, so low-high order) and XOR-ing them. For example, if
-there are 3 transactions in a block:
+The _history hash_ is a hash over all transactions leading up to a certain point. It is used for quickly comparing (large) DAGs.
+It is calculated by sorting the head transaction references (ascending, so low-high order) and XOR-ing them. For example, if
+there are 3 heads:
 
 ```
 T1=a5b7485b33d485cc4744a63e3273e581e0e7d0fd1b3f020b19c3b913bd5465dc
@@ -108,6 +104,7 @@ blockHash = xor(xor(T1, T2), T3)
 blockHash = 9d7938c0f608e58b10f393681a6e262f5aefd4d5420eb0449ddad6af760ea528
 ```
 
+Each last transaction of every branch is considered a head for history hash calculation.
 
 ### 5.2. Broadcasting
 
@@ -179,16 +176,14 @@ on their node. However, when offences are repeated the node SHOULD apply "Three 
 SHOULD deny further connections using the peer's certificate (identified by certificate issuer DN and serial number),
 until the ban is lifted by an operator.
 
-TODO: Limit number of connections from a certain certificate?
-
 ### 8.1. Denial of Service
 
 #### Threat: Memory Exhaustion due to Large Messages
 
-A (malicious) peer could exhaust the node's memory with (many) large messages.
+A (malicious) peer could exhaust the node's memory with (many) large network messages.
 
 Countermeasures:
-- Nodes SHOULD NOT accept incoming messages larger than 5mb (5242880 bytes).
+- Nodes MUST NOT accept incoming network messages larger than 5mb (5242880 bytes).
 
 #### Threat: Resource Exhaustion through Connection Flooding
 
@@ -206,17 +201,13 @@ A peer that floods the node with many messages threatens the stability of a node
 for processing incoming messages often have hard limits in the form connection pools, thread pools or backlogs.
 
 Countermeasures:
-- Nodes SHOULD limit the number of messages received from a peer.
-
-TODO: What would be a good number? 5/second?
+- Nodes SHOULD limit the number of network messages received from a peer to 5 per second.
 
 #### Threat: Uncontrolled DAG Growth
 
 A single peer or orchestrated group of peers can quickly produce many transactions, quickly growing the DAG. Since history
 must be retained to verify the DAG integrity in the future, it's desirable to limit the number of faulty transactions or
 transactions without a meaningful payload.
-
-TODO: How to mitigate this?
 
 ### 8.2. Data Manipulation
 
