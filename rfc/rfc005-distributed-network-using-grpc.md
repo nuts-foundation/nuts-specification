@@ -236,18 +236,11 @@ The following issues must be either be solved in this RFC or acknowledged being 
   - Nodes broadcast their last hash to sync (every 2 secs), lots of chatter
 - Fast replay (from another node) when starting a new node
 - We need some kind of flooding detection and prevention
-- Maybe; more authorisation than just "you need to have a PKIOverheid certificate"?
-	- What if a malicious node produces lots (e.g. gigabytes) of crap that clutters the DAG?
 - Detect dead nodes
   - Possible solution: SWIM?
 - Retrieve transaction payload from other nodes than the one who sent you the hash
   - Possible solution: kademlia-ish hash distance comparison to determine which node to query for the contents? 
 - Detect nodes that refuse to sync with you (but keep sending different hashes)
-- Peer ID spoofing: peer ID can be spoofed by copying a peer's ID and providing it when connecting to other nodes.
-  Depending on the other peers' implementation, spoofing could be used to impersonate other nodes, which may cause interruptions the other nodes' operation, 
-  - Possible solution: peer ID MUST be created by generating a P-256 elliptic curve key pair, taking the public key and signing it with the private key.
-    - Option 1: signing challenge (downside: requires a handshake, which is complicated).
-    - Option 2: signing a nonce (downside: peer needs to track the nonce to make sure it's not used more than once).
 - Querying a peer when the local node receives a local hash now works by just querying all transactions for that block,
   which might become too slow when there are many transactions in a block. Possible optimizations:
   - Pathfinding: let peer find a path from the block's first hash to the unknown head and return all transactions.
