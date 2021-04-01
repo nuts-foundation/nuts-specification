@@ -348,7 +348,7 @@ First we describe the mechanism of detecting and resolving conflicts. DID Docume
 The transactions described in [RFC004](rfc004-verifiable-transactional-graph.md) do refer to previous transactions. This system can be used to detect conflicts and to resolve them.
 For DID Documents additional transactional requirements are added:
 
-* Updates to DID Documents MUST refer in their transaction to the transaction of the previous version. (In addition to the HEADs)
+* Updates to DID Documents MUST refer in their transaction to the transaction of the previous version. They SHOULD also refer to the latest transactions as described by [RFC005]().
 * In case of a conflict, the conflict can be resolved with an additional transaction referring to the all the conflicting transactions.
 
 The algorithm for conflict detection can be referred from these requirements:
@@ -360,7 +360,7 @@ The algorithm for conflict detection can be referred from these requirements:
 
 ### 5.1 @context
 
-The `@context` is determined by the protocol version and should not change.
+The `@context` is determined by the protocol version and cannot differ if both transactions use the same protocol version.
 
 ### 5.2 id
 
@@ -368,16 +368,16 @@ The `id` identifies the DID Document and by definition will be equal for updates
 
 ### 5.3 controller
 
-Controller entries are references to other DID Documents. If the list of controllers differs, the resulting list must be all unique elements from both documents combined.
+Controller entries are references to other DID Documents. If the list of controllers differs, the result MUST be a set of th elements from both documents combined.
 
 ### 5.4 verification methods
 
-Verification methods are defined by their public-key and thus their contents. This makes each method immutable. When the list of methods differs between documents,
+Verification methods are defined by their public key and thus their contents. This makes each method immutable. When the list of methods differs between documents,
 the resulting list must be all unique elements from both documents combined.
 
 ### 5.5 authentication & assertion
 
-The authentication and assertion lists only refer to verificationMethods by their id. This makes them immutable and can therefore use the same mechanism as described by §5.4.
+The authentication and assertionMethod lists only refer to verificationMethods by their id. This makes them immutable and can therefore use the same mechanism as described by §5.4.
 
 ### 5.6 services
 
