@@ -91,7 +91,7 @@ Nuts DID Documents are wrapped in a JWS (JSON Web Signature) to ensure cryptogra
 [RFC004](rfc004-verifiable-transactional-graph.md). Please refer to that RFC on how to create the JWS.
 
 The JWS MUST be signed by the private part of the key pair.
-The public key MUST also be present in the `verificationMethods` and referenced by the `authentication` field.
+The public key MUST also be present in the `verificationMethods` and referenced by the `capabilityInvocation` field.
 
 ### 3.2 Method operations
 
@@ -100,14 +100,14 @@ The envelope is in the form of a JWS as described in [RFC004](rfc004-verifiable-
 Once the network layer has confirmed the correctness of the signature of the JWS, the verifiable data registry MUST validate if the 
 submitter was authorized to create, update or deactivate the document. If the authorization fails, the document MUST NOT be processed by the registry.
 
-A DID document can ony be created by its subject. To prove ownership of the private key, the JWS MUST be signed by a new private key.
-The corresponding public key MUST be listed as a `capabilityInvocation` verification relationship in the form of a reference.
+A DID document can only be created directly by its subject. A new DID is created by generating a key pair and proving 
+control over the private key by signing the transaction containing the DID document with it.
+The corresponding public key MUST be embedded as a `verificationMethod` and referenced as a `capabilityInvocation`.
+Directly after creation, the DID document is configured as its own controller.
 
 A DID document can only be updated or deactivated by one of its controllers. The `controller` field MAY list the controllers of a document.
-If no controllers are listed, the DID subject itself is the only controller. If the DID document is not one of the listed controllers, the subject is NOT its own controller.
-There can only be one level of controllers, i.e. controllers of controllers MUST NOT be able to update or deactivate a DID document.
-
-Controllers sign the JWS with the private key of which the public key MUST be included as a `capabilityInvocation` in the controllers DID document.
+If no controllers are listed, the DID subject itself is the only controller. If the DID document is not one of the listed controllers, the subject can't update or deactivate its own DID document.
+There can only be one level of controllers. A JWS signed by any other DID document than a direct controller of the DID document MUST NOT be processed by the registry.
 
 #### 3.2.1 Create (Register)
 
@@ -119,7 +119,7 @@ A Create operation for a DID Document puts the following additional requirements
 - `tid` MUST be absent
 
 The `kid` field of the `jwk` header parameter MUST be prefixed by the `id` of the DID document.
-In order for the contents to be accepted in the Verifiable Data Registry, the JWK MUST match the `authentication` key in the DID document with the same identifier. 
+In order for the contents to be accepted in the Verifiable Data Registry, the JWK MUST match the `capabilityInvocation` key in the DID document with the same identifier. 
 The `kid` field from the JWK MUST match the `id` from the verification key in the DID document.
 
 Example JWS header
@@ -150,8 +150,8 @@ Example JWS header
 The DID document has the following basic requirements:
 
 - the `id` MUST be generated according to the method specified at the beginning of §3
-- at least 1 key MUST be present in the `verificationMethod` and `authentication`
-- all key references in `authentication` MUST refer to keys listed under `verificationMethods`
+- at least 1 key MUST be present in the `verificationMethod` and be referenced in the`capabilityInvocation`
+- all key references in `capabilityInvocation` MUST refer to keys listed under `verificationMethods`
 
 Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` and the public key fingerprint according to [rfc7638](https://tools.ietf.org/html/rfc7638)
 Each key MUST be of type `JsonWebKey2020` according to §5.3.1 of the [did-core-spec](https://www.w3.org/TR/did-core/#key-types-and-formats)
@@ -181,7 +181,7 @@ Example DID document:
       "kty": "EC"
     }
   }],
-  "authentication": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
+  "capabilityInvocation": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
   "service": []
 }
 ```
@@ -201,12 +201,11 @@ document. `updated` MUST contain the `sigt` timestamp of the last version of the
 #### 3.2.3 Update (Replace)
 The complete document gets replaced with a newer version. 
 
-Changes to DID documents can only be accepted if the update is signed with a current controller authentication key:
+Changes to DID documents can only be accepted if the update is signed with a capabilityInvocation key from one of the controllers:
 
-- a key referenced from the `authentication` section of the latest DID document version.
-- a key referenced from the `authentication` section of a controller. One of the entries in the `controller` field MAY refer to a different DID Document.
-  The `authentication` keys of the latest version of that DID Document can be used as authorized key.
-- a key referenced from the `authentication` section of the given DID document if it is a `Create` action.
+- a key referenced from the `capabilityInvocation` section of the latest DID document version.
+- a key referenced from the `capabilityInvocation` section of a controller. One of the entries in the `controller` field MAY refer to a different DID Document.
+  The `capabilityInvocation` keys of the latest version of that DID Document can be used as authorized key.
 
 The following requirements on the JWS header parameter apply:
 
@@ -228,26 +227,24 @@ Example JWS header:
 }
 ```
 
-#### 3.2.4 Delete (Revoke)
+#### 3.2.4 Delete (Deactivate)
 
-DID Documents cannot be deleted as in being "erased", only its keys can be removed as to prevent future changes (revocation).
+DID documents cannot be deleted as in being "erased", only its keys and controllers can be removed as to prevent future changes (deactivation).
 To revoke the keys to prevent future updates;
 
-1. Remove all keys (specified by `verificationMethod`) and references (specified by e.g. `authentication`) to
+1. Remove all keys (specified by `verificationMethod`) and references (specified by e.g. `capabilityInvocation`) to
    these keys from the document. 
 2. Remove all controllers from the document.
+3. Optionally remove all services
 
 Deletion can not be undone.
 
-Example DID document:
+Example of a deactivated DID document:
 
 ```json
 {
   "@context": [ "https://www.w3.org/ns/did/v1" ],
-  "id": "did:nuts:123",
-  "controller": [],
-  "verificationMethod": [],
-  "authentication": []
+  "id": "did:nuts:123"
 }
 ```
 
@@ -259,7 +256,7 @@ Almost all security considerations are covered by the mechanisms described in [R
 - **replay** - DID documents are identified and published by their hash (SHA-256). Replaying will result in replaying the exact same content.
 - **message insertion** - [RFC004](rfc004-verifiable-transactional-graph.md) defines hashing and signing of published documents.
 - **deletion** - All DID documents are published and copied on a mesh network. Deletion of a single document will only occur locally and will not damage other nodes.
-- **modification** - DID documents can only be modified if they are published with a signature from one of the `authentication` keys.
+- **modification** - DID documents can only be modified if they are published with a signature from one of the `capabilityInvocation` keys.
 - **man-in-the-middle** - All communications is sent over two-way TLS and all documents are signed. A DID can not be hijacked since it is derived from the public key.
 - **denial of service** - This is out of scope and handled by [RFC004](rfc004-verifiable-transactional-graph.md).
 
@@ -390,7 +387,7 @@ The SaaS provider registers itself with:
         "kty": "EC"
       }
     }],
-  "authentication": [
+  "capabilityInvocation": [
     "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
     "did:nuts:1#_kalsjdyurtnAa4895akljnjghl584B9lkEJHNLJKFGA"
   ],
@@ -429,7 +426,7 @@ The SaaS provider registers a care organization as:
         "kty": "EC"
       }
     }],
-  "authentication": [
+  "capabilityInvocation": [
     "did:nuts:2#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
   ],
   "controller": [
@@ -448,7 +445,7 @@ The SaaS provider registers a care organization as:
 }
 ```
 
-The care organization does have an `authentication` key, this is required for the generation of the `id`. The SaaS provider will most likely not store the key since that key is not in control of the DID document.
+The care organization does have an `capabilityInvocation` key, this is required for the generation of the `id`. The SaaS provider will most likely not store the key since that key is not in control of the DID document.
 Since this key isn't after initial creation of the document the SaaS provider SHOULD remove it from the authentication document afterwards to improve security and clarity.
 The DID document of the SaaS provider is the controller of the DID document.
 
@@ -486,7 +483,7 @@ The hospital would be able to register a single DID document:
         "kty": "EC"
       }
     }],
-  "authentication": [
+  "capabilityInvocation": [
     "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
   ],
   "assertion": [
@@ -515,10 +512,10 @@ The hospital would be able to register a single DID document:
 }
 ```
 
-The hospital registered 2 keys, one if used for assertions and one for authentication. 
-The authentication key is kept offline, meaning that any change to the DID document will require an administrator to sign the changes manually.
-The assertion key is available online and used within the defined services.
-All services are registered directly on the DID document.
+The hospital registered 2 keys, one is used for assertions and one for authorization as the DID controller. 
+The authorization key, listed  under `capabilityInvocation` is kept offline, meaning that any change to the DID document
+will require an administrator to sign the changes manually. The assertion key is available online and used within the 
+defined services. All services are registered directly on the DID document.
 
 ### 6.3 Single person deployment
 
@@ -543,7 +540,7 @@ This example is the most simple, there's one key and it's used for all cases.
         "kty": "EC"
       }
     }],
-  "authentication": [
+  "capabilityInvocation": [
     "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
   ],
   "assertion": [
