@@ -6,14 +6,14 @@
 | Request for Comments: 012 | Nedap |
 |  | February 2021 |
 
-## Nuts Company Credential
+## Nuts Organization Credential
 ### Abstract
 
 Creating a network with trusted Verified Credentials is victim of the chicken-and-egg-problem. 
 Issuers are not yet convinced they should support VCs until the network is mature enough and nobody is willing to use the network without official credentials/identities.
-The **Nuts company credential** offers a temporary solution. It allows for any DID subject to issue a VC. 
+The **Nuts organization credential** offers a temporary solution. It allows for any DID subject to issue a VC. 
 Trust is established manually by adding the DID to a trusted list of issuers. 
-For development use-cases and as bootstrap for a production network, the `Nuts Organization Credential` is a way to add the required information to the network.
+For development use-cases and as bootstrap for a production network, the `Nuts Organization Credential` will add names to DIDs.
 
 ### Status
 
@@ -52,7 +52,7 @@ and has the following requirements:
 
 * all fields are required.
 * all fields are encoded as strings.  
-* **id** MUST refer to a known Nuts DID.
+* **id** MUST refer to a known Nuts DID as specified by [RFC006](rfc006-distributed-registry.md).
 
 ## 4 Issuance & distribution
 
@@ -61,15 +61,17 @@ The VC does not have any other requirements nor does it add requirements to othe
 
 ## 5 Supported proofs
 
-Only default proofs from [RFC011](rfc011-verifiable-credential.md) are supported.
+Only proofs from [RFC011](rfc011-verifiable-credential.md) are supported.
 
 ## 6 Trust
 
-The Nuts Organization Credential MUST be trusted manually. The mechanism for this is up to the implementation.
+The Nuts Organization Credential MUST be trusted manually. 
+An implementation can choose to trust each VC individually or trust a certain **Issuer**. 
+The mechanism for this is up to the implementation.
 
 ## 7 Revocation
 
-The Nuts Organization Credential uses the default revocation mechanism as stated by [RFC011](rfc011-verifiable-credential.md).
+The Nuts Organization Credential uses the revocation mechanism as stated by [RFC011](rfc011-verifiable-credential.md).
 
 ## 8 Use cases
 
@@ -78,11 +80,11 @@ The credential MAY also be used as a way to find the correct DID and its service
 
 ## 9 Privacy considerations
 
-All information in the credential is public knowledge.
+All information in the credential SHOULD be public knowledge. The VC MAY NOT contain private information.
 
 ## 10 Services
 
-No additional services than the Nuts network are required.
+No additional services other than the Nuts network are required.
 
 ## 11. Example
 
@@ -109,10 +111,7 @@ No additional services than the Nuts network are required.
     "created": "2017-06-18T21:19:10Z",
     "proofPurpose": "assertionMethod",
     "verificationMethod": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467#qjHYrzaJjpEstmDATng4-cGmR4t-_V3ipbDVYZrVe4A",
-    "jws": "eyJhbGciOiJSUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..TCYt5X
-      sITJX1CxPCT8yAV-TVkIEq_PbChOMqsLfRoPsnsgw5WEuts01mq-pQy7UJiN5mgRxD-WUc
-      X16dUEMGlv50aqzpqh4Qktb3rk-BuQy72IFLOqV0G_zS245-kronKb78cPN25DGlcTwLtj
-      PAYuNzVBAh4vGHSrQyHUdBBPM"
+    "jws": "eyJhbGciOiJSUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..TCYt5XsITJX1CxPCT8yAV-TVkIEq_PbChOMqsLfRoPsnsgw5WEuts01mq-pQy7UJiN5mgRxD-WUcX16dUEMGlv50aqzpqh4Qktb3rk-BuQy72IFLOqV0G_zS245-kronKb78cPN25DGlcTwLtjPAYuNzVBAh4vGHSrQyHUdBBPM"
   }
 }
 ```

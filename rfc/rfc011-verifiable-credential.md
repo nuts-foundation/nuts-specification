@@ -33,7 +33,7 @@ Making sure this information is correct and that it can be trusted is therefore 
 
 * **DID**: [Decentralized Identifiers](https://www.w3.org/TR/did-core/).
 * **holder**: The party that receives a VC from an issuer.  
-* **issuer**: The party that issues and signs a VC.  
+* **issuer**: The party that issues a VC.  
 * **proof**: Proof asserting that a VC is valid using cryptography.
 * **VC**: Verifiable Credential according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
 * **VP**: Verifiable Presentation according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
@@ -51,17 +51,17 @@ The following proof types must be supported:
 
 #### 3.1.1 JsonWebSignature2020
 
-resources:
+This standard is described by https://w3c-ccg.github.io/lds-jws2020. It uses a detached JWS for presenting the signature in the proof. 
+[RFC7797](https://tools.ietf.org/html/rfc7797) describes how a detached JWS works. The proof is formatted according to https://w3c-ccg.github.io/ld-proofs/.
 
-* https://w3c-ccg.github.io/ld-proofs/ 
-* https://tools.ietf.org/html/rfc7797
-* https://w3c-ccg.github.io/lds-jws2020
+The signature for a JsonWebSignature2020 is basically a normal JWS but with its payload removed. 
+The most important part to take into account is that the signature is computed over the payload without the `proof` part. 
 
-The algorithm used to create the signature is as follows:
+The complete algorithm used to create the signature is as follows:
 
 - take the input Verifiable Credential and remove the `proof` field. Store as `raw_vc`.
-- compute the sha256 of the `raw_vc`, store as `hash_vc = sha256(raw_vc)`.  
-- compose a `raw_proof` json object without the `jws` field:
+- compute the sha256 of the `raw_vc`, store as `hash_vc`:`hash_vc = sha256(raw_vc)`.  
+- compose a `raw_proof` JSON object without the `jws` field:
 
 ```json
 {
@@ -74,11 +74,11 @@ The algorithm used to create the signature is as follows:
 where the `verificationMethod` must be a valid assertionMethod ID from the DID Document. `created` MUST be a RFC3339 compliant time string.
 `type` and `proofPurpose` MUST be entered as above.
 
-- compute the sha256 of the `raw_proof`, store as `hash_proof = sha256(raw_proof)`.
+- compute the sha256 of the `raw_proof`, store as `hash_proof`:`hash_proof = sha256(raw_proof)`.
 - concatenate  `hash_proof` with `raw_proof` and store as `payload`.
-- construct the JWS `header` as `{"alg":"ES256","b64":false,"crit":["b64"]}` where the `alg` SHOULD be replaced with a valid algorithm.
-- construct a challenge by base64 encoding the header and payload and join with a `.`: `challenge = base64_rawurlencode(header) + '.' + base64_rawurlencode(challenge)`  
-- sign the bytes from the previous step with the private key corresponding to the `kid`: `sig = sign(challenge, pkey(kid))`
+- construct the JWS `header` as `{"alg":"ES256","b64":false,"crit":["b64"]}` where `alg` MUST contain the right algorithm.
+- construct a challenge by base64 encoding the header and payload and join with a `.`: `challenge = base64_rawurlencode(header) + '.' + base64_rawurlencode(hash_vc)`  
+- sign the bytes from the previous step with the private key corresponding to the `kid`: `sig = sign(challenge, privateKey(kid))`
 - create `jws` as `header + ".." + base64_rawurlencode(sig)`
 - place the result in the `jws` field of the `proof`:
 
@@ -94,9 +94,9 @@ where the `verificationMethod` must be a valid assertionMethod ID from the DID D
 
 ### 3.2 Content-type
 
-All VCs have a content-type equal to `application/vc+json` when published on the network.
-All VCs MUST be handled as normal JSON. All issued VCs MUST add the `https://nuts.nl/credentials/v1` context.
-VCs within Nuts MAY NOT specify more than one additional type next to `VerifiableCredential`.
+All VCs MUST have a content-type equal to `application/vc+json` when published on the network.
+All issued VCs MUST contain the `https://nuts.nl/credentials/v1` context.
+VCs MAY NOT specify more than one additional type next to `VerifiableCredential`.
 
 ### 3.3 Updates
 
@@ -108,7 +108,7 @@ VC identifiers MUST be constructed as `DID#id` where `id` is unique for the give
 
 ### 3.5 VC Example
 
-Below is an example of a credential.
+Below is an example of a credential. **Issuer** and **Subject** are the same in the example. This specification neither requires nor prevents this. 
 
 ```json
 {
@@ -146,12 +146,11 @@ All the following chapters MUST be present in the specification of a VC.
 
 ### 4.1 CredentialSubject
 
-It MUST specify the contents of the `credentialSubject` JSON field. It MUST specify which parts of the `credentialSubject` are mandatory or optional and the format.
+It MUST specify the contents of the `credentialSubject` JSON field. It MUST specify which parts of the `credentialSubject` are mandatory or optional, and the format.
 
 ### 4.2 Issuance & distribution
 
-A VC specification MUST specify how a VC is issued and who may issue it. It MUST specify which protocols and standards are used in obtaining the VC. 
-It MUST specify where it MAY be stored and if it's distributed to others in some way. It MUST specify any requirements for the holder.
+A VC specification MUST specify how a VC is issued and if there are any requirements on the issuer. It MUST specify any requirements for the holder.
 It MUST specify if VCs or other credentials are required in order to obtain the VC. It MUST specify the content-type `type` selector.
 
 ### 4.3 Supported proofs
@@ -161,7 +160,7 @@ This also means that specifications SHOULD to be updated when new proof types ar
 
 ### 4.4 Trust
 
-It MUST list the requirements for when a VC is to be trusted. This can be any combination of configuration, other VCs and/or automatic mechanism.
+It MUST list the requirements for when a VC is to be trusted. It could, for example, require every node to trust a certain issuer by default.
 
 ### 4.5 Revocation
 
@@ -191,19 +190,19 @@ Such a revocation transaction has the following requirements:
 * the **issuer** MUST match the DID as the `issuer` field of the VC.
 * the **subject** MUST match the `id` field of the VC.
 * a **reason** MAY be filled with a revocation reason.
-* the **date** MUST provide the date in rfc3339 format. From this moment in time the VC is revoked.
+* the **date** MUST provide the date in RFC3339 format. From this moment in time the VC is revoked.
 * the **proof** MUST be a `JsonWebSignature2020` proof.
 
-The transaction MUST be published on the Nuts network. It MAY use the `verificationMethod` for the transaction.
+The transaction MUST be published on the Nuts network.
 The content-type is `application/vc+json;type=revocation`
 
 The signature is calculated as stated in §3.1.1.
 
 ### 4.6 Use cases
 
-It MUST specify where the VC SHOULD be used: as requirement for other VCs, in the oauth flow according to [RFC003](rfc003-oauth2-authorization.md) or any other use case.
+It MUST specify where the VC SHOULD be used: as requirement for other VCs, in the OAuth flow according to [RFC003](rfc003-oauth2-authorization.md) or any other use case.
 If a VC can be used in a Verifiable Presentation (VP), it MUST specify if additional VCs are to be expected in the VP.
-It SHOULD describe the use case well enough so any implementation can take appropriate measures, such as indexing certain fields.
+It SHOULD describe the use case well enough so any implementation can take appropriate measures for optimizing querying/checking, such as indexing certain fields.
 
 ### 4.7 Privacy considerations
 
