@@ -78,7 +78,7 @@ For example, consider the following Ed25519 key (as JWK):
 ```
 
 For this key type the `x` parameter is used to derive `idstring`:
-`idstring = BASE-59(SHA-256(BASE64URL-DECODE(key.x)))`
+`idstring = BASE-58(SHA-256(BASE64URL-DECODE(key.x)))`
 
 Outputs:
 ```json
@@ -213,7 +213,7 @@ Example JWS header:
   "alg": "PS256",
   "cty": "application/json+did-document",
   "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
-  "crit": ["sigt", "ver","prevs"],
+  "crit": ["sigt", "ver", "prevs"],
   "sigt": "2020-01-06T15:00:00Z",
   "ver": "1",
   "prevs": ["148b3f9b46787220b1eeb0fc483776beef0c2b3e"],
@@ -289,10 +289,18 @@ A service can define an absolute endpoint URI or be a compound service, referrin
 when a SaaS provider defines endpoints to be used for all clients.
 
 For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing the URI. For a compound service the
-`serviceEndpoint` MUST contain a map containing references to absolute endpoint URI services.
+`serviceEndpoint` MUST contain a map containing references to absolute endpoint URI services. 
+The references MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service.
+A compound service MAY refer to absolute endpoints from other DID Documents.
+See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards.
 
-The service identifier MUST be constructed from the DID followed by a `#` and an identifier.
+A DID Document MAY NOT contain more than one service with the same type.
+
+The service identifier MUST be constructed from the DID followed by a `#` and an id string.
 The service identifier MUST be unique to the DID document.
+
+The id string is calculated as:
+`idstring = BASE-58(SHA-256(json-bytes-without-id))`
 
 Below is an example of a service registered by a care organization that uses the endpoints from a SaaS provider:
 
@@ -303,13 +311,13 @@ The SaaS provider defines the actual URL:
   "id": "did:nuts:123",
   "service": [
     {
-      "id": "did:nuts:123#NutsOAuth",
-      "type": "NutsOAuth",
+      "id": "did:nuts:123#IyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "type": "oauth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:123#NutsFHIR",
-      "type": "NutsFHIR",
+      "id": "did:nuts:123#_TKzHv2jFIF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
+      "type": "fhir",
       "serviceEndpoint": "https://example.com/fhir"
     }
   ]
@@ -323,11 +331,11 @@ The care organisation refers to it:
   "id": "did:nuts:abc",
   "service": [
     {
-      "id": "did:nuts:abc#NutsCompoundService-1",
+      "id": "did:nuts:abc#F1Dsgwngfdg3SH6TpDv0Ta1aOE",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauth": "did:nuts:123#NutsOAuth",
-        "fhirEndpoint": "did:nuts:123#NutsFHIR"
+        "oauth": "did:nuts:123?type=oauth",
+        "fhir": "did:nuts:123?type=fhir"
       }
     }
   ]
@@ -390,13 +398,13 @@ The SaaS provider registers itself with:
   ],
   "service": [
     {
-      "id": "did:nuts:123#NutsOAuth",
-      "type": "NutsOAuth",
+      "id": "did:nuts:123#Dsgwngfdg3SH6TpDTa1",
+      "type": "oauth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:123#NutsFHIR",
-      "type": "NutsFHIR",
+      "id": "did:nuts:123#Dsgwngf3SH6TpDv0Ta1",
+      "type": "fhir",
       "serviceEndpoint": "https://example.com/fhir"
     }
   ]
@@ -431,11 +439,11 @@ The SaaS provider registers a care organization as:
   ],
   "service": [
     {
-      "id": "did:nuts:abc#NutsCompoundService-1",
+      "id": "did:nuts:abc#Dsgwngfdg3SH6TpDv0Ta1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:1#NutsOAuth",
-        "fhirEndpoint": "did:nuts:1#NutsFHIR"
+        "oauth": "did:nuts:1?type=oauth",
+        "fhir": "did:nuts:1?type=fhir"
       }
     }
   ]
@@ -488,21 +496,21 @@ The hospital would be able to register a single DID document:
   ],
   "service": [
     {
-      "id": "did:nuts:1#NutsOAuth",
-      "type": "NutsOAuth",
+      "id": "did:nuts:1#Dsgwngfdg3SH6TpDTa1",
+      "type": "oauth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:1#NutsFHIR",
-      "type": "NutsFHIR",
+      "id": "did:nuts:1#Dsgwngf3SH6TpDv0Ta1",
+      "type": "fhir",
       "serviceEndpoint": "https://example.com/fhir"
     },
     {
-      "id": "did:nuts:abc#NutsCompoundService-1",
+      "id": "did:nuts:abc#Dsgwngfdg3SH6TpDv0Ta1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:1#NutsOAuth",
-        "fhirEndpoint": "did:nuts:1#NutsFHIR"
+        "oauth": "did:nuts:1?type=oauth",
+        "fhir": "did:nuts:1?type=fhir"
       }
     }
   ]
