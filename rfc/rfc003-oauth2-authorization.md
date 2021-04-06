@@ -112,7 +112,7 @@ In order for the client to resolve the authorization server endpoint it MUST loo
 * **iss**: The issuer MUST contain the DID of the actor, thus the care organization making the request.
 * **sub**: The subject MUST contain the DID of the custodian. The custodian's DID could be used to find the relevant consent \(together with the actor and subject\).
 * **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional.
-* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the service identifier from the DID Document. The service MUST be of type: `oauth`.
+* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the `oauth` service identifier refered to by the custodian DID Document.
 * **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
 * **exp**: Expiration, MUST NOT be later than 5 seconds after issuing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
