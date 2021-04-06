@@ -35,7 +35,8 @@ In this document we will provide a way of protecting RESTful APIs with use of an
 * **JWT bearer token**: JWT encoded bearer token contains the user’s identity, subject and custodian and is signed by the acting party. This token is used to obtain an OAuth 2 access token.
 * **Access token**: An OAuth 2 access token, provided by an authorization Server. This token is handed to the client so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
 * **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian and token validity. This mechanism is called token introspection which is described by [RFC7662](https://tools.ietf.org/html/rfc7662).
-* **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document. \[RFC006\] describes endpoint registration.
+* **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document. [RFC006](rfc006-distributed-registry.md) describes endpoint registration.
+* **Compound service**: Higher level service as described by [RFC006](rfc006-distributed-registry.md).
 
 Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
@@ -96,8 +97,9 @@ Example of the actor's DID document:
 
 #### 4.1.2 Server registration
 
-Each service MUST define an `oauth` serviceEndpoint. This endpoint refers to another service in the DID Document with the type: `oauth`.
+Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refers to another service in a DID Document with the type: `oauth`.
 In order for the client to resolve the authorization server endpoint it MUST look up the `oauth` service endpoint of the service.
+A compound service may refer to endpoint services from other DID Documents.
 
 ### 4.2. Constructing the JWT
 
@@ -112,7 +114,7 @@ In order for the client to resolve the authorization server endpoint it MUST loo
 * **iss**: The issuer MUST contain the DID of the actor, thus the care organization making the request.
 * **sub**: The subject MUST contain the DID of the custodian. The custodian's DID could be used to find the relevant consent \(together with the actor and subject\).
 * **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional.
-* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the `oauth` service identifier refered to by the custodian DID Document.
+* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the `aud` MUST be an `oauth` service identifier. That service MUST be an absolute endpoint.
 * **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
 * **exp**: Expiration, MUST NOT be later than 5 seconds after issuing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
@@ -221,7 +223,7 @@ The JWT **iat** and **exp** fields MUST be validated. The timestamp of validatio
 **5.2.1.5. Login contract validation**
 
 The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the `name` and `city` of the actor.
-The `name` and `city` MUST match with a valid [Verifiable Credential](rfc011-verifiable-credential.md) issued to the actor. This must be a [NutsOrganizationCredential](rfc012-nuts-organization-credential.md).
+The `name` and `city` MUST exactly (case sensitive) match with a valid [Verifiable Credential](rfc011-verifiable-credential.md) issued to the actor. This must be a [NutsOrganizationCredential](rfc012-nuts-organization-credential.md).
 
 **5.2.1.6. Endpoint validation**
 
