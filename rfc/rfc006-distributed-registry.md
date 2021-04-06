@@ -44,7 +44,6 @@ This RFC describes how to create, update and resolve the data structures require
   e.g. a care software vendor or SaaS provider.
 * **Endpoint**: a URI or URL exposed by a network participant which can be used by other participants to pull data.
 * **Service**: a group of endpoints implementing a service required by a Bolt.
-* **CRDT**: Conflict-free replicated data type.
 
 ## 3. Nuts DID Method
 
@@ -214,7 +213,7 @@ Example JWS header:
   "alg": "PS256",
   "cty": "application/json+did-document",
   "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
-  "crit": ["sigt", "ver","prevs"],
+  "crit": ["sigt", "ver", "prevs"],
   "sigt": "2020-01-06T15:00:00Z",
   "ver": "1",
   "prevs": ["148b3f9b46787220b1eeb0fc483776beef0c2b3e"],
@@ -340,51 +339,7 @@ The care organisation refers to it:
 }
 ```
 
-## 5. Conflict resolution
-
-§3.4 of [RFC004](rfc004-verifiable-transactional-graph.md) requires each payload type to describe how conflicts are resolved when parallel transactions are encountered.
-A DID Document is not a CRDT, but its contents can be. The paragraphs below describe how each of the elements should be treated in case of a conflict.
-First we describe the mechanism of detecting and resolving conflicts. DID Documents do not refer to their previous version in any way. 
-The transactions described in [RFC004](rfc004-verifiable-transactional-graph.md) do refer to previous transactions. This system can be used to detect conflicts and to resolve them.
-For DID Documents additional transactional requirements are added:
-
-* Updates to DID Documents MUST refer in their transaction to the transaction of the previous version. They SHOULD also refer to the latest transactions as described by [RFC005]().
-* In case of a conflict, the conflict can be resolved with an additional transaction referring to the all the conflicting transactions.
-
-The algorithm for conflict detection can be referred from these requirements:
-
-- A DID Document update transaction is received.
-- The current version is resolved together with the metadata (the metadata holds the originating transaction(s)).
-- If the transaction refers to all transactions present in the metadata, the update is valid and the DID Document is replaced.
-- If the transaction does not refer to all transactions, it is a conflict and the rules from the paragraphs below are applied. 
-
-### 5.1 @context
-
-The `@context` is determined by the protocol version and cannot differ if both transactions use the same protocol version.
-
-### 5.2 id
-
-The `id` identifies the DID Document and by definition will be equal for updates.
-
-### 5.3 controller
-
-Controller entries are references to other DID Documents. If the list of controllers differs, the result MUST be a set of th elements from both documents combined.
-
-### 5.4 verification methods
-
-Verification methods are defined by their public key and thus their contents. This makes each method immutable. When the list of methods differs between documents,
-the resulting list must be all unique elements from both documents combined.
-
-### 5.5 authentication & assertion
-
-The authentication and assertionMethod lists only refer to verificationMethods by their id. This makes them immutable and can therefore use the same mechanism as described by §5.4.
-
-### 5.6 services
-
-§4 describes services as immutable and non-referable by ID. This makes a list of services suitable for merging as well. 
-There's an implication though, if a service is referenced by query and multiple services match due to a merger, it's up to the user of the service to handle this.  
-
-## 6. Supported Cryptographic Algorithms and Key Types
+## 5. Supported Cryptographic Algorithms and Key Types
 
 Since RSA algorithms are deemed to be insecure for medium to long term, only elliptic curve-type algorithms are supported.
 The library support for newer algorithms (e.g. `Ed25519`) and curves (`X25519`) however is limited, so for now only
@@ -394,14 +349,14 @@ according to the [Dutch Cyber Security Council](https://www.ncsc.nl/).
 It is expected however, that as library support improves more (stronger) algorithms and key types will be supported,
 which should be taken in account by implementors.
 
-## 7. Deployment scenarios
+## 6. Deployment scenarios
 
 The definition of the Nuts DID method enables a wide variety of usages.
 To better understand the usages, this chapter illustrates some example scenarios.
 
 This section is non-normative.
 
-### 7.1 SaaS provider
+### 6.1 SaaS provider
 
 This example consists of a SaaS provider that acts as enabler, controller and node operator for all of its customers. The SaaS provider has access to all the key material, while the care organizations hasn't.
 
@@ -440,13 +395,13 @@ The SaaS provider registers itself with:
   ],
   "service": [
     {
-      "id": "did:nuts:123#NutsOAuth",
-      "type": "NutsOAuth",
+      "id": "did:nuts:123#Dsgwngfdg3SH6TpDTa1",
+      "type": "oauth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:123#NutsFHIR",
-      "type": "NutsFHIR",
+      "id": "did:nuts:123#Dsgwngf3SH6TpDv0Ta1",
+      "type": "fhir",
       "serviceEndpoint": "https://example.com/fhir"
     }
   ]
@@ -481,11 +436,11 @@ The SaaS provider registers a care organization as:
   ],
   "service": [
     {
-      "id": "did:nuts:abc#NutsCompoundService-1",
+      "id": "did:nuts:abc#Dsgwngfdg3SH6TpDv0Ta1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:1#NutsOAuth",
-        "fhirEndpoint": "did:nuts:1#NutsFHIR"
+        "oauth": "did:nuts:1?type=oauth",
+        "fhir": "did:nuts:1?type=fhir"
       }
     }
   ]
@@ -496,7 +451,7 @@ The care organization does have an `authentication` key, this is required for th
 Since this key isn't after initial creation of the document the SaaS provider SHOULD remove it from the authentication document afterwards to improve security and clarity.
 The DID document of the SaaS provider is the controller of the DID document.
 
-### 7.2 Hospital
+### 6.2 Hospital
 
 We assume that a hospital has its own data centre and therefore, runs its own node. 
 This means that the DID document of the hospital doesn't need an additional controller. The hospital is in control of its own private keys. It does however, need to take precautions for private key loss/theft.
@@ -538,21 +493,21 @@ The hospital would be able to register a single DID document:
   ],
   "service": [
     {
-      "id": "did:nuts:1#NutsOAuth",
-      "type": "NutsOAuth",
+      "id": "did:nuts:1#Dsgwngfdg3SH6TpDTa1",
+      "type": "oauth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:1#NutsFHIR",
-      "type": "NutsFHIR",
+      "id": "did:nuts:1#Dsgwngf3SH6TpDv0Ta1",
+      "type": "fhir",
       "serviceEndpoint": "https://example.com/fhir"
     },
     {
-      "id": "did:nuts:abc#NutsCompoundService-1",
+      "id": "did:nuts:abc#Dsgwngfdg3SH6TpDv0Ta1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:1#NutsOAuth",
-        "fhirEndpoint": "did:nuts:1#NutsFHIR"
+        "oauth": "did:nuts:1?type=oauth",
+        "fhir": "did:nuts:1?type=fhir"
       }
     }
   ]
@@ -564,7 +519,7 @@ The authentication key is kept offline, meaning that any change to the DID docum
 The assertion key is available online and used within the defined services.
 All services are registered directly on the DID document.
 
-### 7.3 Single person deployment
+### 6.3 Single person deployment
 
 It is possible to deploy a node as a person. You'll probably not offer any services, but you'll still be able to consume them.
 Also losing key material is less of a problem since you only have to restore it for yourself.
