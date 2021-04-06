@@ -12,7 +12,7 @@
 
 ### Abstract
 
-This RFC describes authorizing users and or systems in the Nuts network using the [OAuth 2.0 framework](https://oauth.net/2/). OAuth 2.0 is a widely accepted authorization framwork well known from e.g. "sign-in with Google". The framework is highly customizable and accepts many _Grant types_. The most used OAuth grant types require clients to be registred up front with the authorization server, tokens to be transfered in advance and do not support zero-knowledge-proofs. In order to use OAuth in a the Nuts network we must choose and configure the appropriate grant type. This RFC describes how to identify a system or a user with a custom JWT and than retrieve an access token which than can be used as bearer token for authorization at the resource server.
+This RFC describes authorizing users and or systems in the Nuts network using the [OAuth 2.0 framework](https://oauth.net/2/). OAuth 2.0 is a widely accepted authorization framework well known from e.g. "sign-in with Google". The framework is highly customizable and accepts many _Grant types_. The most used OAuth grant types require clients to be registered up front with the authorization server, tokens to be transfered in advance and do not support zero-knowledge-proofs. In order to use OAuth in the Nuts network we must choose and configure the appropriate grant type. This RFC describes how to identify a system or a user with a custom JWT and then retrieve an access token which than can be used as bearer token for authorization at the resource server.
 
 ### Status of document
 
@@ -53,7 +53,7 @@ Part of the Nuts security framework involves the user identity. Data can only be
 
 ### 3.2. Obtain access token
 
-The client application MUST obtain an access token before accessing data. This SHOULD be done right before accessing the data. An access token is only valid for seconds \(determined by the authorization server\). The client application SHOULD refresh the access token only when more data is to be requested.
+The client application MUST obtain an access token before accessing data. This SHOULD be done right before accessing the data. An access token is only valid for seconds/minutes \(determined by the authorization server\). The client application SHOULD refresh the access token only when more data is to be requested.
 
 In order to obtain the access token, the client application MUST construct a signed JWT and send it to the registered authorization server token endpoint. The authorization server MUST validate the JWT and optionally validate if a legal base is present for the given custodian, subject and actor combination. If all is well, the authorization server SHOULD return an access token.
 
@@ -96,8 +96,8 @@ Example of the actor's DID document:
 
 #### 4.1.2 Server registration
 
-Each service MUST define an `oauth` serviceEndpoint. This endpoint is either the URL of the authorization server, or in case of a compound service an URI which resolves to another service.
-In order for the client to resolve the authorization server endpoint it MUST look up the `auth` service endpoint of the service.
+Each service MUST define an `oauth` serviceEndpoint. This endpoint refers to another service in the DID Document with the type: `oauth`.
+In order for the client to resolve the authorization server endpoint it MUST look up the `oauth` service endpoint of the service.
 
 ### 4.2. Constructing the JWT
 
@@ -112,7 +112,7 @@ In order for the client to resolve the authorization server endpoint it MUST loo
 * **iss**: The issuer MUST contain the DID of the actor, thus the care organization making the request.
 * **sub**: The subject MUST contain the DID of the custodian. The custodian's DID could be used to find the relevant consent \(together with the actor and subject\).
 * **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional.
-* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the DID listed under the `auth` key of the services serviceEndpoint.
+* **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the aud MUST be the service identifier from the DID Document. The service MUST be of type: `oauth`.
 * **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
 * **exp**: Expiration, MUST NOT be later than 5 seconds after issuing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
@@ -135,7 +135,7 @@ All other claims may be ignored.
   "iss": "did:nuts:123",
   "sub": "did:nuts:456",
   "sid": "urn:oid:2.16.840.1.113883.2.4.6.3:9999990",
-  "aud": "did:nuts:456#oauth-1",
+  "aud": "did:nuts:456#_08934567fgjsdroiuty230467",
   "usi": {...Base64 encoded token container...},
   "osi": {...hardware token sig...},
   "exp": 1578915481,
@@ -220,11 +220,13 @@ The JWT **iat** and **exp** fields MUST be validated. The timestamp of validatio
 
 **5.2.1.5. Login contract validation**
 
-The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the name of the actor.
+The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the `name` and `city` of the actor.
+The `name` and `city` MUST match with a valid [Verifiable Credential](rfc011-verifiable-credential.md) issued to the actor. This must be a [NutsOrganizationCredential](rfc012-nuts-organization-credential.md).
 
 **5.2.1.6. Endpoint validation**
 
-The **aud** field MUST match the registered endpoint from which the authorization server is listening. This prevents the use of the JWT at any other endpoint. The endpoint reference is used for this. \([RFC7523](https://tools.ietf.org/html/rfc7523#section-3)\)
+The **aud** field MUST match the identifier of the registered endpoint. This prevents the use of the JWT at any other endpoint. The endpoint reference is used for this. \([RFC7523](https://tools.ietf.org/html/rfc7523#section-3)\). 
+An endpoint identifier contains a DID and a fragment. 
 
 **5.2.1.7. Validate legal base**
 
@@ -289,9 +291,3 @@ The resource server MUST validate the validity of the access token. It MAY conta
 ### 6.3. Error codes
 
 Different protocols return different types of error messages. The format will most likely also differ. This means that error messages have to be specified per use-case. If an error message supports a text-based error code, then it should support the illegal\_access\_token code. If a client receives this error code then it MUST NOT reuse the access token.
-
-## 7 Current issues
-
-### Matching of actor name to login contract
-The login contract contains the name of the actor (care provider). The custodian must check if the name matches the issuer's name in the registry. The registration of names is not yet a part of the registry spec.
-The registration of a care providers name will probably be done by the use of [W3C Verifiable Credentials](https://www.w3.org/TR/vc-data-model/)
