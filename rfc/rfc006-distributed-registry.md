@@ -290,8 +290,11 @@ when a SaaS provider defines endpoints to be used for all clients.
 
 For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing the URI. For a compound service the
 `serviceEndpoint` MUST contain a map containing references to absolute endpoint URI services. 
-The references MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service. 
+The references MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service.
+A compound service MAY refer to absolute endpoints from other DID Documents.
 See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards.
+
+A DID Document MAY NOT contain more than one service with the same type.
 
 The service identifier MUST be constructed from the DID followed by a `#` and an id string.
 The service identifier MUST be unique to the DID document.
