@@ -332,7 +332,7 @@ The care organisation refers to it:
       "type": "NutsCompoundService",
       "serviceEndpoint": {
         "oauth": "did:nuts:123?type=oauth",
-        "fhirEndpoint": "did:nuts:123?type=fhir"
+        "fhir": "did:nuts:123?type=fhir"
       }
     }
   ]
