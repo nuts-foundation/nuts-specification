@@ -109,7 +109,7 @@ Parallel updates of the same application data, in the form of branches, MUST be 
 Consider the DAG from the previous chapter. If transaction `C` and  `D` where to update the same application data, nodes could process the transaction in a different order.
 This would create an inconsistency in the network. To fix this the following rules MUST be taken into account:
 
-* If the payloads are equal, mark both transactions as processed and apply one of the payloads.
+* If the payloads are equal, process as normal.
 * If the payloads are not equal, create a representation that is a merger of the payloads according to rules for the specific payload.
 
 The last rule requires the payload to be immutable or conform to its contents MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
