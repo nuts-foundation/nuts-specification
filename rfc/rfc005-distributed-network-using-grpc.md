@@ -183,7 +183,8 @@ until the ban is lifted by an operator.
 A (malicious) peer could exhaust the node's memory with (many) large network messages.
 
 Countermeasures:
-- Nodes MUST NOT accept incoming network messages larger than 5mb (5242880 bytes).
+- Nodes MUST NOT accept incoming network messages larger than 512 kilobytes.
+- Nodes MUST NOT send network messages larger than 512 kilobytes.
 
 #### Threat: Resource Exhaustion through Connection Flooding
 
@@ -202,6 +203,7 @@ for processing incoming messages often have hard limits in the form connection p
 
 Countermeasures:
 - Nodes SHOULD limit the number of network messages received from a peer to 5 per second.
+- Nodes SHOULD limit the number of network messages send to a peer to 5 per second.
 
 #### Threat: Uncontrolled DAG Growth
 
