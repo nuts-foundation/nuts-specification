@@ -59,8 +59,9 @@ The protocol generally operates as follows:
    - the heads of the current block (today) `T`,
    - the heads of the 2 previous blocks `T-1` and `T-2`,
    - XOR of the heads of historic blocks leading up to `T-2`.
-   Heads of a block are either transactions that have to other transactions referring to it as `prev` or the last
-   transaction of the block before midnight (the next transaction in the branch falls in the next day).
+   Heads of a block are either:
+   - transactions with no succeeding transactions referring to it as `prev`, or
+   - the last transaction of the block before midnight (the next transaction in the branch falls in the next day).
 2. When receiving a peer's broadcast, compare it to the local DAG and add missing transaction's to the local DAG:
    - When all head hashes are known in the local DAG and the historic hash equals: no action required.
    - Peer has unknown head: query the block's transactions to find out which transactions are missing.
