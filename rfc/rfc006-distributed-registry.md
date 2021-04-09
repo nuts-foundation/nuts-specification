@@ -344,9 +344,9 @@ The care organisation refers to it:
 
 ### 4.1. Contact information
 
-A node's DID document SHOULD define a service of type `node-contact-info` that contains information that can be used
-to contact the operator of the node. The information MUST NOT contain any personally identifiable information such as
-personal names, e-mail addresses or telephone numbers. It SHOULD contain a company/unit name, e-mail address and/or
+A DID MAY contain a service of type `node-contact-info` that contains information which can be used to contact the
+operator of the node that controls the DID document. The information MUST NOT contain any personally identifiable information (PII)
+such as personal names, e-mail addresses or telephone numbers. It SHOULD contain a company/unit name, e-mail address and/or
 telephone number instead. The `serviceEndpoint` MUST be a map and MUST contain the `email` property. It addition it MAY
 contain the following properties: `tel` (telephone number), `name` (company/unit name), `web` (website URL). All properties
 MUST be formatted as string. For example:
