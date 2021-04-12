@@ -373,7 +373,7 @@ the `serviceEndpoint` MUST be a DID URL as string which queries the referenced s
 
 The reference MUST resolve to a contact information service as described above.
 
-Since the information is self-proclaimed and not authenticated or verified in any way applications MUST treat it as
+Since the information is self-proclaimed and not authenticated or verified in any way, applications MUST treat it as
 untrusted, with great care. Failing to do so could make the operator of the node vulnerable for spoofing and other attacks. 
 
 ## 5. Supported Cryptographic Algorithms and Key Types
