@@ -342,6 +342,40 @@ The care organisation refers to it:
 }
 ```
 
+### 4.1. Contact information
+
+A DID MAY contain a service of type `node-contact-info` that contains information which can be used to contact the
+operator of the node that controls the DID document. The information MUST NOT contain any personally identifiable information (PII)
+such as personal names, e-mail addresses or telephone numbers. It SHOULD contain a company/unit name, e-mail address and/or
+telephone number instead. The `serviceEndpoint` MUST be a map and MUST contain the `email` property. It addition it MAY
+contain the following properties: `tel` (telephone number), `name` (company/unit name), `web` (website URL). All properties
+MUST be formatted as string. For example:
+
+```json
+{
+    "serviceEndpoint": {
+        "name": "Some Vendor",
+        "email": "administrator@nuts.node",
+        "telephone": "00316123456",
+        "website": "https://www.nuts.node"
+    }
+}
+```
+
+The service MAY also refer to another DID's contact information service (in case of a SaaS provider). In this case
+the `serviceEndpoint` MUST be a DID URL as string which queries the referenced service:
+
+```json
+{
+  "serviceEndpoint": "did:nuts:some-other-did?type=node-contact-info"
+}
+```
+
+The reference MUST resolve to a contact information service as described above.
+
+Since the information is self-proclaimed and not authenticated or verified in any way, applications MUST treat it as
+untrusted, with great care. Failing to do so could make the operator of the node vulnerable for spoofing and other attacks. 
+
 ## 5. Supported Cryptographic Algorithms and Key Types
 
 Since RSA algorithms are deemed to be insecure for medium to long term, only elliptic curve-type algorithms are supported.
