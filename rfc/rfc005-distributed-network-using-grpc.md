@@ -93,8 +93,7 @@ The signing time of a transaction determines which block it belongs to. As such 
 ### 5.1.1. History hash
 
 The _history hash_ is a hash over all transactions leading up to a certain point. It is used for quickly comparing (large) DAGs.
-It is calculated by sorting the head transaction references (ascending, so low-high order) and XOR-ing them. For example, if
-there are 3 heads:
+It is calculated by XOR-ing the references of the head transactions. For example, if there are 3 heads:
 
 ```
 T1=a5b7485b33d485cc4744a63e3273e581e0e7d0fd1b3f020b19c3b913bd5465dc
