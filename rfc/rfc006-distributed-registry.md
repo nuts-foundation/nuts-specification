@@ -92,17 +92,23 @@ Nuts DID Documents are wrapped in a JWS (JSON Web Signature) to ensure cryptogra
 [RFC004](rfc004-verifiable-transactional-graph.md). Please refer to that RFC on how to create the JWS.
 
 The JWS MUST be signed by the private part of the key pair.
-The public key MUST also be present in the `verificationMethods` and referenced by the `authentication` field.
+The public key MUST also be present in the `verificationMethods` and referenced by the `capabilityInvocation` field.
 
 ### 3.2 Method operations
 
 DID documents are enclosed in a message envelope to ensure consistency in the network.
 The envelope is in the form of a JWS as described in [RFC004](rfc004-verifiable-transactional-graph.md).
-Once the network layer has confirmed the signature of the JWS, the registry MUST validate if the submitter is authorized to create, update or delete the document.
-If the authorization fails, the document should be ignored.
+Once the network layer has confirmed the correctness of the signature of the JWS, the verifiable data registry MUST validate if the 
+submitter was authorized to create, update or deactivate the document. If the authorization fails, the document MUST NOT be processed by the registry.
 
-The `controller` field MAY be present. If no `controller` field is present, the DID subject itself is the controller.
-If the `controller` field is present, only the DID subjects from the `controller` field can change the DID document.
+A DID document can only be created directly by its subject. A new DID is created by generating a key pair and proving 
+control over the private key by signing the transaction containing the DID document with it.
+The corresponding public key MUST be embedded as a `verificationMethod` and referenced as a `capabilityInvocation`.
+Directly after creation, the DID document is configured as its own controller.
+
+A DID document can only be updated or deactivated by one of its controllers. The `controller` field MAY list the controllers of a document.
+If no controllers are listed, the DID subject itself is the only controller. If the DID document is not one of the listed controllers, the subject can't update or deactivate its own DID document.
+There can only be one level of controllers. A JWS signed by any other DID document than a direct controller of the DID document MUST NOT be processed by the registry.
 
 #### 3.2.1 Create (Register)
 
@@ -114,7 +120,7 @@ A Create operation for a DID Document puts the following additional requirements
 - `tid` MUST be absent
 
 The `kid` field of the `jwk` header parameter MUST be prefixed by the `id` of the DID document.
-In order for the contents to be accepted in the Verifiable Data Registry, the JWK MUST match the `authentication` key in the DID document with the same identifier. 
+In order for the contents to be accepted in the Verifiable Data Registry, the JWK MUST match the `capabilityInvocation` key in the DID document with the same identifier. 
 The `kid` field from the JWK MUST match the `id` from the verification key in the DID document.
 
 Example JWS header
@@ -145,8 +151,8 @@ Example JWS header
 The DID document has the following basic requirements:
 
 - the `id` MUST be generated according to the method specified at the beginning of §3
-- at least 1 key MUST be present in the `verificationMethod` and `authentication`
-- all key references in `authentication` MUST refer to keys listed under `verificationMethods`
+- at least 1 key MUST be present in the `verificationMethod` and be referenced in the`capabilityInvocation`
+- all key references in `capabilityInvocation` MUST refer to keys listed under `verificationMethods`
 
 Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` and the public key fingerprint according to [rfc7638](https://tools.ietf.org/html/rfc7638)
 Each key MUST be of type `JsonWebKey2020` according to §5.3.1 of the [did-core-spec](https://www.w3.org/TR/did-core/#key-types-and-formats)
@@ -176,7 +182,7 @@ Example DID document:
       "kty": "EC"
     }
   }],
-  "authentication": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
+  "capabilityInvocation": ["did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"],
   "service": []
 }
 ```
@@ -196,12 +202,11 @@ document. `updated` MUST contain the `sigt` timestamp of the last version of the
 #### 3.2.3 Update (Replace)
 The complete document gets replaced with a newer version. 
 
-Changes to DID documents can only be accepted if the update is signed with a current controller authentication key:
+Changes to DID documents can only be accepted if the update is signed with a capabilityInvocation key from one of the controllers:
 
-- a key referenced from the `authentication` section of the latest DID document version.
-- a key referenced from the `authentication` section of a controller. One of the entries in the `controller` field MAY refer to a different DID Document.
-  The `authentication` keys of the latest version of that DID Document can be used as authorized key.
-- a key referenced from the `authentication` section of the given DID document if it is a `Create` action.
+- a key referenced from the `capabilityInvocation` section of the latest DID document version.
+- a key referenced from the `capabilityInvocation` section of a controller. One of the entries in the `controller` field MAY refer to a different DID Document.
+  The `capabilityInvocation` keys of the latest version of that DID Document can be used as authorized key.
 
 The following requirements on the JWS header parameter apply:
 
@@ -214,7 +219,7 @@ Example JWS header:
   "alg": "PS256",
   "cty": "application/json+did-document",
   "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
-  "crit": ["sigt", "ver","prevs"],
+  "crit": ["sigt", "ver", "prevs"],
   "sigt": "2020-01-06T15:00:00Z",
   "ver": "1",
   "prevs": ["148b3f9b46787220b1eeb0fc483776beef0c2b3e"],
@@ -223,26 +228,24 @@ Example JWS header:
 }
 ```
 
-#### 3.2.4 Delete (Revoke)
+#### 3.2.4 Delete (Deactivate)
 
-DID Documents cannot be deleted as in being "erased", only its keys can be removed as to prevent future changes (revocation).
+DID documents cannot be deleted as in being "erased", only its keys and controllers can be removed as to prevent future changes (deactivation).
 To revoke the keys to prevent future updates;
 
-1. Remove all keys (specified by `verificationMethod`) and references (specified by e.g. `authentication`) to
+1. Remove all keys (specified by `verificationMethod`) and references (specified by e.g. `capabilityInvocation`) to
    these keys from the document. 
 2. Remove all controllers from the document.
+3. Optionally remove all services
 
 Deletion can not be undone.
 
-Example DID document:
+Example of a deactivated DID document:
 
 ```json
 {
   "@context": [ "https://www.w3.org/ns/did/v1" ],
-  "id": "did:nuts:123",
-  "controller": [],
-  "verificationMethod": [],
-  "authentication": []
+  "id": "did:nuts:123"
 }
 ```
 
@@ -254,7 +257,7 @@ Almost all security considerations are covered by the mechanisms described in [R
 - **replay** - DID documents are identified and published by their hash (SHA-256). Replaying will result in replaying the exact same content.
 - **message insertion** - [RFC004](rfc004-verifiable-transactional-graph.md) defines hashing and signing of published documents.
 - **deletion** - All DID documents are published and copied on a mesh network. Deletion of a single document will only occur locally and will not damage other nodes.
-- **modification** - DID documents can only be modified if they are published with a signature from one of the `authentication` keys.
+- **modification** - DID documents can only be modified if they are published with a signature from one of the `capabilityInvocation` keys.
 - **man-in-the-middle** - All communications is sent over two-way TLS and all documents are signed. A DID can not be hijacked since it is derived from the public key.
 - **denial of service** - This is out of scope and handled by [RFC004](rfc004-verifiable-transactional-graph.md).
 
@@ -291,8 +294,11 @@ when a SaaS provider defines endpoints to be used for all clients.
 
 For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing the URI. For a compound service the
 `serviceEndpoint` MUST contain a map containing references to absolute endpoint URI services. 
-The references MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service. 
+The references MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service.
+A compound service MAY refer to absolute endpoints from other DID Documents.
 See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards.
+
+A DID Document MAY NOT contain more than one service with the same type.
 
 The service identifier MUST be constructed from the DID followed by a `#` and an id string.
 The service identifier MUST be unique to the DID document.
@@ -333,12 +339,46 @@ The care organisation refers to it:
       "type": "NutsCompoundService",
       "serviceEndpoint": {
         "oauth": "did:nuts:123?type=oauth",
-        "fhirEndpoint": "did:nuts:123?type=fhir"
+        "fhir": "did:nuts:123?type=fhir"
       }
     }
   ]
 }
 ```
+
+### 4.1. Contact information
+
+A DID MAY contain a service of type `node-contact-info` that contains information which can be used to contact the
+operator of the node that controls the DID document. The information MUST NOT contain any personally identifiable information (PII)
+such as personal names, e-mail addresses or telephone numbers. It SHOULD contain a company/unit name, e-mail address and/or
+telephone number instead. The `serviceEndpoint` MUST be a map and MUST contain the `email` property. It addition it MAY
+contain the following properties: `tel` (telephone number), `name` (company/unit name), `web` (website URL). All properties
+MUST be formatted as string. For example:
+
+```json
+{
+    "serviceEndpoint": {
+        "name": "Some Vendor",
+        "email": "administrator@nuts.node",
+        "telephone": "00316123456",
+        "website": "https://www.nuts.node"
+    }
+}
+```
+
+The service MAY also refer to another DID's contact information service (in case of a SaaS provider). In this case
+the `serviceEndpoint` MUST be a DID URL as string which queries the referenced service:
+
+```json
+{
+  "serviceEndpoint": "did:nuts:some-other-did?type=node-contact-info"
+}
+```
+
+The reference MUST resolve to a contact information service as described above.
+
+Since the information is self-proclaimed and not authenticated or verified in any way, applications MUST treat it as
+untrusted, with great care. Failing to do so could make the operator of the node vulnerable for spoofing and other attacks. 
 
 ## 5. Conflict resolution
 
@@ -434,19 +474,19 @@ The SaaS provider registers itself with:
         "kty": "EC"
       }
     }],
-  "authentication": [
+  "capabilityInvocation": [
     "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
     "did:nuts:1#_kalsjdyurtnAa4895akljnjghl584B9lkEJHNLJKFGA"
   ],
   "service": [
     {
-      "id": "did:nuts:123#NutsOAuth",
-      "type": "NutsOAuth",
+      "id": "did:nuts:123#Dsgwngfdg3SH6TpDTa1",
+      "type": "oauth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:123#NutsFHIR",
-      "type": "NutsFHIR",
+      "id": "did:nuts:123#Dsgwngf3SH6TpDv0Ta1",
+      "type": "fhir",
       "serviceEndpoint": "https://example.com/fhir"
     }
   ]
@@ -473,7 +513,7 @@ The SaaS provider registers a care organization as:
         "kty": "EC"
       }
     }],
-  "authentication": [
+  "capabilityInvocation": [
     "did:nuts:2#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
   ],
   "controller": [
@@ -481,18 +521,18 @@ The SaaS provider registers a care organization as:
   ],
   "service": [
     {
-      "id": "did:nuts:abc#NutsCompoundService-1",
+      "id": "did:nuts:abc#Dsgwngfdg3SH6TpDv0Ta1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:1#NutsOAuth",
-        "fhirEndpoint": "did:nuts:1#NutsFHIR"
+        "oauth": "did:nuts:1?type=oauth",
+        "fhir": "did:nuts:1?type=fhir"
       }
     }
   ]
 }
 ```
 
-The care organization does have an `authentication` key, this is required for the generation of the `id`. The SaaS provider will most likely not store the key since that key is not in control of the DID document.
+The care organization does have an `capabilityInvocation` key, this is required for the generation of the `id`. The SaaS provider will most likely not store the key since that key is not in control of the DID document.
 Since this key isn't after initial creation of the document the SaaS provider SHOULD remove it from the authentication document afterwards to improve security and clarity.
 The DID document of the SaaS provider is the controller of the DID document.
 
@@ -530,7 +570,7 @@ The hospital would be able to register a single DID document:
         "kty": "EC"
       }
     }],
-  "authentication": [
+  "capabilityInvocation": [
     "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
   ],
   "assertion": [
@@ -538,31 +578,31 @@ The hospital would be able to register a single DID document:
   ],
   "service": [
     {
-      "id": "did:nuts:1#NutsOAuth",
-      "type": "NutsOAuth",
+      "id": "did:nuts:1#Dsgwngfdg3SH6TpDTa1",
+      "type": "oauth",
       "serviceEndpoint": "https://example.com/oauth"
     },
     {
-      "id": "did:nuts:1#NutsFHIR",
-      "type": "NutsFHIR",
+      "id": "did:nuts:1#Dsgwngf3SH6TpDv0Ta1",
+      "type": "fhir",
       "serviceEndpoint": "https://example.com/fhir"
     },
     {
-      "id": "did:nuts:abc#NutsCompoundService-1",
+      "id": "did:nuts:abc#Dsgwngfdg3SH6TpDv0Ta1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauthEndpoint": "did:nuts:1#NutsOAuth",
-        "fhirEndpoint": "did:nuts:1#NutsFHIR"
+        "oauth": "did:nuts:1?type=oauth",
+        "fhir": "did:nuts:1?type=fhir"
       }
     }
   ]
 }
 ```
 
-The hospital registered 2 keys, one if used for assertions and one for authentication. 
-The authentication key is kept offline, meaning that any change to the DID document will require an administrator to sign the changes manually.
-The assertion key is available online and used within the defined services.
-All services are registered directly on the DID document.
+The hospital registered 2 keys, one is used for assertions and one for authorization as the DID controller. 
+The authorization key, listed  under `capabilityInvocation` is kept offline, meaning that any change to the DID document
+will require an administrator to sign the changes manually. The assertion key is available online and used within the 
+defined services. All services are registered directly on the DID document.
 
 ### 7.3 Single person deployment
 
@@ -587,7 +627,7 @@ This example is the most simple, there's one key and it's used for all cases.
         "kty": "EC"
       }
     }],
-  "authentication": [
+  "capabilityInvocation": [
     "did:nuts:1#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
   ],
   "assertion": [
