@@ -383,46 +383,74 @@ untrusted, with great care. Failing to do so could make the operator of the node
 ## 5. Conflict resolution
 
 §3.4 of [RFC004](rfc004-verifiable-transactional-graph.md) requires each payload type to describe how conflicts are resolved when parallel transactions are encountered.
-A DID Document is not a CRDT, but its contents can be. The paragraphs below describe how each of the elements should be treated in case of a conflict.
+A DID Document is not a CRDT, but its contents are. The paragraphs below describe how each of the elements should be treated in case of a conflict.
 First we describe the mechanism of detecting and resolving conflicts. DID Documents do not refer to their previous version in any way. 
 The transactions described in [RFC004](rfc004-verifiable-transactional-graph.md) do refer to previous transactions. This system can be used to detect conflicts and to resolve them.
 For DID Documents additional transactional requirements are added:
 
-* Updates to DID Documents MUST refer in their transaction to the transaction of the previous version. They SHOULD also refer to the latest transactions as described by [RFC005]().
+* Updates to DID Documents MUST refer in their transaction to the transaction of the previous version. They SHOULD also refer to the latest transactions as described by [RFC005](rfc005-distributed-network-using-grpc.md).
 * In case of a conflict, the conflict can be resolved with an additional transaction referring to the all the conflicting transactions.
 
-The algorithm for conflict detection can be referred from these requirements:
+## 5.1 Conflict detection
+
+The algorithm for conflict detection can be summarized as follows:
 
 - A DID Document update transaction is received.
 - The current version is resolved together with the metadata (the metadata holds the originating transaction(s)).
-- If the transaction refers to all transactions present in the metadata, the update is valid and the DID Document is replaced.
-- If the transaction does not refer to all transactions, it is a conflict and the rules from the paragraphs below are applied. 
+- If the transaction refers to all transactions present in the metadata, the update is valid, and the DID Document is replaced.
+- If the transaction does not refer to all transactions, it is a conflict, and the rules from the paragraphs below are applied. 
 
-### 5.1 @context
+A transaction is modelled as:
+
+```
+hash // sha256(data)
+data // A signed JWS in compact form, here it'll represent a DID Document. It also contains the `prevs` field which refers to previous transactions.
+```
+
+The `hash` values of the transactions are stored within the metadata of a DID Document.
+
+If a new transaction `tx` is received where `exists(tx.data.did)`. 
+Let `old` be the existing DID Document and `old.meta` the metadata of the existing DID Document.
+A conflict exists when:
+
+```
+old.meta.hash - tx.data.prevs != []
+```
+
+When this condition is met, the metadata of the conflicted DID Document SHOULD refer to both conflicting transactions.
+
+### 5.2 element specific conflict resolution
+
+#### 5.2.1 @context
 
 The `@context` is determined by the protocol version and cannot differ if both transactions use the same protocol version.
 
-### 5.2 id
+#### 5.2.2 id
 
 The `id` identifies the DID Document and by definition will be equal for updates.
 
-### 5.3 controller
+#### 5.2.3 controller
 
 Controller entries are references to other DID Documents. If the list of controllers differs, the result MUST be a set of th elements from both documents combined.
 
-### 5.4 verification methods
+#### 5.2.4 verification methods
 
 Verification methods are defined by their public key and thus their contents. This makes each method immutable. When the list of methods differs between documents,
 the resulting list must be all unique elements from both documents combined.
 
-### 5.5 authentication & assertion
+#### 5.2.5 authentication & assertion
 
 The authentication and assertionMethod lists only refer to verificationMethods by their id. This makes them immutable and can therefore use the same mechanism as described by §5.4.
 
-### 5.6 services
+#### 5.2.6 services
 
 §4 describes services as immutable and non-referable by ID. This makes a list of services suitable for merging as well. 
 There's an implication though, if a service is referenced by query and multiple services match due to a merger, it's up to the user of the service to handle this.  
+
+### 5.3 Conflict removal
+
+The conflict can be removed by constructing a new update of the DID Document. 
+The transaction for this update MUST refer to all values from `old.meta.hash` and to the latest heads.
 
 ## 6. Supported Cryptographic Algorithms and Key Types
 
