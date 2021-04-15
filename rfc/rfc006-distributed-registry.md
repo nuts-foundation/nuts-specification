@@ -44,6 +44,7 @@ This RFC describes how to create, update and resolve the data structures require
   e.g. a care software vendor or SaaS provider.
 * **Endpoint**: a URI or URL exposed by a network participant which can be used by other participants to pull data.
 * **Service**: a group of endpoints implementing a service required by a Bolt.
+* **CRDT**: Conflict-free replicated data type.
 
 ## 3. Nuts DID Method
 
@@ -379,7 +380,81 @@ The reference MUST resolve to a contact information service as described above.
 Since the information is self-proclaimed and not authenticated or verified in any way, applications MUST treat it as
 untrusted, with great care. Failing to do so could make the operator of the node vulnerable for spoofing and other attacks. 
 
-## 5. Supported Cryptographic Algorithms and Key Types
+## 5. Conflict resolution
+
+§3.4 of [RFC004](rfc004-verifiable-transactional-graph.md) requires each payload type to describe how conflicts are resolved when parallel transactions are encountered.
+A DID Document is not a CRDT, but its contents are. The paragraphs below describe how each of the elements should be treated in case of a conflict.
+First we describe the mechanism of detecting and resolving conflicts. DID Documents do not refer to their previous version in any way. 
+The transactions described in [RFC004](rfc004-verifiable-transactional-graph.md) do refer to previous transactions. This system can be used to detect conflicts and to resolve them.
+For DID Documents additional transactional requirements are added:
+
+* Updates to DID Documents MUST refer in their transaction to the transaction of the previous version. They SHOULD also refer to the latest transactions as described by [RFC005](rfc005-distributed-network-using-grpc.md).
+* In case of a conflict, the conflict can be resolved with an additional transaction referring to the all the conflicting transactions.
+
+## 5.1 Conflict detection
+
+The algorithm for conflict detection can be summarized as follows:
+
+- A DID Document update transaction is received.
+- The current version is resolved together with the resolution metadata (the metadata refers to the transaction(s) that created the current version).
+- If the received transaction refers to all transactions present in the metadata, the update is valid, and the DID Document is replaced.
+- If the received transaction does not refer to all transactions, it is a conflict, and the rules from the paragraphs below are applied. 
+
+A transaction is modelled as:
+
+```
+hash // sha256(data)
+data // A signed JWS in compact form, here it'll represent a DID Document. It also contains the `prevs` field which refers to previous transactions.
+```
+
+The `hash` values of the transactions MUST be stored for each DID Document. How these are stored is up to the implementation.
+The [did-core-spec](https://www.w3.org/TR/did-core/#did-resolution-metadata) defines the concept of resolution metadata when a DID Document is resolved.
+This metadata could contain the `hash` value, but this is implementation specific. 
+
+If a new transaction `tx` is received where `exists(tx.data.did)`. 
+Let `current` be the existing DID Document and `current.meta` the resolution metadata of the existing DID Document.
+A conflict exists when:
+
+```
+current.meta.hash - tx.data.prevs != []
+```
+
+When this condition is met, the metadata of the conflicted DID Document SHOULD refer to both conflicting transactions.
+
+### 5.2 Element specific conflict resolution
+
+#### 5.2.1 @context
+
+The `@context` is determined by the protocol version and MUST be equal if both transactions use the same protocol version.
+
+#### 5.2.2 id
+
+The `id` identifies the DID Document and by definition will be equal for updates.
+
+#### 5.2.3 controller
+
+Controller entries are references to other DID Documents. If the list of controllers differs, the result MUST be a set of the elements from both documents combined.
+
+#### 5.2.4 verification methods
+
+Verification methods are defined by their public key and thus their contents. This makes each method immutable. When the list of methods differs between documents,
+the result MUST be a set of the elements from both documents combined.
+
+#### 5.2.5 authentication, assertion & capabilityInvocation
+
+The authentication, assertionMethod and capabilityInvocation lists only refer to verificationMethods by their id. This makes them immutable and can therefore use the same mechanism as described by §5.2.4.
+
+#### 5.2.6 services
+
+§4 describes services as immutable and non-referable by `id`. This makes a list of services suitable for merging as well. 
+When a service is referenced by query and multiple services match due to a merger, it's up to the user of the service to handle this.  
+
+### 5.3 Conflict removal
+
+The conflict can be removed by constructing a new update of the DID Document. 
+The transaction for this update MUST refer to all values from `current.meta.hash`, where `current` is the resolved state of the DID Document.
+
+## 6. Supported Cryptographic Algorithms and Key Types
 
 Since RSA algorithms are deemed to be insecure for medium to long term, only elliptic curve-type algorithms are supported.
 The library support for newer algorithms (e.g. `Ed25519`) and curves (`X25519`) however is limited, so for now only
@@ -389,14 +464,14 @@ according to the [Dutch Cyber Security Council](https://www.ncsc.nl/).
 It is expected however, that as library support improves more (stronger) algorithms and key types will be supported,
 which should be taken in account by implementors.
 
-## 6. Deployment scenarios
+## 7. Deployment scenarios
 
 The definition of the Nuts DID method enables a wide variety of usages.
 To better understand the usages, this chapter illustrates some example scenarios.
 
 This section is non-normative.
 
-### 6.1 SaaS provider
+### 7.1 SaaS provider
 
 This example consists of a SaaS provider that acts as enabler, controller and node operator for all of its customers. The SaaS provider has access to all the key material, while the care organizations hasn't.
 
@@ -491,7 +566,7 @@ The care organization does have an `capabilityInvocation` key, this is required 
 Since this key isn't after initial creation of the document the SaaS provider SHOULD remove it from the authentication document afterwards to improve security and clarity.
 The DID document of the SaaS provider is the controller of the DID document.
 
-### 6.2 Hospital
+### 7.2 Hospital
 
 We assume that a hospital has its own data centre and therefore, runs its own node. 
 This means that the DID document of the hospital doesn't need an additional controller. The hospital is in control of its own private keys. It does however, need to take precautions for private key loss/theft.
@@ -559,7 +634,7 @@ The authorization key, listed  under `capabilityInvocation` is kept offline, mea
 will require an administrator to sign the changes manually. The assertion key is available online and used within the 
 defined services. All services are registered directly on the DID document.
 
-### 6.3 Single person deployment
+### 7.3 Single person deployment
 
 It is possible to deploy a node as a person. You'll probably not offer any services, but you'll still be able to consume them.
 Also losing key material is less of a problem since you only have to restore it for yourself.
