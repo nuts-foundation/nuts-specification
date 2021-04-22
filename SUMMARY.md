@@ -8,6 +8,7 @@
 * [RFC002 Authentication token](rfc/rfc002-authentication-token.md)
 * [RFC003 OAuth2 Authorization](rfc/rfc003-oauth2-authorization.md)
 * [RFC004 Verifiable Transactional Graph](rfc/rfc004-verifiable-transactional-graph.md)
+* [RFC005 Distributed Network using gRPC](rfc/rfc005-distributed-network-using-grpc.md)
 * [RFC006 Distributed Registry with Decentralized Identifiers (DID)](rfc/rfc006-distributed-registry.md)
 * [RFC008 Certificate Structure](rfc/rfc008-certificate-structure.md)
 * [RFC009 Verifiable Presentations](rfc/rfc009-verifiable-presentations.md)
