@@ -62,7 +62,7 @@ base58char = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" / "
     
 ```
 
-The `idstring` is derived from the public part of a key pair that was valid at the moment of creating the corresponding DID document.
+The `idstring` is derived from the public part of a key pair that was used to sign the transaction that created the DID document.
 
 `idstring = BASE-58(SHA-256(raw-public-key-bytes))`
 
@@ -92,7 +92,7 @@ Nuts DID Documents are wrapped in a JWS (JSON Web Signature) to ensure cryptogra
 [RFC004](rfc004-verifiable-transactional-graph.md). Please refer to that RFC on how to create the JWS.
 
 The JWS MUST be signed by the private part of the key pair.
-The public key MUST also be present in the `verificationMethods` and referenced by the `capabilityInvocation` field.
+The public key MAY also be present in the `verificationMethods` and referenced by the `capabilityInvocation` field.
 
 ### 3.2 Method operations
 
@@ -103,8 +103,8 @@ submitter was authorized to create, update or deactivate the document. If the au
 
 A DID document can only be created directly by its subject. A new DID is created by generating a key pair and proving 
 control over the private key by signing the transaction containing the DID document with it.
-The corresponding public key MUST be embedded as a `verificationMethod` and referenced as a `capabilityInvocation`.
-Directly after creation, the DID document is configured as its own controller.
+The corresponding public key MAY be embedded as a `verificationMethod` and referenced as a `capabilityInvocation`.
+The DID document MAY be configured as its own controller when created. It MAY also list another DID as controller upon creation.
 
 A DID document can only be updated or deactivated by one of its controllers. The `controller` field MAY list the controllers of a document.
 If no controllers are listed, the DID subject itself is the only controller. If the DID document is not one of the listed controllers, the subject can't update or deactivate its own DID document.
@@ -151,8 +151,7 @@ Example JWS header
 The DID document has the following basic requirements:
 
 - the `id` MUST be generated according to the method specified at the beginning of §3
-- at least 1 key MUST be present in the `verificationMethod` and be referenced in the`capabilityInvocation`
-- all key references in `capabilityInvocation` MUST refer to keys listed under `verificationMethods`
+- all key references in `capabilityInvocation`, `capabilityDelegation`, `assertionMethod` and `authentication` MUST refer to keys listed under `verificationMethods`
 
 Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` and the public key fingerprint according to [rfc7638](https://tools.ietf.org/html/rfc7638)
 Each key MUST be of type `JsonWebKey2020` according to §5.3.1 of the [did-core-spec](https://www.w3.org/TR/did-core/#key-types-and-formats)
@@ -279,7 +278,10 @@ The keys of that controller can be kept offline.
 A stolen key can alter the DID document in such a way that the attacker can get full control with a new key and can exclude the previous owner from making changes.
 Appropriate measures MUST be taken to keep authentication keys secure. 
 
-When control over a DID document has been lost, the DID subject will have to have all Verifiable Credentials revoked. 
+The consequences of a theft can be mitigated by making a chain of controllers where each DID Document can only be altered by its controller.
+The root must be in control of its own DID Document, the key for this root should be stored offline (like a vault or offline machine).
+
+If no chain is present and control over a DID document has been lost, the DID subject will have to have all Verifiable Credentials revoked. 
 Without Verifiable Credentials linked to the DID document, the DID document no longer has any value.
 The DID subject will have to go through the process of reacquiring all Verifiable Credentials for a new DID document.
 
