@@ -278,10 +278,11 @@ The keys of that controller can be kept offline.
 A stolen key can alter the DID document in such a way that the attacker can get full control with a new key and can exclude the previous owner from making changes.
 Appropriate measures MUST be taken to keep authentication keys secure. 
 
-The consequences of a theft can be mitigated by making a chain of controllers where each DID Document can only be altered by its controller.
-The root must be in control of its own DID Document, the key for this root should be stored offline (like a vault or offline machine).
+The consequences of a theft can be mitigated by chaining controllers where each DID Document can only be altered by its controller.
+A root document of this chain would be the only DID Document that can be altered with a key present in the root document.
+The key for the root document should be stored offline (like a vault or offline machine).
 
-If no chain is present and control over a DID document has been lost, the DID subject will have to have all Verifiable Credentials revoked. 
+If a DID Document doesn't have any other controllers, and the control over the private key has been lost, the DID subject will have to have all Verifiable Credentials revoked. 
 Without Verifiable Credentials linked to the DID document, the DID document no longer has any value.
 The DID subject will have to go through the process of reacquiring all Verifiable Credentials for a new DID document.
 
@@ -525,7 +526,7 @@ The SaaS provider registers itself with:
 }
 ```
 
-It registers two keys: one if kept offline as backup, and the other is available in the software of the SaaS provider.
+It registers two keys: one is kept offline as backup, and the other is available in the software of the SaaS provider.
 
 The SaaS provider registers a care organization as:
 
@@ -545,9 +546,7 @@ The SaaS provider registers a care organization as:
         "kty": "EC"
       }
     }],
-  "capabilityInvocation": [
-    "did:nuts:2#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw"
-  ],
+  "capabilityInvocation": [],
   "controller": [
     "did:nuts:1"
   ],
@@ -564,8 +563,7 @@ The SaaS provider registers a care organization as:
 }
 ```
 
-The care organization does have an `capabilityInvocation` key, this is required for the generation of the `id`. The SaaS provider will most likely not store the key since that key is not in control of the DID document.
-Since this key isn't after initial creation of the document the SaaS provider SHOULD remove it from the authentication document afterwards to improve security and clarity.
+The care organization doesn't have a `capabilityInvocation` key. The SaaS provider will not store the key that generated the DID since that key is not in control of the DID document.
 The DID document of the SaaS provider is the controller of the DID document.
 
 ### 7.2 Hospital
