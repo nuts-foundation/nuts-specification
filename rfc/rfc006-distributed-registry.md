@@ -64,7 +64,9 @@ base58char = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" / "
 
 The `idstring` is derived from the public part of a key pair that was used to sign the transaction that created the DID document.
 
-`idstring = BASE-58(SHA-256(raw-public-key-bytes))`
+`idstring = BASE-58(hash)`
+
+The `hash` is calculated conforming [rfc7638](https://tools.ietf.org/html/rfc7638), using the `SHA256` hashing algorithm.
 
 For example, consider the following Ed25519 key (as JWK):
 
@@ -78,13 +80,19 @@ For example, consider the following Ed25519 key (as JWK):
 }
 ```
 
-For this key type the `x` parameter is used to derive `idstring`:
-`idstring = BASE-58(SHA-256(BASE64URL-DECODE(key.x)))`
+Will be reduced to:
+
+```
+{"crv":"Ed25519","x":"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"}
+```
+
+The `idstring` will then be:
+`idstring = BASE-58(SHA-256(json))`
 
 Outputs:
 ```json
 {
-  "id": "did:nuts:e3cacd5c2d931295a64f6c3bb3f6ea58c3a9b253b990e32c5abce43c2f94c564"
+  "id": "did:nuts:J9wL5jxsbyKY6qA4PVHKJQQ7oWXiMek45K28aFmzoDmH"
 }
 ```
 
