@@ -66,7 +66,7 @@ The `idstring` is derived from the public part of a key pair that was used to si
 
 `idstring = BASE-58(hash)`
 
-The `hash` is calculated conforming [rfc7638](https://tools.ietf.org/html/rfc7638), using the `SHA256` hashing algorithm.
+The `hash` is calculated conforming [rfc7638](https://tools.ietf.org/html/rfc7638) using the `SHA256` hashing algorithm.
 
 For example, consider the following Ed25519 key (as JWK):
 
