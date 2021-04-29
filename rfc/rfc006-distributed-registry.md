@@ -675,3 +675,11 @@ This example is the most simple, there's one key and it's used for all cases.
 }
 ```
 
+## Appendix A: Design decisions
+
+### A.1 DID generation
+
+The choice has been made to use [rfc7638](https://tools.ietf.org/html/rfc7638) over generating a hash from the public key bytes.
+rfc7638 Describes how to generate a hash for public keys. If a public key can be presented as a JWK [rfc7517](https://tools.ietf.org/html/rfc7517) then it is possible to generate a fingerprint.
+There's no alternative that describes how a hash can be computed over different key types. JWK libraries are present for a multitude of languages.
+Base58 encoding is used since a DID can not contain `-` and `_`.
