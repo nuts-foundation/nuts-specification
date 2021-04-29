@@ -72,18 +72,18 @@ For example, consider the following Ed25519 key (as JWK):
 
 ```json
 {
-  "kty" : "OKP",
-  "crv" : "Ed25519",
-  "x"   : "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
-  "use" : "sig",
-  "kid" : "FdFYFzERwC2uCBB46pZQi4GG85LujR8obt-KWRBICVQ"
+  "kty" : "EC",
+  "crv" : "P-256",
+  "x"   : "Qn6xbZtOYFoLO2qMEAczcau9uGGWwa1bT+7JmAVLtg4=",
+  "y"   : "d20dD0qlT+d1djVpAfrfsAfKOUxKwKkn1zqFSIuJ398=",
+  "kid" : "did:nuts:3gU9z3j7j4VCboc3qq3Vc5mVVGDNGjfg32xokeX8c8Zn#J9O6wvqtYOVwjc8JtZ4aodRdbPv_IKAjLkEq9uHlDdE"
 }
 ```
 
 Will be reduced to:
 
 ```
-{"crv":"Ed25519","x":"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"}
+{"crv":"P-256","x":"Qn6xbZtOYFoLO2qMEAczcau9uGGWwa1bT+7JmAVLtg4=","y":"d20dD0qlT+d1djVpAfrfsAfKOUxKwKkn1zqFSIuJ398="}
 ```
 
 The `idstring` will then be:
@@ -92,7 +92,7 @@ The `idstring` will then be:
 Outputs:
 ```json
 {
-  "id": "did:nuts:J9wL5jxsbyKY6qA4PVHKJQQ7oWXiMek45K28aFmzoDmH"
+  "id": "did:nuts:3gU9z3j7j4VCboc3qq3Vc5mVVGDNGjfg32xokeX8c8Zn"
 }
 ```
 
