@@ -83,7 +83,7 @@ For example, consider the following Ed25519 key (as JWK):
 Will be reduced to:
 
 ```
-{"crv":"P-256","x":"Qn6xbZtOYFoLO2qMEAczcau9uGGWwa1bT+7JmAVLtg4=","y":"d20dD0qlT+d1djVpAfrfsAfKOUxKwKkn1zqFSIuJ398="}
+{"crv":"P-256","kty":"EC",x":"Qn6xbZtOYFoLO2qMEAczcau9uGGWwa1bT+7JmAVLtg4=","y":"d20dD0qlT+d1djVpAfrfsAfKOUxKwKkn1zqFSIuJ398="}
 ```
 
 The `idstring` will then be:
