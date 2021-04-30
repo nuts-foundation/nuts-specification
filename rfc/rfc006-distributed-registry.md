@@ -64,27 +64,35 @@ base58char = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" / "
 
 The `idstring` is derived from the public part of a key pair that was used to sign the transaction that created the DID document.
 
-`idstring = BASE-58(SHA-256(raw-public-key-bytes))`
+`idstring = BASE-58(hash)`
+
+The `hash` is calculated conforming [rfc7638](https://tools.ietf.org/html/rfc7638) using the `SHA256` hashing algorithm.
 
 For example, consider the following Ed25519 key (as JWK):
 
 ```json
 {
-  "kty" : "OKP",
-  "crv" : "Ed25519",
-  "x"   : "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
-  "use" : "sig",
-  "kid" : "FdFYFzERwC2uCBB46pZQi4GG85LujR8obt-KWRBICVQ"
+  "kty" : "EC",
+  "crv" : "P-256",
+  "x"   : "Qn6xbZtOYFoLO2qMEAczcau9uGGWwa1bT+7JmAVLtg4=",
+  "y"   : "d20dD0qlT+d1djVpAfrfsAfKOUxKwKkn1zqFSIuJ398=",
+  "kid" : "did:nuts:3gU9z3j7j4VCboc3qq3Vc5mVVGDNGjfg32xokeX8c8Zn#J9O6wvqtYOVwjc8JtZ4aodRdbPv_IKAjLkEq9uHlDdE"
 }
 ```
 
-For this key type the `x` parameter is used to derive `idstring`:
-`idstring = BASE-58(SHA-256(BASE64URL-DECODE(key.x)))`
+Will be reduced to:
+
+```
+{"crv":"P-256","kty":"EC",x":"Qn6xbZtOYFoLO2qMEAczcau9uGGWwa1bT+7JmAVLtg4=","y":"d20dD0qlT+d1djVpAfrfsAfKOUxKwKkn1zqFSIuJ398="}
+```
+
+The `idstring` will then be:
+`idstring = BASE-58(SHA-256(json))`
 
 Outputs:
 ```json
 {
-  "id": "did:nuts:e3cacd5c2d931295a64f6c3bb3f6ea58c3a9b253b990e32c5abce43c2f94c564"
+  "id": "did:nuts:3gU9z3j7j4VCboc3qq3Vc5mVVGDNGjfg32xokeX8c8Zn"
 }
 ```
 
@@ -667,3 +675,11 @@ This example is the most simple, there's one key and it's used for all cases.
 }
 ```
 
+## Appendix A: Design decisions
+
+### A.1 DID generation
+
+The choice has been made to use [rfc7638](https://tools.ietf.org/html/rfc7638) over generating a hash from the public key bytes.
+rfc7638 Describes how to generate a hash for public keys. If a public key can be presented as a JWK [rfc7517](https://tools.ietf.org/html/rfc7517) then it is possible to generate a fingerprint.
+There's no alternative that describes how a hash can be computed over different key types. JWK libraries are present for a multitude of languages.
+Base58 encoding is used since a DID can not contain `-` and `_`.
