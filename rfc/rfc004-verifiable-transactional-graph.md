@@ -80,6 +80,8 @@ When serializing a reference to string form it MUST be hexadecimal encoded and S
 
 Transactions MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to the previous transaction. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor. A new transaction MUST be appended to the end of the DAG by referring to the last transaction of the DAG \(_leaf_\) by including its reference in the **prevs** field.
 
+All transactions referred to by `prev` MUST be present, since failing to do so would corrupt the DAG.
+
 As the name implies the DAG MUST be acyclic, transactions that introduce a cycle are invalid MUST be ignored. ANY following transaction that refers to the invalid transaction \(direct or indirect\) MUST be ignored as well.
 
 Since it takes some time for the transactions to be synced to all network peers \(eventual consistency\) there COULD be multiple transactions referring to the previous transactions in the **prevs** field, a phenomenon called _branching_. Since branches \(especially old and/or long ones\) may cause transactions to be reordered which hurts performance they MUST be merged as soon as possible. Branches are merged by specifying their leafs in the **prevs** field:
@@ -118,7 +120,7 @@ The last rule requires the payload to be immutable, so a merger is irrelevant. W
 
 Processing the DAG can be seen as planning tasks required for construction: some tasks can happen in parallel \(laying floors and installing electricity\), some tasks must happen sequentially \(foundation must be poured before building the walls\). This is the same for transactions on the DAG: transactions on a branch MUST be processed sequentially but processing order of parallel branches is unspecified, and before processing a merging transaction all **prevs** \(branches\) must have been processed.
 
-An algorithm that COULD be used is _Breadth-First-Search_. However with branches with more than 1 transaction this algorithm processes the merging transaction before all preceding transactions were processed. This CAN be solved by adding an extra check that skips the transaction when not all previous transactions have been processed. When the missing previous transaction is processed the merging transaction will be re-added to the queue for processing. The pseudo code for this algorithm looks as follows:
+An algorithm that COULD be used is _Breadth-First-Search_. However with branches with more than 1 transaction this algorithm processes the merging transaction before all preceding transactions were processed. This CAN be solved by adding an extra check that skips the transaction when not all previous transactions have been processed. When the before unprocessed previous transaction is processed the merging transaction will be re-added to the queue for processing. The pseudo code for this algorithm looks as follows:
 
 ```text
 given FIFO queue
