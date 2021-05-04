@@ -145,7 +145,7 @@ Future means will be added when available.
 
 [IRMA](https://irma.app), which stands for “I reveal my attributes” is the name of an app that implements the idemix cryptographic protocol suite. It provides strong authentication as well as privacy-preserving features such as anonymity, the ability to transact without revealing the identity of the transactor, and unlinkability, the ability of a single identity to send multiple transactions without revealing that the transactions were sent by the same identity. More information can be found on the website of the [Privacy by Design foundation](https://privacybydesign.foundation/irma-explanation/).
 
-IRMA works by having the service provider show a challenge which can be cryptographically proven by a user, using it’s mobile. There are three types of challenges IRMA supports:
+IRMA works by having the service provider show a challenge which can be cryptographically proven by a user, using their mobile. There are three types of challenges IRMA supports:
 
 * Loading attributes
 * Disclosing attributes
@@ -315,25 +315,25 @@ Certificates on the card follow a known chain: The certificates descent from the
 
 #### 7.2.2 Attributes
 
-The certificate contains the following attributes which can be used to identify the care giver and optionally its organisation. These fields are included here for clearity. More information can be found in the the UZI CPS, section 7.1.5:
+The certificate contains the following attributes which can be used to identify the care giver and optionally their organisation. These fields are included here for clarity. More information can be found in the the UZI CPS, section 7.1.5:
 
 * `oidCa` The OID that Identifies the certificates CA. Different CAs are used for different card types. 
-* `cartType` A single char which indicates what type of card it is:
+* `cartType` A single character to represent the card type:
   * Z: Health care professional \(Zorgverlener\)
   * N: Employee registred \(Medewerker op naam\)
   * M: Anonymous employee \(Medewerker niet op naam\)
   * S: Server
-* `orgID` Numer to identify the care organisation
-* `rollCode`Indicates the profession of the care professional and its specialism.
+* `orgID` Number to identify the care organisation
+* `rollCode`Indicates the profession of the care professional and their specialism.
 * `uziNr` The actual identifying number.
-* `givenName` First names of certificate holder
-* `surname` Prefix and birthname of certificate holder
+* `givenName` First names of certificate holder.
+* `surname` Prefix and birthname of certificate holder.
 
 #### 7.2.3 UZI signed JWS
 
 A convenient way of packaging data with its signature is the form of a JWS \[RFC7515\].
 
-A JWS contains of a header, payload and signature. The **header** MUST contain the the `typ` , `x5c`and `alg` fields. The type depends on the content of the payload, the `x5c` field MUST contain the certificate from the UZI card used to sign the JWS. The `alg` SHOULD contain the value `RS256` value. The **payload** can be any set of bytes.
+A JWS consists of a header, payload and signature. The **header** MUST contain the the `typ` , `x5c`and `alg` fields. The type depends on the content of the payload, the `x5c` field MUST contain the certificate from the UZI card used to sign the JWS. The `alg` SHOULD contain the value `RS256` value. The **payload** can be any set of bytes.
 
 The header SHOULD NOT contain any other fields.
 
@@ -347,16 +347,16 @@ To use the UZI card to sign an _authentication token_, the form of a JWT MUST be
 
 In order to validate an UZI signed JWS, the validator MUST perform the following checks:
 
-* The `alg` value MUST be equal to`RS256`
+* The `alg` value MUST be equal to `RS256`
 * The `signature` MUST be correct and created with the certificate from the `x5c` header field
 * The certificate MUST descend from the known CA tree
 * The certificate MUST have the `repudiation` bit set
 * The certificate MUST NOT be revoked
-* If the `typ` is a JWT and the JSON payload contains an `iat`, the certificate chain MUST be valid at the given date.
+* If the `typ` is a JWT and the JSON payload contains an `iat`, the certificate chain MUST be valid at the given date
 
 #### 7.2.6 Examples
 
-The following snippets contain exaples of an UZI signed JWT with a login contract.
+The following snippets contain examples of an UZI signed JWT with a login contract.
 
 {% code title="Header" %}
 ```json
@@ -398,5 +398,5 @@ Beside the mandatory VP fields, the following applies:
 * The `type` field MUST be set to the value `["VerifiablePresentation", "NutsUziPresentation"]`.
 * The `proof` field MUST be a singular object.
 * The `proof.type` field MUST equal `NutsUziSignedContract`.
-* The `proof.proofValue` field MUST contain the JWT in its compact serialization form as described in \[[RFC7515 section 3.1](https://tools.ietf.org/html/rfc7515#section-3.1)\]
+* The `proof.proofValue` field MUST contain the JWT in its compact serialization form as described in \[[RFC7515 section 3.1](https://tools.ietf.org/html/rfc7515#section-3.1)\].
 
