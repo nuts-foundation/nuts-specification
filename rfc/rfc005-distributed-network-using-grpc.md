@@ -34,7 +34,8 @@ This RFC describes a protocol for building such a distributed network using gRPC
 * **Peer**: remote software system connected to the local node using the protocol described here.
 * **Transaction**: self-contained unit of application data on the DAG. 
 * **DAG** (Directed Acyclic Graph): graph formed of all transactions that. It provides casual ordering for transactions and means to efficiently compare the local DAG with those of peers. 
-* **Heads**: latest transactions of the DAG with no succeeding transactions that refer to it as previous transaction,
+* **Heads**: latest transactions of the DAG with no succeeding transactions that refer to it as previous transaction.
+* **Block**: all transactions which signing time falls within a single day.
 
 ## 3. Goals
 
