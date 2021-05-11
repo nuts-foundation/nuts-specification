@@ -34,7 +34,8 @@ This RFC describes a protocol for building such a distributed network using gRPC
 * **Peer**: remote software system connected to the local node using the protocol described here.
 * **Transaction**: self-contained unit of application data on the DAG. 
 * **DAG** (Directed Acyclic Graph): graph formed of all transactions that. It provides casual ordering for transactions and means to efficiently compare the local DAG with those of peers. 
-* **Heads**: latest transactions of the DAG with no succeeding transactions that refer to it as previous transaction,
+* **Heads**: latest transactions of the DAG with no succeeding transactions that refer to it as previous transaction.
+* **Block**: all transactions which signing time falls within a single day.
 
 ## 3. Goals
 
@@ -69,7 +70,9 @@ The protocol generally operates as follows:
      tries to attack the network by injecting transactions with old timestamps. Ignore the peer's broadcast and report
      to the local node operator.
 3. After adding a peer's transaction to the DAG (making sure its cryptographic signature is valid), query the payload from the
-   peer if it's missing. 
+   peer if it's missing.
+
+The node MUST make sure to only add transactions of which all previous transactions are present.
 
 The sections below specify the details of the protocol operation and maps it to the gRPC messages. See the section
 "Protobuf Definition" for a full specification of the protobuf/gRPC contract.
@@ -115,8 +118,8 @@ It is advised to keep it relatively short because it directly influences the spe
 ### 5.3. Querying Peer's DAG
 
 When the local node decides to query a peer's DAG because it differs from its own, it uses the `TransactionListQuery` message.
-It MUST specify the block for which to retrieve the transactions using a Unix timestamp that falls within the requested
-block. The receiving peer MUST respond with the `TransactionList` message containing all transactions (without payload) from its DAG.
+It MUST specify the block for which to retrieve the transactions using a Unix timestamp that falls within the requested block.
+The receiving peer MUST respond with the `TransactionList` message containing all transactions (without payload) from its DAG.
 
 ### 5.4. Resolving Transaction Payload
 
