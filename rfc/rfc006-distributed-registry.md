@@ -211,9 +211,9 @@ The complete document gets replaced with a newer version.
 
 Changes to DID documents can only be accepted if the update is signed with a capabilityInvocation key from one of the controllers:
 
-- a key referenced from the `capabilityInvocation` section of the latest DID document version.
-- a key referenced from the `capabilityInvocation` section of a controller. One of the entries in the `controller` field MAY refer to a different DID Document.
-  The `capabilityInvocation` keys of the latest version of that DID Document can be used as authorized key.
+- if no controllers are listed under `controllers`, use a key referenced from the `capabilityInvocation` section of the DID Document itself.
+- if there are entries under `controllers`, then use a key referenced from the `capabilityInvocation` section from within the DID Document of one of those controllers.
+- a `capabilityInvocation` key MUST always come from the latest version of a DID Document.
 
 The following requirements on the JWS header parameter apply:
 
