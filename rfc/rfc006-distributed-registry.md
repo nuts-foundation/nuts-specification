@@ -159,7 +159,7 @@ Example JWS header
 The DID document has the following basic requirements:
 
 - the `id` MUST be generated according to the method specified at the beginning of §3
-- all key references in `capabilityInvocation`, `capabilityDelegation`, `assertionMethod` and `authentication` MUST refer to keys listed under `verificationMethods`
+- all key references in `capabilityInvocation`, `capabilityDelegation`, `assertionMethod`, `authentication` and `keyAgreement` MUST refer to keys listed under `verificationMethods`
 
 Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` and the public key fingerprint according to [rfc7638](https://tools.ietf.org/html/rfc7638)
 Each key MUST be of type `JsonWebKey2020` according to §5.3.1 of the [did-core-spec](https://www.w3.org/TR/did-core/#key-types-and-formats)
@@ -451,9 +451,9 @@ Controller entries are references to other DID Documents. If the list of control
 Verification methods are defined by their public key and thus their contents. This makes each method immutable. When the list of methods differs between documents,
 the result MUST be a set of the elements from both documents combined.
 
-#### 5.2.5 authentication, assertion & capabilityInvocation
+#### 5.2.5 authentication, assertion, capabilityInvocation, capabilityDelegation & keyAgreement
 
-The authentication, assertionMethod and capabilityInvocation lists only refer to verificationMethods by their id. This makes them immutable and can therefore use the same mechanism as described by §5.2.4.
+These verification relationships only refer to verificationMethods by their id. This makes them immutable and can therefore use the same mechanism as described by §5.2.4.
 
 #### 5.2.6 services
 
