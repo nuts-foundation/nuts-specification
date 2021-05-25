@@ -36,7 +36,7 @@ The terminology used is defined in https://www.w3.org/TR/did-core/#terminology a
 
 ## 3. Requirements for verifiable credentials
 
-The implementation MUST support the use of verifiable credentials in the roles of Issuer, Holder, and Verifier as described in [Verifiable Credentials Use Cases](https://www.w3.org/TR/vc-use-cases/) and [W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/). In the terms of decentralized Identifiers, the implementation acts as a software agent of the person or organisation accountable for the role of Issuer, Holder, and Verifier.
+The implementation MUST support the use of verifiable credentials in the roles of Issuer, Holder, and Verifier as described in [Verifiable Credentials Use Cases](https://www.w3.org/TR/vc-use-cases/) and [W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/). In the terms of decentralized Identifiers, the implementation acts as a software agent of the person or organization accountable for the role of Issuer, Holder, and Verifier.
 
 The implementation MUST support the DID web method. See https://w3c-ccg.github.io/did-method-web/. To be able to support the web method, the implementation MUST support the use core specification of decentralized identifiers as described in https://www.w3.org/TR/did-core/.
 

@@ -40,7 +40,7 @@ todo
 
 ### 3.1. User
 
-The user will be a care professional or patient. The user has a need to process data across care providers. It is the party that needs to be authenticated and authorized. It either is the subject and therefore automatically has certain rights to process data or it is a care professional which also has a relation with a care organisation.
+The user will be a care professional or patient. The user has a need to process data across care providers. It is the party that needs to be authenticated and authorized. It either is the subject and therefore automatically has certain rights to process data or it is a care professional which also has a relation with a care organization.
 
 ### 3.2. Issuer
 
@@ -66,7 +66,7 @@ The login contract must also be machine readable. This means that the variation 
 
 ### 4.3. Single party verification
 
-A verifier must be able to verify the token without contacting external services. Contacting an external service would give that service too much information about care professionals, care organisations and service providers.
+A verifier must be able to verify the token without contacting external services. Contacting an external service would give that service too much information about care professionals, care organizations and service providers.
 
 ### 4.4. User identification
 
@@ -80,13 +80,13 @@ The token holds a digital signature binding the identity attributes to the login
 
 The token is only valid during a limited time. This period of validity must be visible in the login contact so the user is aware of the validity period.
 
-### 4.7. Organisation limited
+### 4.7. Organization limited
 
-A token is limited to a single care organisation. The name of the care organisation must therefore be displayed in the login contract.
+A token is limited to a single care organization. The name of the care organization must therefore be displayed in the login contract.
 
 ### 4.8. Non-transferable
 
-A token can only be used by service providers that provide service for the same care organisation stated in the login contract.
+A token can only be used by service providers that provide service for the same care organization stated in the login contract.
 
 ### 4.9. Versionable
 
@@ -98,7 +98,7 @@ A login contract should be able to support multiple languages.
 
 ## 5. Login contract
 
-A mandate usually consists of two parties: the party giving the mandate and the party receiving the mandate. It’s limited in time and limited in scope. The scope for the login contract consists of the care organisation the user works for and a custom scope which could limit the use of the contract for data retrieval, single-sign-on or something else.
+A mandate usually consists of two parties: the party giving the mandate and the party receiving the mandate. It’s limited in time and limited in scope. The scope for the login contract consists of the care organization the user works for and a custom scope which could limit the use of the contract for data retrieval, single-sign-on or something else.
 
 The following template is to be used to create a token for a care professional:
 
@@ -127,7 +127,7 @@ EN:PractitionerLogin:v2 Undersigned gives permission to Nuts foundation to make 
 
 ### 5.1. Constraints
 
-The time layout used is constructed as: `Monday, 2 January 2006 15:04:05` The name of the service provider must match the name that has been registered for this service provider. The name of the care organisation must match the name within the proof that has been published by the service provider. The signature must be made by cryptographic means which can be connected to the user.
+The time layout used is constructed as: `Monday, 2 January 2006 15:04:05` The name of the service provider must match the name that has been registered for this service provider. The name of the care organization must match the name within the proof that has been published by the service provider. The signature must be made by cryptographic means which can be connected to the user.
 
 ## 6. Verifiable Presentation
 
@@ -301,7 +301,7 @@ Beside the mandatory VP fields, the following applies:
 
 ### 7.2 UZI
 
-UZI is a Dutch abbriviation for "Unieke Zorgverlener Identificatienummer" and translates to Unique Care-professional Identification number. The number is issued by the CIBG authority, an organisation implementing Dutch government policies related to care professions.
+UZI is a Dutch abbriviation for "Unieke Zorgverlener Identificatienummer" and translates to Unique Care-professional Identification number. The number is issued by the CIBG authority, an organization implementing Dutch government policies related to care professions.
 
 The number is coupled to the BIG register, a Dutch authority which registers the competence of a care professional, based on education and training.
 
@@ -315,7 +315,7 @@ Certificates on the card follow a known chain: The certificates descent from the
 
 #### 7.2.2 Attributes
 
-The certificate contains the following attributes which can be used to identify the care giver and optionally their organisation. These fields are included here for clarity. More information can be found in the the UZI CPS, section 7.1.5:
+The certificate contains the following attributes which can be used to identify the care giver and optionally their organization. These fields are included here for clarity. More information can be found in the the UZI CPS, section 7.1.5:
 
 * `oidCa` The OID that Identifies the certificates CA. Different CAs are used for different card types. 
 * `cartType` A single character to represent the card type:
@@ -323,7 +323,7 @@ The certificate contains the following attributes which can be used to identify 
   * N: Employee registred \(Medewerker op naam\)
   * M: Anonymous employee \(Medewerker niet op naam\)
   * S: Server
-* `orgID` Number to identify the care organisation
+* `orgID` Number to identify the care organization
 * `rollCode`Indicates the profession of the care professional and their specialism.
 * `uziNr` The actual identifying number.
 * `givenName` First names of certificate holder.

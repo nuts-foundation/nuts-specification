@@ -339,7 +339,7 @@ The SaaS provider defines the actual URL:
 }
 ```
 
-The care organisation refers to it:
+The care organization refers to it:
 ```json
 {
   "@context": [ "https://www.w3.org/ns/did/v1" ],
