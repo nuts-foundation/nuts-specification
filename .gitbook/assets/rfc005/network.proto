@@ -116,7 +116,7 @@ message DiagnosticsResponse {
     // peers contains the peer IDs of the node's peers.
     repeated string peers = 3;
     // numberOfTransactions contains the total number of transactions on the node's DAG.
-    uint32 numberOfTranactions = 4;
+    uint32 numberOfTransactions = 4;
     // version contains an indication of the software version of the node. It's recommended to use a (Git) commit ID that uniquely resolves to a code revision, alternatively a semantic version could be used (e.g. 1.2.5).
     string version = 10;
     // vendor contains an indication of the vendor of the software of the node. For open source implementations it's recommended to specify URL to the public, open source repository.
