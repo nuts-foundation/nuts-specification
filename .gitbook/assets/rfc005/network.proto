@@ -38,6 +38,8 @@ message NetworkMessage {
         TransactionList TransactionList = 102;
         TransactionPayloadQuery transactionPayloadQuery = 103;
         TransactionPayload transactionPayload = 104;
+        DiagnosticsRequest diagnosticsRequest = 105;
+        DiagnosticsResponse diagnosticsResponse = 106;
     }
 }
 
@@ -99,4 +101,20 @@ message TransactionPayload {
     bytes payloadHash = 1;
     // data contains the actual payload.
     bytes data = 10;
+}
+
+// DiagnosticsRequest is the request message for querying a peer's diagnostics.
+message DiagnosticsRequest {
+}
+
+// DiagnosticsResponse is the response message to a diagnostics request. All fields are optional.
+message DiagnosticsResponse {
+    // uptime the uptime (time since the node started) in seconds.
+    uint32 uptime = 1;
+    // peerID contains the ID of the node.
+    string peerID = 2;
+    // peers contains the peer IDs of the node's peers.
+    repeated string peers = 3;
+    // numberOfTransactions contains the total number of transactions on the node's DAG.
+    uint32 numberOfTransactions = 4;
 }
