@@ -253,7 +253,7 @@ The contents of the schemes can be viewed on Github: [pbdf](https://github.com/p
 ### 4.4 Revocation
 
 Although IRMA supports revocation for credentials, the revocation check is only applied during issuance.
-An IRMA credential revoked today will not invalidate any signatures done in the past.
+An IRMA credential revoked today will not invalidate any signatures created in the past.
 This means that a Verifiable Credential with an IRMA proof MUST adhere to the generic revocation definition stated in §4.5 of [RFC011 - Verifiable Credentials](rfc011-verifiable-credentials.md#4-5-revocation).
 It's the responsibility of the IRMA credential holder to revoke verifiable credentials that could have been compromised. 
 The IRMA credential holder can do this with a renewed, not revoked IRMA credential.
