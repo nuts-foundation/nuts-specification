@@ -196,7 +196,7 @@ HTTP/1.1 200 OK
 
 ### 5.1. Registration
 
-The authorization server endpoint needs to be registered for each service that requires authentication in the care organisation DID document.
+The authorization server endpoint needs to be registered for each service that requires authentication in the care organization DID document.
 
 ### 5.2. Validation
 
@@ -236,7 +236,7 @@ The **iss** fields contains the identifier of the actor, the **sub** field conta
 
 **5.2.1.8. Subject validation**
 
-The **sub** field in the JWT MUST be a known organisation. It MUST have been registered by the node operator of the authorization server and it MUST be valid at the time indicated by the **iat** field.
+The **sub** field in the JWT MUST be a known organization. It MUST have been registered by the node operator of the authorization server and it MUST be valid at the time indicated by the **iat** field.
 
 #### 5.2.2. Error responses
 
@@ -288,7 +288,7 @@ The resource server MUST validate the validity of the access token. It MAY conta
 
 1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
 2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify if a known legal base is present for the combination of custodian, actor, subject and resource.
-3. **The actor and custodian are the same.** It may be the case that a care organisation is using multiple service providers. In that case each service provider acts on behalf of the care organisation. Therefore, it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organisation.
+3. **The actor and custodian are the same.** It may be the case that a care organization is using multiple service providers. In that case each service provider acts on behalf of the care organization. Therefore, it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organization.
 
 ### 6.3. Error codes
 

@@ -33,7 +33,7 @@ This document describes the general principles of all related Nuts architecture.
 * **Digital signature**: A cryptographic signature e.g. specified in [RFC5280](https://tools.ietf.org/html/rfc5280) or [RFC7515](https://tools.ietf.org/html/rfc7515). Specifically not the digital version of the wet signature.
 * **Legal Base**: Grounds for medical data exchange given by the subject conforming to national and international legislation. By default no medical data may be exchanged.
 * **Node**: A piece of software implementing the Nuts specification.
-* **Service provider**: An organisation providing software services which support care organisations in their daily work.
+* **Service provider**: An organization providing software services which support care organizations in their daily work.
 * **Subject**: The subject of the medical data, usually the patient, client or civilian.
 
 ## 3. Manifest
@@ -84,11 +84,11 @@ Medical data is regarded as one of the most sensitive types of data. It therefor
 
 #### 4.1.2. Authorization
 
-When accessing sensitive resources, an authenticated identity also must be authorized for the requested resources \[M6, M7\]. It depends on the particular use-case which attribute is required to link the identity to an authorized resource. The authorization might be given to the identity directly but in most cases the authorization lies with the organisation the user \(holding the identity\) is representing. In the case of an individual authorization, the identity must have an attribute that uniquely identifies the user. In the case where the authorization lies with the organisation, a link between the identity and the organisation must be given. This link must be represented by a chain of digital signatures where each certificate \(or public key\) used in the chain can be trusted \[M8\]. See also the chapter on Trust. When the authorization lies with the organisation, the organisation requires an attribute that identifies that organisation.
+When accessing sensitive resources, an authenticated identity also must be authorized for the requested resources \[M6, M7\]. It depends on the particular use-case which attribute is required to link the identity to an authorized resource. The authorization might be given to the identity directly but in most cases the authorization lies with the organization the user \(holding the identity\) is representing. In the case of an individual authorization, the identity must have an attribute that uniquely identifies the user. In the case where the authorization lies with the organization, a link between the identity and the organization must be given. This link must be represented by a chain of digital signatures where each certificate \(or public key\) used in the chain can be trusted \[M8\]. See also the chapter on Trust. When the authorization lies with the organization, the organization requires an attribute that identifies that organization.
 
 #### 4.1.3. Auditing
 
-Auditing is required to give the subject insight in who has seen their information \[M2\]. To assist the subject this must consist of human readable information about the user and the organisation that user is working for. Therefore it’s required for an identity to at least have human readable attributes, eg: name and initials. For the organisation identity this makes the organisation name required.
+Auditing is required to give the subject insight in who has seen their information \[M2\]. To assist the subject this must consist of human readable information about the user and the organization that user is working for. Therefore it’s required for an identity to at least have human readable attributes, eg: name and initials. For the organization identity this makes the organization name required.
 
 ### 4.2. Privacy & Legislation
 
@@ -100,9 +100,9 @@ Therefore: keep data at the source and retrieve on demand. Do not copy without r
 
 #### 4.4.2. Data exchange parties
 
-The GDPR speaks of data processors which play a role in digital information exchange. In the case of Nuts these are the service providers. Service providers have a direct relation with the care organisation it’s providing services for. Medical \(and other personal\) data must be exchanged directly between the service providers of care organisations. No third party may play a role in this data exchange since it would be able to deduce information even when all data is encrypted. This also means that there’s no room for a central party that would be involved in data exchange or the exchange/management of any document establishing the legal base for a data exchange \[M6\].
+The GDPR speaks of data processors which play a role in digital information exchange. In the case of Nuts these are the service providers. Service providers have a direct relation with the care organization it’s providing services for. Medical \(and other personal\) data must be exchanged directly between the service providers of care organizations. No third party may play a role in this data exchange since it would be able to deduce information even when all data is encrypted. This also means that there’s no room for a central party that would be involved in data exchange or the exchange/management of any document establishing the legal base for a data exchange \[M6\].
 
-The result of reducing the involved parties is that the network must be a distributed network \[M4\]. Required information for care organisations, their service providers and available service descriptions must be distributed amongst all network participants. Since this registry data is security related, it must be signed with a digital signature.
+The result of reducing the involved parties is that the network must be a distributed network \[M4\]. Required information for care organizations, their service providers and available service descriptions must be distributed amongst all network participants. Since this registry data is security related, it must be signed with a digital signature.
 
 #### 4.2.3. Legal base for data exchange
 
@@ -116,37 +116,37 @@ In a perfect world, the legal base should also have a digital signature that can
 
 Trust is, in the case of Nuts, the collective of authorizations, digital signatures and curated list of trusted 3rd parties. This relates closely to the general security of the network as a whole. An exchange of data between a custodian and actor is only allowed if all involved parties can be trusted \[M7\]. An action in the virtual domain must be linkable to real world parties \[M6\].
 
-The Nuts trust model is multi-layered. All layers combined provide the level of trust that is required for exchanging medical data. Each layer has its own set of allowed digital signatures. The separation makes sure an organisation can't act as a care professional and that a service provider can't act as a care organisation. The only exceptions are a one-man practise where the care professional is also the owner of the organisation or when a care organisation is hosting its own services \(on-premise\).
+The Nuts trust model is multi-layered. All layers combined provide the level of trust that is required for exchanging medical data. Each layer has its own set of allowed digital signatures. The separation makes sure an organization can't act as a care professional and that a service provider can't act as a care organization. The only exceptions are a one-man practise where the care professional is also the owner of the organization or when a care organization is hosting its own services \(on-premise\).
 
 | layer | responsible party | establishes trust in |
 | :--- | :--- | :--- |
-| user | Care professional | a user session exists. This session is linked to the care organisation. [\[RFC002\]](rfc002-authentication-token.md). |
-| data | Care organisation | registry data. The connection between care organisations, services and endpoints. \[RFC006\]. |
+| user | Care professional | a user session exists. This session is linked to the care organization. [\[RFC002\]](rfc002-authentication-token.md). |
+| data | Care organization | registry data. The connection between care organizations, services and endpoints. \[RFC006\]. |
 | network | Service provider | members of the private network. \[RFC005\]. |
 
-A fundamental choice has been made to place trust in a curated list of 3rd parties \[M4\]. Trust between individual service providers or care organisations does not play a role \[M7\]. Technically this is enforced with the use of digital signatures \[M8\]. Attributes that are exchanged between parties do not hold any value unless it can be verified by a digital signature. Besides the improved security, it also levels the playing field for new parties and eliminates the value of inter-party political relationships \[M1, M3\]. Placing trust in certain 3rd parties does create a dependency on those parties and their security and trust model.
+A fundamental choice has been made to place trust in a curated list of 3rd parties \[M4\]. Trust between individual service providers or care organizations does not play a role \[M7\]. Technically this is enforced with the use of digital signatures \[M8\]. Attributes that are exchanged between parties do not hold any value unless it can be verified by a digital signature. Besides the improved security, it also levels the playing field for new parties and eliminates the value of inter-party political relationships \[M1, M3\]. Placing trust in certain 3rd parties does create a dependency on those parties and their security and trust model.
 
 The following sections describe the different relations and how this eventually relates to a root-of-trust \(or actually multiple roots\).
 
 #### 4.3.1. Request & Service Provider
 
-Service providers are the gatekeepers for care organisations for the virtual domain. They provide access to the virtual domain by means of software. So in order to authorize a specific technical request, the requesting service provider must be identified and authenticated first. This must be done via digital signature where the secure key must be verifiable by a trusted 3rd party.
+Service providers are the gatekeepers for care organizations for the virtual domain. They provide access to the virtual domain by means of software. So in order to authorize a specific technical request, the requesting service provider must be identified and authenticated first. This must be done via digital signature where the secure key must be verifiable by a trusted 3rd party.
 
-#### 4.3.2. Request & Care organisation
+#### 4.3.2. Request & Care organization
 
-In order to do authorization, a request for data must contain information about the custodian, actor and subject. The identity of the requesting party must be verifiable by means of a digital signature. The requesting party usually is the actor and may consist of a combination of organisation and/or user identity. The relationship between the requesting service provider and the requesting party must also be verifiable.
+In order to do authorization, a request for data must contain information about the custodian, actor and subject. The identity of the requesting party must be verifiable by means of a digital signature. The requesting party usually is the actor and may consist of a combination of organization and/or user identity. The relationship between the requesting service provider and the requesting party must also be verifiable.
 
-#### 4.3.3. Service provider & Care Organisation
+#### 4.3.3. Service provider & Care Organization
 
-When a custodian and actor interact, they do this through their service providers, therefore the relationship between care organisation and service provider must be verifiable by others \[M4, M7\]. A relationship can only be verified if both sides provide proof of the relationship. As with other proofs in Nuts, this requires digital signatures of specific attributes representing the relationship \[M8\]. The secure key used for the signatures must be verified by a trusted 3rd party. The proof of the relationship must be distributed along the network since it is required before any interaction can take place \[M4\]. The most important identifiable part of a care organisation is it’s commonly known name. A proof for this name must be available from a trusted 3rd party if it’s to be distributed amongst all network participants.
+When a custodian and actor interact, they do this through their service providers, therefore the relationship between care organization and service provider must be verifiable by others \[M4, M7\]. A relationship can only be verified if both sides provide proof of the relationship. As with other proofs in Nuts, this requires digital signatures of specific attributes representing the relationship \[M8\]. The secure key used for the signatures must be verified by a trusted 3rd party. The proof of the relationship must be distributed along the network since it is required before any interaction can take place \[M4\]. The most important identifiable part of a care organization is it’s commonly known name. A proof for this name must be available from a trusted 3rd party if it’s to be distributed amongst all network participants.
 
-#### 4.3.4. Care organisation & User identity
+#### 4.3.4. Care organization & User identity
 
-In the case a user acts as the actor and the authorization is given to the care organisation which the actor represents, a digital signature proving the relation between user and organisation must be present in the request \[M7\]. This proof can’t be distributed beforehand since it’ll contain information about the user identity which also has its own privacy rights. This digital signature also prevents service providers from acting as a representative of the care organisation.
+In the case a user acts as the actor and the authorization is given to the care organization which the actor represents, a digital signature proving the relation between user and organization must be present in the request \[M7\]. This proof can’t be distributed beforehand since it’ll contain information about the user identity which also has its own privacy rights. This digital signature also prevents service providers from acting as a representative of the care organization.
 
 #### 4.3.5. User identity & User
 
-In the end it’s the user that is viewing sensitive data. So the final proof of relationship is that the user, currently behind the controls, proves it has the user identity \[M6\]. This must be done by signing a contract stating the extent of the required privileges for the current session. This is also known as the authentication process. The signature must validate the required user attributes and the secure key used for the signature must be verified by a trusted 3rd party. This signature must also validate that the user is working in the context of a care organisation.
+In the end it’s the user that is viewing sensitive data. So the final proof of relationship is that the user, currently behind the controls, proves it has the user identity \[M6\]. This must be done by signing a contract stating the extent of the required privileges for the current session. This is also known as the authentication process. The signature must validate the required user attributes and the secure key used for the signature must be verified by a trusted 3rd party. This signature must also validate that the user is working in the context of a care organization.
 
 ### 4.4. Configuration & automation
 
