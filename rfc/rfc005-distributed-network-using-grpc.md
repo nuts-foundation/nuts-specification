@@ -127,6 +127,13 @@ When the local node is missing a transaction's payload, it SHOULD query the peer
 for the payload using the `TransactionPayloadQuery` message. The peer MUST respond with the `TransactionPayload` message,
 providing the actual payload in the `data` field. If the peer doesn't have the payload the `data` field MUST be left empty.
 
+### 5.5. Diagnostics
+
+To provide insight into the state of the network, and the DAG for informational purposes and to aid analysis of anomalies,
+the node can request a diagnostic information from its peers using the `DiagnosticsRequest` message.
+A peer MUST respond with the `DiagnosticResponse` message, but it MAY choose not to include some, or any of the specified fields.
+For instance, the peer could run a proprietary node implementation about which it can't or is not allowed to share diagnostic information about.
+
 ## 6. Connections
 
 The protocol uses [gRPC](https://grpc.io/) over [HTTP/2](https://tools.ietf.org/html/rfc7540). Since the protocol uses a
