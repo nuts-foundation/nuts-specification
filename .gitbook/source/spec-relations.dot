@@ -15,10 +15,14 @@ digraph D {
         RFC006 [label = "RFC006\nDistributed Registry using DIDs",href = "rfc006-distributed-registry"];
         RFC008 [label = "RFC008\nCertificate Structure",href = "rfc008-certificate-structure"];
         RFC009 [label = "RFC009\nVerifiable Presentations",href = "rfc009-verifiable-presentations"];
+        RFC011 [label = "RFC011\nVerifiable Credentials",href = "rfc011-verifiable-credential"];
+        RFC012 [label = "RFC012\nNuts Organization Credential",href = "rfc012-nuts-organization-credential"];
+        RFC013 [label = "RFC013\nVerifiable Credential IRMA Proof",href = "rfc013-vc-irma-proof"];
     }
 
     // External RFCs
     subgraph cluster_external {
+        RFC7779_EXT [label = "RFC7779\nJSON Web Signature (JWS) Unencoded Payload Option", href = "https://datatracker.ietf.org/doc/html/rfc7797", fillcolor = azure2, style = filled]
         RFC7662_EXT [label = "RFC7662\nOAuth 2.0 Token Introspection", href = "https://tools.ietf.org/html/rfc7662", fillcolor = azure2, style = filled]
         RFC7523_EXT [label = "RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants", href = "https://tools.ietf.org/html/rfc7523", fillcolor = azure2, style = filled,]
         RFC7515_EXT [label = "RFC7515\nJSON Web Signature (JWS)", href = "https://tools.ietf.org/html/rfc7515", fillcolor = azure2, style = filled]
@@ -40,4 +44,14 @@ digraph D {
 
     RFC006 -> RFC004
     RFC006 -> RFC008
+
+    RFC011 -> RFC003
+    RFC011 -> RFC004
+    RFC011 -> RFC7779_EXT
+
+    RFC012 -> RFC003
+    RFC012 -> RFC006
+    RFC012 -> RFC011
+
+    RFC013 -> RFC011
 }
