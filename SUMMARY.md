@@ -14,6 +14,7 @@
 * [RFC009 Verifiable Presentations](rfc/rfc009-verifiable-presentations.md)
 * [RFC011 Verifiable Credential](rfc/rfc011-verifiable-credential.md)
 * [RFC012 Nuts Organization Credential](rfc/rfc012-nuts-organization-credential.md)
+* [RFC013 Verifiable Credential IRMA Proof Type](rfc/rfc013-vc-irma-proof.md)
 
 ## templates
 
