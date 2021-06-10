@@ -130,9 +130,9 @@ providing the actual payload in the `data` field. If the peer doesn't have the p
 ### 5.5. Diagnostics
 
 To provide insight into the state of the network, and the DAG for informational purposes and to aid analysis of anomalies,
-the node can request a diagnostic information from its peers using the `DiagnosticsRequest` message.
-A peer MUST respond with the `DiagnosticResponse` message, but it MAY choose not to include some, or any of the specified fields.
-For instance, the peer could run a proprietary node implementation about which it can't or is not allowed to share diagnostic information about.
+nodes SHOULD broadcast diagnostic information to its peers using the `Diagnostics` message. If broadcasting, the node MUST do this at least every minute,
+but it MUST NOT broadcast more often than every 5 seconds (to avoid producing too much chatter).
+A node MAY choose not to include some of the specified fields.
 
 ## 6. Connections
 
@@ -172,9 +172,7 @@ and which Certificate Authorities should be accepted.
 
 ## 7. Protobuf Definition
 
-```proto
 {% include "../.gitbook/assets/rfc005/network.proto" %}
-```
 
 ## 8. Security Considerations
 

@@ -38,8 +38,7 @@ message NetworkMessage {
         TransactionList TransactionList = 102;
         TransactionPayloadQuery transactionPayloadQuery = 103;
         TransactionPayload transactionPayload = 104;
-        DiagnosticsRequest diagnosticsRequest = 105;
-        DiagnosticsResponse diagnosticsResponse = 106;
+        Diagnostics diagnosticsBroadcast = 105;
     }
 }
 
@@ -103,23 +102,18 @@ message TransactionPayload {
     bytes data = 10;
 }
 
-// DiagnosticsRequest is the request message for querying a peer's diagnostics.
-message DiagnosticsRequest {
-}
-
-// DiagnosticsResponse is the response message to a diagnostics request. All fields are optional.
-message DiagnosticsResponse {
-    // uptime the uptime (time since the node started) in seconds.
+// Diagnostics is a broadcast message for information peers of the local node's state. All fields are optional.
+message Diagnostics {
+    // uptime contains the uptime (time since the node started) in seconds.
     uint32 uptime = 1;
-    // peerID contains the ID of the node.
-    string peerID = 2;
     // peers contains the peer IDs of the node's peers.
     repeated string peers = 3;
     // numberOfTransactions contains the total number of transactions on the node's DAG.
     uint32 numberOfTransactions = 4;
-    // version contains an indication of the software version of the node. It's recommended to use a (Git) commit ID that uniquely resolves to a code revision, alternatively a semantic version could be used (e.g. 1.2.5).
-    string version = 10;
-    // vendor contains an indication of the vendor of the software of the node. For open source implementations it's recommended to specify URL to the public, open source repository.
-    // Proprietary implementations could specify the product's or vendor's name.
-    string vendor = 11;
+    // softwareVersion contains an indication of the software version of the node. It's recommended to use a (Git) commit ID that uniquely resolves to a code revision, alternatively a semantic version could be used (e.g. 1.2.5).
+    string softwareVersion = 10;
+    // softwareID contains an identification of the particular Nuts implementation of the node.
+    // For open source implementations it's recommended to specify URL to the public, open source repository.
+    // Proprietary implementations could specify the product or vendor's name.
+    string softwareID = 11;
 }
