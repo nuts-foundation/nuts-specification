@@ -27,6 +27,7 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 When care organizations want to exchange public information (e.g. registry) using a decentralized network,
 they need a protocol that builds a distributed network allowing them to freely query and publish that information.
 This RFC describes a protocol for building such a distributed network using gRPC to achieve that goal.
+The Google Protobuf definition which contains the actual messages and detailed documentation on their fields can be found in §7 Protobuf Definition.
 
 ## 2. Terminology
 

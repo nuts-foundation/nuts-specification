@@ -102,10 +102,12 @@ message TransactionPayload {
     bytes data = 10;
 }
 
-// Diagnostics is a broadcast message for information peers of the local node's state. All fields are optional.
+// Diagnostics is a message to inform peers of the local node's state. All fields are optional.
 message Diagnostics {
     // uptime contains the uptime (time since the node started) in seconds.
     uint32 uptime = 1;
+    // peerID contains the ID of the node.
+    string peerID = 2;
     // peers contains the peer IDs of the node's peers.
     repeated string peers = 3;
     // numberOfTransactions contains the total number of transactions on the node's DAG.
