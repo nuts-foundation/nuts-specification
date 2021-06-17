@@ -21,7 +21,7 @@ Zorginzage
   },
   "evidence": {
     "id": "pdf/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
-    "type": ["Document"],
+    "type": ["application/pdf"],
     "endpoint": "did:nuts:custodian?type=fhir-document"
   },
   "proof": {...}
