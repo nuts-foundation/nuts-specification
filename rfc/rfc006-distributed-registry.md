@@ -237,13 +237,8 @@ Example JWS header:
 
 #### 3.2.4 Delete (Deactivate)
 
-DID documents cannot be deleted as in being "erased", only its keys and controllers can be removed as to prevent future changes (deactivation).
-To revoke the keys to prevent future updates;
-
-1. Remove all keys (specified by `verificationMethod`) and references (specified by e.g. `capabilityInvocation`) to
-   these keys from the document. 
-2. Remove all controllers from the document.
-3. Optionally remove all services
+DID documents cannot be deleted as in being "erased", only its contents can be removed as to prevent future changes (deactivation).
+To deactivate a DID Document, remove all contents except the `id` and `context`.
 
 Deletion can not be undone.
 
