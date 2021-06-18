@@ -140,7 +140,9 @@ A node MAY choose not to include some of the specified fields.
 The protocol uses [gRPC](https://grpc.io/) over [HTTP/2](https://tools.ietf.org/html/rfc7540). Since the protocol uses a
 bi-directional stream over which peers can send and receive messages, there needs to be only a single connection between
 two peers. For instance, if node _A_ connects to node _B_, _B_ can send messages back to _A_ without having to connect
-back to node _A_. Nodes MUST avoid maintaining duplicate connections to their peers to minimize traffic and system load. 
+back to node _A_. Nodes MUST avoid maintaining duplicate connections to their peers to minimize traffic and system load.
+If a node accepts a connection from a peer which is already connected (identified by _peer ID_), the node MUST disconnect the first connection,
+because the peer might be reconnecting due to a network failure.
 
 ### 6.1. Peer Identification
 
