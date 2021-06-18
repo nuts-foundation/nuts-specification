@@ -1,6 +1,9 @@
 # RFC009 Verifiable presentations
 
-
+| :memo: NOTE                                                                              |
+|:-----------------------------------------------------------------------------------------|
+| This RFC is currently under review to determine its place within the Nuts specification. | 
+| The content is not be implemented yet!                                                   |
 
 ## Abstract
 

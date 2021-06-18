@@ -14,7 +14,6 @@ digraph D {
         RFC005 [label = "RFC005\nDistributed Document Network using gRPC",href = "rfc005-distributed-document-network-grpc"];
         RFC006 [label = "RFC006\nDistributed Registry using DIDs",href = "rfc006-distributed-registry"];
         RFC008 [label = "RFC008\nCertificate Structure",href = "rfc008-certificate-structure"];
-        RFC009 [label = "RFC009\nVerifiable Presentations",href = "rfc009-verifiable-presentations"];
         RFC011 [label = "RFC011\nVerifiable Credentials",href = "rfc011-verifiable-credential"];
         RFC012 [label = "RFC012\nNuts Organization Credential",href = "rfc012-nuts-organization-credential"];
         RFC013 [label = "RFC013\nVerifiable Credential IRMA Proof",href = "rfc013-vc-irma-proof"];
