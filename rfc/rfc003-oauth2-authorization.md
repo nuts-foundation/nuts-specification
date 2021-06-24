@@ -97,8 +97,8 @@ Example of the actor's DID document:
 
 #### 4.1.2 Server registration
 
-Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refers to another service in a DID Document with the type: `oauth`.
-In order for the client to resolve the authorization server endpoint it MUST look up the `oauth` service endpoint of the service.
+Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refers to another service in a DID Document.
+In order for the client to resolve the authorization server endpoint it MUST look up the `oauth` service endpoint of the compound service.
 A compound service may refer to endpoint services from other DID Documents.
 
 ### 4.2. Constructing the JWT
@@ -113,7 +113,7 @@ A compound service may refer to endpoint services from other DID Documents.
 
 * **iss**: The issuer MUST contain the DID of the actor, thus the care organization making the request.
 * **sub**: The subject MUST contain the DID of the custodian. The custodian's DID could be used to find the relevant consent \(together with the actor and subject\).
-* **sid**: The Nuts subject id, patient identifier in the form of an oid encoded BSN. Optional.
+* **vcs**: A list of base64 encoded [Nuts Authorization Credentials](rfc014-authorization-credential.md). Optional
 * **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the `aud` MUST be an `oauth` service identifier. That service MUST be an absolute endpoint.
 * **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
@@ -135,7 +135,7 @@ All other claims may be ignored.
 ```yaml
 {
   "iss": "did:nuts:123",
-  "sub": "did:nuts:456",
+  "vcs": [...Base64 encoded token credential...],
   "sid": "urn:oid:2.16.840.1.113883.2.4.6.3:9999990",
   "aud": "did:nuts:456#_08934567fgjsdroiuty230467",
   "usi": {...Base64 encoded token container...},
@@ -230,9 +230,21 @@ The `name` and `city` MUST exactly (case sensitive) match with a valid [Verifiab
 The **aud** field MUST match the identifier of the registered endpoint. This prevents the use of the JWT at any other endpoint. The endpoint reference is used for this. \([RFC7523](https://tools.ietf.org/html/rfc7523#section-3)\). 
 An endpoint identifier contains a DID and a fragment. 
 
-**5.2.1.7. Validate legal base**
+**5.2.1.7. Validate authorization credentials**
 
-The **iss** fields contains the identifier of the actor, the **sub** field contains the identifier of the custodian and the **sid** field contains the identifier for the subject. A known legal base MAY be present at the authorization server/resource server side for this triple. If a particular resource may be accessed MUST be checked when accessing the resource. If no **sid** field is present, this check MUST be skipped. An `invalid_request` error MUST be returned when this validation fails.
+The **vcs** field contains the authorization credentials that determine the accessible resource.
+Each credential must valid according to the following rules:
+
+* The credential `issuer` equals the **sub** field of the JWT.
+* The credential `credentialSubject.id` equals the **iss** field of the JWT.
+* It is valid according to [RFC014](rfc014-authorization-credential.md).
+* The credential proof is valid.
+* The credential has not been revoked.
+* The credential has not expired.
+
+The credentials contain the policy and allowed resources that MUST be checked when the actor accesses the resources.
+
+The **vcs** field is not needed when actor and custodian ar the same.
 
 **5.2.1.8. Subject validation**
 
@@ -287,7 +299,7 @@ A token MAY be used multiple times unless the returned error code prevents it. A
 The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The resource server MUST also check if the client certificate used for the TLS connections is from the same party that requested the access token. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
 
 1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
-2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify if a known legal base is present for the combination of custodian, actor, subject and resource.
+2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify if a Nuts Auhtorization Credential was used in the access token request for the combination of custodian, actor, subject and resource.
 3. **The actor and custodian are the same.** It may be the case that a care organization is using multiple service providers. In that case each service provider acts on behalf of the care organization. Therefore, it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organization.
 
 ### 6.3. Error codes

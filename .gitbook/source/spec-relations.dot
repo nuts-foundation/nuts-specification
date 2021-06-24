@@ -17,6 +17,7 @@ digraph D {
         RFC011 [label = "RFC011\nVerifiable Credentials",href = "rfc011-verifiable-credential"];
         RFC012 [label = "RFC012\nNuts Organization Credential",href = "rfc012-nuts-organization-credential"];
         RFC013 [label = "RFC013\nVerifiable Credential IRMA Proof",href = "rfc013-vc-irma-proof"];
+        RFC014 [label = "RFC014\nNuts Authorization Credential",href = "rfc014-authorization-credential"];
     }
 
     // External RFCs
@@ -53,4 +54,8 @@ digraph D {
     RFC012 -> RFC011
 
     RFC013 -> RFC011
+
+    RFC014 -> RFC001
+    RFC014 -> RFC003
+    RFC014 -> RFC011
 }
