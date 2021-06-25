@@ -175,7 +175,7 @@ and which Certificate Authorities should be accepted.
 
 ## 7. Protobuf Definition
 
-{% include "../.gitbook/assets/rfc005/network.proto" %}
+{% include "git+https://github.com/nuts-foundation/nuts-node/blob/master/network/transport/network.proto" %}
 
 ## 8. Security Considerations
 
