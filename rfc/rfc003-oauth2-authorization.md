@@ -242,9 +242,10 @@ Each credential must valid according to the following rules:
 * The credential has not been revoked.
 * The credential has not expired.
 
-The credentials contain the policy and allowed resources that MUST be checked when the actor accesses the resources.
+The credentials contain the policy and allowed resources. 
+It MUST be verified that the actor's request conforms to the specified policy and only requests allowed resources.
 
-The **vcs** field is not needed when actor and custodian ar the same.
+The **vcs** field is not needed when actor and custodian are the same.
 
 **5.2.1.8. Subject validation**
 
@@ -299,7 +300,7 @@ A token MAY be used multiple times unless the returned error code prevents it. A
 The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The resource server MUST also check if the client certificate used for the TLS connections is from the same party that requested the access token. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
 
 1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
-2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify if a Nuts Auhtorization Credential was used in the access token request for the combination of custodian, actor, subject and resource.
+2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify a Nuts Authorization Credential was used in the access token request for the combination of custodian, actor, subject and resource.
 3. **The actor and custodian are the same.** It may be the case that a care organization is using multiple service providers. In that case each service provider acts on behalf of the care organization. Therefore, it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organization.
 
 ### 6.3. Error codes

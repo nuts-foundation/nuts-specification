@@ -12,8 +12,9 @@
 A Nuts Authorization Credential describes which data an actor may access. 
 It is scoped to a specific combination of custodian, actor and service (Bolt). 
 The credential also contains the legal base on which data access may occur. 
-This allows this credential to be used for explicit consent from a patient but also in cases where the data follows the process. 
-This RFC adds a requirement to Bolts. Bolts have to define an access policy. 
+This allows this credential to be used for explicit consent from a patient but also in cases where consent is implied.
+A patient can consent to a referral to a specialist. This implies that relevant data is accessible to that specialist.
+This RFC adds the requirement for Bolts to define an access policy. 
 A resource server, hosted by a custodian, will use the policy and the credential to grant access to a specific resource. 
 The credential is currently only usable for FHIR based services.
 
@@ -40,13 +41,11 @@ The type of data that is shared should also be limited to what is needed by the 
 There are various reasons why data can be shared. 
 The process of determining a valid reason happens at different places and at different times:
 
-- A patient is at the GPs office and wants the GP to view data from the hospital.
-- A patient consents with a specific treatment or test and this treatment/test requires specific data.
+- A patient at the GP's office wants the GP to view data from the hospital.
+- A patient consents to a specific treatment or test and this treatment/test requires specific data.
 - An elderly receiving home care wants his/her GP to be able to review data from the home care organization.
 - A patient is discharged from the hospital and needs to undergo physical therapy. 
 - Etc.
-
-As can be seen, data sharing can happen at the request of the actor, the custodian or the patient. 
 
 This RFC builds upon [RFC011](rfc011-verifiable-credential.md).
 
@@ -92,12 +91,13 @@ When `implicit`, values MUST be added to the `restrictions` array.
 
 ### 3.2 Scoping
 
-The custodian is always the issuer of the VC and the actor is entered in the `credentialSubject.id` field.
+The `issuer` field MUST contain the DID of the custodian.
+The `credentialSubject.id` field MUST contain the DID of the actor.
 The `subject` field MAY contain the patient identifier. In the example above the *oid* for the Dutch citizenship number is used.
 The `service` field refers to a Bolt. A Bolt MUST describe the set of FHIR resources that can be accessed with the credential.
 The `restrictions` array MAY further limit access.
-When no subject is given, the credential MUST contain `restrictions` that refer to individual resources.
-When resolved, those individual resources MUST NOT contain any personal information.
+When no `subject` is given, the credential MUST contain `restrictions` that refer to individual resources.
+The contents of those individual resources MUST NOT contain any personal information.
 
 ### 3.3 Legal base
 
@@ -123,16 +123,17 @@ Identification and authentication are covered by [RFC003](rfc003-oauth2-authoriz
 If no `restrictions` are added to the credential, the resource server MUST follow the policy rules of the Bolt.
 The Bolt policy will list the operations and resource types that can be accessed. 
 A policy MAY also require certain parameters. For example, when a `search` operation is done on a FHIR `observation` resource, the policy may have a rule that requires a query parameter using the `subject` field of the credential.
-All restrictions and policy rules MUST use paths relative to the endpoint from the Nuts registry for the given service.
+All restrictions and policy rules MUST use paths relative to the endpoint for the given service.
+The registration of services is covered by [§4 of RFC006](rfc006-distributed-registry.md#4-services).
 If `restrictions` are present in the credential, the resource server can compare the operation and relative path of the request to the `restrictions` present in the credential.
 
-Although Nuts Authorization Credentials are part of the OAuth flow of [RFC003](rfc003-oauth2-authorization.md), the actual checking is done at request time. This means that the resource server will have to check the policy and make a request for the restrictions from the Nuts registry. This model can be compared with an Attribute Based Access Control (ABAC) model. The Bolt policies are added to the Policy Administration Point, the Nuts node acts as Policy Information Point. The resource server is the Policy Enforcement Point. It's up to the vendor to implement the Policy Decision Point. 
+Although Nuts Authorization Credentials are part of the OAuth flow of [RFC003](rfc003-oauth2-authorization.md), the actual checking is done at request time. This means that the resource server will have to check the policy and make a request for the restrictions from the Nuts registry. This model can be compared with an [Attribute Based Access Control (ABAC) model](https://en.wikipedia.org/wiki/Attribute-based_access_control). The Bolt policies are added to the Policy Administration Point, the Nuts node acts as Policy Information Point. The resource server is the Policy Enforcement Point. It's up to the vendor to implement the Policy Decision Point. 
 
 ## 5. Issuance & distribution
 
 A Nuts Authorization Credential is private and the transaction MAY be published over the Nuts network.
 The contents of the Credential MUST NOT be attached to the network transaction.
-Only the custodian and actor MAY request and retrieve the transaction payload.
+Only the custodian and actor MAY retrieve the transaction payload.
 Every DID MAY issue an authorization credential.
 The VC does not have any other requirements nor does it add requirements to other VCs.
 
@@ -147,7 +148,7 @@ It MUST be trusted automatically.
 
 ## 8. Revocation
 
-The Nuts Authorization Credential uses the revocation mechanism as stated by [RFC011](rfc011-verifiable-credential.md).
+The Nuts Authorization Credential follows revocation rules as stated by [RFC011](rfc011-verifiable-credential.md).
 
 ## 9. Use cases
 
