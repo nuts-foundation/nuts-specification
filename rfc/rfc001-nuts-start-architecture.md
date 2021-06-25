@@ -160,5 +160,5 @@ An important part of the automated process is how nodes can make sure they can t
 
 #### 4.5.1. Eventual Consistency for Distributed Data
 
-Since the Nuts network is distributed \[M4\] there's a trade-off to be made between consistency, availability and network partition tolerance \(CAP-theorem, [https://en.wikipedia.org/wiki/CAP\_theorem](https://en.wikipedia.org/wiki/CAP_theorem)\). Since strong consistency is very expensive for distributed networks the Nuts network aims for maximum availability \(of data\) and network partition tolerance, thus sacrificing. This means distributed data is _eventual consistent._
+Since the Nuts network is distributed \[M4\] there's a trade-off to be made between consistency, availability and network partition tolerance \(CAP-theorem, [https://en.wikipedia.org/wiki/CAP\_theorem](https://en.wikipedia.org/wiki/CAP_theorem)\). Since strong consistency is very expensive for distributed networks the Nuts network aims for maximum availability \(of data\) and network partition tolerance, thus sacrificing some consistency. This means distributed data is _eventual consistent._
 
