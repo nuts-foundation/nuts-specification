@@ -7,29 +7,24 @@
 |  | May 2021 |
 
 ## RFC013 Verifiable Credential IRMA Proof Type
+
 ### Abstract
 
-This RFC describes requirements for a [Verifiable Credential Proof](https://www.w3.org/TR/vc-data-model/#proofs-signatures) using [IRMA](https://irma.app/) signatures. It also specifies the requirements for Verifiable Credentials that support this proof type. 
-An IRMA proof type acts as bridge between the IRMA ecosystem and Nuts ecosystem. Nuts uses DIDs, DID Documents and Verifiable Credentials as its base. Nuts node operators must trust specific DIDs. IRMA publishes public keys of its issuers on Github. By trusting that specific repository and by running the IRMA server, a Nuts node operator can trust all Verifiable Credentials signed by IRMA.
-Verifiable Credentials with an IRMA proof are still issued to DIDs but not issued by DIDs. 
-The trust in the issuer is replaced by the trust in the IRMA ecosystem.
+This RFC describes requirements for a [Verifiable Credential Proof](https://www.w3.org/TR/vc-data-model/#proofs-signatures) using [IRMA](https://irma.app/) signatures. It also specifies the requirements for Verifiable Credentials that support this proof type. An IRMA proof type acts as bridge between the IRMA ecosystem and Nuts ecosystem. Nuts uses DIDs, DID Documents and Verifiable Credentials as its base. Nuts node operators must trust specific DIDs. IRMA publishes public keys of its issuers on Github. By trusting that specific repository and by running the IRMA server, a Nuts node operator can trust all Verifiable Credentials signed by IRMA. Verifiable Credentials with an IRMA proof are still issued to DIDs but not issued by DIDs. The trust in the issuer is replaced by the trust in the IRMA ecosystem.
 
 ### Status
 
 This document is currently a draft.
 
 ### Copyright Notice
+
 ![](../.gitbook/assets/license.png)
 
 This document is released under the [Attribution-ShareAlike 4.0 International \(CC BY-SA 4.0\) license](https://creativecommons.org/licenses/by-sa/4.0/).
 
 ## 1. Introduction
 
-A Nuts network relies on trust. Verifiable Credentials only have value when their issuer is trusted. 
-Without trusting any issuers, a Nuts node will just be a collection of identifiers and public keys. 
-Not all desired issuers support DID and VC technology. Some of these trusted third parties do support the IRMA ecosystem. 
-IRMA does not support DIDs and/or VCs but is capable of generating zero knowledge proof signatures.
-Using IRMA could therefore support adaption of Nuts until DIDs and VCs are widely accepted as the technology of choice. The IRMA ecosystem consists of a server and a mobile app. The existence of this mobile app makes it possible for a person to be in control of setting a signature. This is also needed since VC wallets are not yet widely available.
+A Nuts network relies on trust. Verifiable Credentials only have value when their issuer is trusted. Without trusting any issuers, a Nuts node will just be a collection of identifiers and public keys. Not all desired issuers support DID and VC technology. Some of these trusted third parties do support the IRMA ecosystem. IRMA does not support DIDs and/or VCs but is capable of generating zero knowledge proof signatures. Using IRMA could therefore support adaption of Nuts until DIDs and VCs are widely accepted as the technology of choice. The IRMA ecosystem consists of a server and a mobile app. The existence of this mobile app makes it possible for a person to be in control of setting a signature. This is also needed since VC wallets are not yet widely available.
 
 ## 2. Terminology
 
@@ -47,9 +42,7 @@ Using IRMA could therefore support adaption of Nuts until DIDs and VCs are widel
 
 ### 3.1 Type
 
-This RFC introduces a new proof type. 
-Any Verifiable Credential type that supports this proof type MUST state this in the corresponding RFC.
-The proof type identifier is:
+This RFC introduces a new proof type. Any Verifiable Credential type that supports this proof type MUST state this in the corresponding RFC. The proof type identifier is:
 
 ```text
 NutsIrmaCredentialProof
@@ -57,17 +50,11 @@ NutsIrmaCredentialProof
 
 ### 3.2 CredentialSubject
 
-The `credentialSubject` part of the VerifiableCredential MUST have an `id` and the `id` MUST be a Nuts DID. The `id` contains the holder of the Verifiable Credential.
-Since the proof is unrelated to Nuts DIDs, the `issuer` MUST be the same as `credentialSubject.id`.
-Trust with this type of proof is not placed in a specific DID but in an IRMA issuer from a specific IRMA scheme.
-Any implementing party MUST state how different IRMA schemes are supported.
+The `credentialSubject` part of the VerifiableCredential MUST have an `id` and the `id` MUST be a Nuts DID. The `id` contains the holder of the Verifiable Credential. Since the proof is unrelated to Nuts DIDs, the `issuer` MUST be the same as `credentialSubject.id`. Trust with this type of proof is not placed in a specific DID but in an IRMA issuer from a specific IRMA scheme. Any implementing party MUST state how different IRMA schemes are supported.
 
-Other attributes in the `credentialSubject` MUST relate to attributes from an IRMA scheme.
-For example the [irma-demo](https://github.com/privacybydesign/irma-demo-schememanager) scheme contains the credential `email` issued by `sidn-pbdf`. 
-This credential contains the attributes `email` and `domain`. All entries in the `credentialSubject` MUST follow the same hierarchy. 
-It MUST be a JSON object and MUST contain the scheme, the issuer, the credential and attribute name. The `email` and `domain` attributes would be included as:
+Other attributes in the `credentialSubject` MUST relate to attributes from an IRMA scheme. For example the [irma-demo](https://github.com/privacybydesign/irma-demo-schememanager) scheme contains the credential `email` issued by `sidn-pbdf`. This credential contains the attributes `email` and `domain`. All entries in the `credentialSubject` MUST follow the same hierarchy. It MUST be a JSON object and MUST contain the scheme, the issuer, the credential and attribute name. The `email` and `domain` attributes would be included as:
 
-```json
+```javascript
 {
   "credentialSubject": {
     "id": "did:nuts:1",
@@ -87,9 +74,7 @@ All attributes in the `credentialSubject` MUST also be part of the IRMA signatur
 
 ### 3.3 Proof
 
-As stated at the beginning of this chapter, the `type` for the `proof` is `NutsIrmaCredentialProof`.
-The `proof` MUST also contain a `proofValue`. The `proofValue` MUST contain a base64 encoded IRMA signature.
-The proof does not contain a signature created with an `assertionMethod` key from the DID Document.
+As stated at the beginning of this chapter, the `type` for the `proof` is `NutsIrmaCredentialProof`. The `proof` MUST also contain a `proofValue`. The `proofValue` MUST contain a base64 encoded IRMA signature. The proof does not contain a signature created with an `assertionMethod` key from the DID Document.
 
 ## 4. IRMA signature
 
@@ -97,7 +82,7 @@ The proof does not contain a signature created with an `assertionMethod` key fro
 
 An IRMA signature is represented as:
 
-```json
+```javascript
 {
 "@context": "https://irma.app/ld/signature/v2",
 "signature": [
@@ -167,19 +152,13 @@ An IRMA signature is represented as:
 }
 ```
 
-[This paper](https://dominoweb.draco.res.ibm.com/reports/rz3730_revised.pdf) contains an explanation on how the cryptographic scheme works. 
-The interesting bits for getting the data from a signature are the `message`, `A`, and `a_disclosed`fields. 
-The `message` is used to relate the signatures and its attributes to a DID. This is the actual text the user has signed using the IRMA app.
-The `A` fields identifies which credential is used from the IRMA scheme.
-The `a_disclosed` field contains the actual attribute values. These values are base64 representations of big integers. Big integers are required for the cryptography to work.
-Underneath they contain strings, booleans, integers or enums.
-All the other fields are required to validate the authenticity of the signature. 
+[This paper](https://dominoweb.draco.res.ibm.com/reports/rz3730_revised.pdf) contains an explanation on how the cryptographic scheme works. The interesting bits for getting the data from a signature are the `message`, `A`, and `a_disclosed`fields. The `message` is used to relate the signatures and its attributes to a DID. This is the actual text the user has signed using the IRMA app. The `A` fields identifies which credential is used from the IRMA scheme. The `a_disclosed` field contains the actual attribute values. These values are base64 representations of big integers. Big integers are required for the cryptography to work. Underneath they contain strings, booleans, integers or enums. All the other fields are required to validate the authenticity of the signature.
 
 The example signature from above will be base64 encoded when used in a Verifiable Credential proof:
 
 Below is a complete example of how an Irma proof can be embedded in a Verifiable Credential:
 
-```json
+```javascript
 {
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
@@ -212,15 +191,13 @@ The `proofValue` has been abbreviated for readability.
 
 ### 4.2 Verification
 
-Verification of an IRMA signature MUST be done by an [IRMA server](https://irma.app/docs/irma-server/) instance. 
-It's also possible for an implementing party to embed the [IRMA go libraries](https://github.com/privacybydesign/irmago).
-Verification is done as follows:
+Verification of an IRMA signature MUST be done by an [IRMA server](https://irma.app/docs/irma-server/) instance. It's also possible for an implementing party to embed the [IRMA go libraries](https://github.com/privacybydesign/irmago). Verification is done as follows:
 
-- Verify IRMA signature using IRMA server (or embedded library), which returns the attributes contained in the IRMA signature.
-- Verify each attribute in credentialSubject against its counterpart in the IRMA signature:
-  - Verify it's present in the IRMA signature
-  - Verify the attribute's value exactly matches its value in the IRMA signature
-- Verify that `message` from the IRMA signature exactly matches the value of `credentialSubject.id`
+* Verify IRMA signature using IRMA server \(or embedded library\), which returns the attributes contained in the IRMA signature.
+* Verify each attribute in credentialSubject against its counterpart in the IRMA signature:
+  * Verify it's present in the IRMA signature
+  * Verify the attribute's value exactly matches its value in the IRMA signature
+* Verify that `message` from the IRMA signature exactly matches the value of `credentialSubject.id`
 
 The dot-delimited format of the attributes in the verification result can be extended as follows:
 
@@ -230,7 +207,7 @@ A.B.C.D=X
 
 becomes
 
-```json
+```javascript
 {
   "A": {
     "B": {
@@ -252,18 +229,13 @@ The contents of the schemes can be viewed on Github: [pbdf](https://github.com/p
 
 ### 4.4 Revocation
 
-Although IRMA supports revocation for credentials, the revocation check is only applied during issuance.
-An IRMA credential revoked today will not invalidate any signatures created in the past.
-This means that a Verifiable Credential with an IRMA proof MUST adhere to the generic revocation definition stated in §4.5 of [RFC011 - Verifiable Credentials](rfc011-verifiable-credentials.md#4-5-revocation).
-It's the responsibility of the IRMA credential holder to revoke verifiable credentials that could have been compromised. 
-The IRMA credential holder can do this with a renewed, not revoked IRMA credential.
-The next paragraph contains a default revocation for a Verifiable Credential with an IRMA proof
+Although IRMA supports revocation for credentials, the revocation check is only applied during issuance. An IRMA credential revoked today will not invalidate any signatures created in the past. This means that a Verifiable Credential with an IRMA proof MUST adhere to the generic revocation definition stated in §4.5 of [RFC011 - Verifiable Credentials](https://github.com/nuts-foundation/nuts-specification/tree/64bf23fd79600390b66f5a9901161330b23d5c92/rfc/rfc011-verifiable-credentials.md#4-5-revocation). It's the responsibility of the IRMA credential holder to revoke verifiable credentials that could have been compromised. The IRMA credential holder can do this with a renewed, not revoked IRMA credential. The next paragraph contains a default revocation for a Verifiable Credential with an IRMA proof
 
 ### 4.4.1 Default revocation
 
 VCs that are issued with an IRMA proof can be revoked by publishing the following transaction on the network:
 
-```json
+```javascript
 {
   "issuer": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv",
   "subject": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv#6f91673b-afa9-4d26-9e0f-00d989943275",
@@ -284,6 +256,5 @@ Such a revocation transaction has the following requirements:
 * the **proof** MUST be a `NutsIrmaCredentialProof` proof.
 * the IRMA signature in the `proofValue` MUST use the same attributes as the IRMA signature in the original VC. 
 
-The transaction MUST be published on the Nuts network.
-The content-type is `application/vc+json;type=revocation`
+The transaction MUST be published on the Nuts network. The content-type is `application/vc+json;type=revocation`
 

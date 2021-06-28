@@ -9,7 +9,7 @@
 * [RFC003 OAuth2 Authorization](rfc/rfc003-oauth2-authorization.md)
 * [RFC004 Verifiable Transactional Graph](rfc/rfc004-verifiable-transactional-graph.md)
 * [RFC005 Distributed Network using gRPC](rfc/rfc005-distributed-network-using-grpc.md)
-* [RFC006 Distributed Registry with Decentralized Identifiers (DID)](rfc/rfc006-distributed-registry.md)
+* [RFC006 Distributed Registry with Decentralized Identifiers \(DID\)](rfc/rfc006-distributed-registry.md)
 * [RFC008 Certificate Structure](rfc/rfc008-certificate-structure.md)
 * [RFC011 Verifiable Credential](rfc/rfc011-verifiable-credential.md)
 * [RFC012 Nuts Organization Credential](rfc/rfc012-nuts-organization-credential.md)
