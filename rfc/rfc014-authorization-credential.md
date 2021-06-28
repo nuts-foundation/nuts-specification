@@ -85,9 +85,9 @@ The `credentialSubject` field contains the following:
 ### 3.1 Required fields
 
 The `id`, `legalBase` and `service` fields MUST be filled. 
-Within the `legalBase` object, `consentType` MUST either be `implicit` or `explicit`. 
+Within the `legalBase` object, `consentType` MUST either be `implied` or `explicit`. 
 When `explicit`, the `evidence` and `subject` fields MUST be filled.
-When `implicit`, values MUST be added to the `restrictions` array.
+When `implied`, values MUST be added to the `restrictions` array.
 
 ### 3.2 Scoping
 
@@ -101,9 +101,9 @@ The contents of those individual resources MUST NOT contain any personal informa
 
 ### 3.3 Legal base
 
-The patient consent can be either implicit or explicit. 
-When it's implicit, this should be reflected by the type of service that is entered.
-A Bolt MUST therefore also describe if it is covered by explicit or implicit consent.
+The patient consent can be either implied or explicit. 
+When it's implied, this should be reflected by the type of service that is entered.
+A Bolt MUST therefore also describe if it is covered by explicit or implied consent.
 When the credential is given in the context of explicit consent, the `legalBase.evidence` MUST be filled.
 It MUST contain a value for the `path` and `type` fields. The `path` is a relative path to the service data endpoint and the `type` contains the media type as specified by [RFC6838](https://datatracker.ietf.org/doc/html/rfc6838).
 The evidence resource MUST be accessible with an access token that was created with the corresponding credential.
@@ -192,7 +192,7 @@ Example of a Nuts Authorization Credential with explicit consent:
   "proof": {...}
 }
 ```
-Example of a Nuts Authorization Credential with implicit consent:
+Example of a Nuts Authorization Credential with implied consent:
 
 ```json
 {
@@ -208,7 +208,7 @@ Example of a Nuts Authorization Credential with implicit consent:
   "credentialSubject": {
     "id": "did:nuts:SjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2",
     "legalBase": {
-      "consentType": "implicit"
+      "consentType": "implied"
     },
     "restrictions": ["/composition/f2aeec97-fc0d-42bf-8ca7-0548192d4231"],
     "service": "eOverdracht",
