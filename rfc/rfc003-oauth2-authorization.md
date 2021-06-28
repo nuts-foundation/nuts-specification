@@ -67,14 +67,14 @@ When requesting data, the client application MUST add the access token to the Au
 ### 4.1. Registration
 
 #### 4.1.1 Client registration
-In common OAuth2 flows an OAuth client must be registered with the authorization server with its client id and client secret. This way the authorization server knows which requests are made by which party. The registration normally involves manual steps of registering and approving. 
-In a network of trust with countless combinations of authorization servers and clients, this approach does not scale well.
 
-So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its signature to a known care provider. The key used to sign the JWT is identified by a key identifier (`kid`) which can be resolved through the Verifiable Data Registry as defined in [RFC006](rfc006-distributed-registry.md).
-The key MUST be listed in the `assertionMethod` section of the actor's DID document. The actor is identified by the `iss` field of the JWT.
+In common OAuth2 flows an OAuth client must be registered with the authorization server with its client id and client secret. This way the authorization server knows which requests are made by which party. The registration normally involves manual steps of registering and approving. In a network of trust with countless combinations of authorization servers and clients, this approach does not scale well.
+
+So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its signature to a known care provider. The key used to sign the JWT is identified by a key identifier \(`kid`\) which can be resolved through the Verifiable Data Registry as defined in [RFC006](rfc006-distributed-registry.md). The key MUST be listed in the `assertionMethod` section of the actor's DID document. The actor is identified by the `iss` field of the JWT.
 
 Example of the actor's DID document:
-```json
+
+```javascript
 {
   "@context": [ "https://www.w3.org/ns/did/v1" ],
   "id": "did:nuts:123",
@@ -97,9 +97,7 @@ Example of the actor's DID document:
 
 #### 4.1.2 Server registration
 
-Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refers to another service in a DID Document with the type: `oauth`.
-In order for the client to resolve the authorization server endpoint it MUST look up the `oauth` service endpoint of the service.
-A compound service may refer to endpoint services from other DID Documents.
+Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refers to another service in a DID Document with the type: `oauth`. In order for the client to resolve the authorization server endpoint it MUST look up the `oauth` service endpoint of the service. A compound service may refer to endpoint services from other DID Documents.
 
 ### 4.2. Constructing the JWT
 
@@ -124,7 +122,7 @@ All other claims may be ignored.
 
 #### 4.2.3. Example JWT
 
-```json
+```javascript
 {
   "alg": "RS256",
   "typ": "JWT",
@@ -222,13 +220,11 @@ The JWT **iat** and **exp** fields MUST be validated. The timestamp of validatio
 
 **5.2.1.5. Login contract validation**
 
-The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the `name` and `city` of the actor.
-The `name` and `city` MUST exactly (case sensitive) match with a valid [Verifiable Credential](rfc011-verifiable-credential.md) issued to the actor. This must be a [NutsOrganizationCredential](rfc012-nuts-organization-credential.md).
+The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the `name` and `city` of the actor. The `name` and `city` MUST exactly \(case sensitive\) match with a valid [Verifiable Credential](rfc011-verifiable-credential.md) issued to the actor. This must be a [NutsOrganizationCredential](rfc012-nuts-organization-credential.md).
 
 **5.2.1.6. Endpoint validation**
 
-The **aud** field MUST match the identifier of the registered endpoint. This prevents the use of the JWT at any other endpoint. The endpoint reference is used for this. \([RFC7523](https://tools.ietf.org/html/rfc7523#section-3)\). 
-An endpoint identifier contains a DID and a fragment. 
+The **aud** field MUST match the identifier of the registered endpoint. This prevents the use of the JWT at any other endpoint. The endpoint reference is used for this. \([RFC7523](https://tools.ietf.org/html/rfc7523#section-3)\). An endpoint identifier contains a DID and a fragment.
 
 **5.2.1.7. Validate legal base**
 
@@ -293,3 +289,4 @@ The resource server MUST validate the validity of the access token. It MAY conta
 ### 6.3. Error codes
 
 Different protocols return different types of error messages. The format will most likely also differ. This means that error messages have to be specified per use-case. If an error message supports a text-based error code, then it should support the illegal\_access\_token code. If a client receives this error code then it MUST NOT reuse the access token.
+

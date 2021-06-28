@@ -10,9 +10,7 @@
 
 ### Abstract
 
-This RFC specifies which certificates are used in which situation. The basic concept is that certificates are only used to create a secured connection.
-Certificates and keys related to the certificates are not used in any signing or validation operation. 
-Instead, the DID and Verifiable Credentials standard are used.
+This RFC specifies which certificates are used in which situation. The basic concept is that certificates are only used to create a secured connection. Certificates and keys related to the certificates are not used in any signing or validation operation. Instead, the DID and Verifiable Credentials standard are used.
 
 ### Status of document
 
@@ -44,37 +42,31 @@ Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-
 
 ## 3. PKIoverheid
 
-The PKIoverheid CA tree is the choice of CA to trust for production use. It's widely trusted and supported. 
-There are multiple vendors that can issue a certificate. 
-A PKIo TLS certificate MUST be used to secure inter-node connections as well as the peer-to-peer connections used to exchange data.
-Production nodes SHOULD not accept any other certificate than a PKIoverheid certificate.
-The certificate SHOULD be used as both server as client certificate in a mutual TLS connection.
+The PKIoverheid CA tree is the choice of CA to trust for production use. It's widely trusted and supported. There are multiple vendors that can issue a certificate. A PKIo TLS certificate MUST be used to secure inter-node connections as well as the peer-to-peer connections used to exchange data. Production nodes SHOULD not accept any other certificate than a PKIoverheid certificate. The certificate SHOULD be used as both server as client certificate in a mutual TLS connection.
 
 ### 3.1 Certificate Authority trust chain
-A node will need to configure the correct CA-tree so other nodes can connect. 
-The certificate to configure are the **Staat der Nederlanden Private Root CA G1** root certificate and the **Staat der Nederlanden Private Services CA – G1** CA.
-All certificates can be downloaded from the [PKIoverheid](https://cert.pkioverheid.nl/cert-pkioverheid-nl.htm) website.
 
-TSPs are responsible for signing certificates. The TSPs have their own CA. 
-To trust all PKIo certificates, any software that validates a certificate and its chain, MUST trust any intermediate CA below the **Staat der Nederlanden Private Services CA – G1** CA.
+A node will need to configure the correct CA-tree so other nodes can connect. The certificate to configure are the **Staat der Nederlanden Private Root CA G1** root certificate and the **Staat der Nederlanden Private Services CA – G1** CA. All certificates can be downloaded from the [PKIoverheid](https://cert.pkioverheid.nl/cert-pkioverheid-nl.htm) website.
 
-The PKIoverheid private services CA is not by default accepted by browsers and operating systems. 
+TSPs are responsible for signing certificates. The TSPs have their own CA. To trust all PKIo certificates, any software that validates a certificate and its chain, MUST trust any intermediate CA below the **Staat der Nederlanden Private Services CA – G1** CA.
+
+The PKIoverheid private services CA is not by default accepted by browsers and operating systems.
 
 ### 3.2 Certification Practise Statement
-The different Certification Practise Statements for the Dutch government can be found on https://cps.pkioverheid.nl/
-The relevant CPS is the **CPS PA PKIoverheid Private Root v1.5**.
+
+The different Certification Practise Statements for the Dutch government can be found on [https://cps.pkioverheid.nl/](https://cps.pkioverheid.nl/) The relevant CPS is the **CPS PA PKIoverheid Private Root v1.5**.
 
 ### 3.3 CRL
-The Certificate Revocation Lists for PKIoverheid certificates are maintained by the different TSPs. 
-The time between signing of a CRL differs per TSP. A node MUST at least update all CRLs every hour.
+
+The Certificate Revocation Lists for PKIoverheid certificates are maintained by the different TSPs. The time between signing of a CRL differs per TSP. A node MUST at least update all CRLs every hour.
 
 ## 4. Test and development
-The use of PKIoverheid might be less suitable for test and development. 
-The PKIoverheid certificates might be relatively expensive for small organizations and private key should not be shared amongst developers or test servers.
-Therefore, a node MUST be able to support any set of CAs. This will allow anyone to setup their own test/development network.
+
+The use of PKIoverheid might be less suitable for test and development. The PKIoverheid certificates might be relatively expensive for small organizations and private key should not be shared amongst developers or test servers. Therefore, a node MUST be able to support any set of CAs. This will allow anyone to setup their own test/development network.
 
 ## 5. Private key management
-A PKIo certificate is costly and it's associated with a single private key. 
-Appropriate measures SHOULD be taken to reduce the number of stored instances of the private key. Reverse/forwarding proxies and centralized keystores with strong encryption can help.
+
+A PKIo certificate is costly and it's associated with a single private key. Appropriate measures SHOULD be taken to reduce the number of stored instances of the private key. Reverse/forwarding proxies and centralized keystores with strong encryption can help.
 
 In case of theft or loss of a private key and/or certificate, please consult the TSP documentation.
+

@@ -133,7 +133,7 @@ The time layout used is constructed as: `Monday, 2 January 2006 15:04:05` The na
 
 The Authentication Token MUST be signed by the user. See section 7 for more detail on supported means. In order to support several signing means, the signed token MUST be encapsulated by a Container. As a container specification we use the [W3C Verifiable Presentation specification 1.0](https://www.w3.org/TR/vc-data-model/).
 
-It is recommended to reuse existing specifications for Verifiable Presentations (VP). If no existing specification exists, the type of the VP MUST be prepended with `Nuts`. This indicates that the VP SHOULD be specified within this RFC.
+It is recommended to reuse existing specifications for Verifiable Presentations \(VP\). If no existing specification exists, the type of the VP MUST be prepended with `Nuts`. This indicates that the VP SHOULD be specified within this RFC.
 
 This specification uses the JSON-LD format for VPs since the JWT format isn't usable for all type of proofs. See the [linked data proofs](https://www.w3.org/TR/vc-data-model/#linked-data-proofs) section for more detail.
 
@@ -173,7 +173,7 @@ The first 3 identify the user but are possibly not unique, therefore the email a
 
 When the service provider is using the open-source IRMA Go server the following request must be sent to the correct endpoint:
 
-```json
+```javascript
 {
 "@context": "https://irma.app/ld/request/signature/v2",
 "Message": "THE LOGIN CONTRACT"
@@ -201,7 +201,7 @@ The message field must have the full login contract as specified in chapter 6. T
 
 Below is the response of a successful IRMA signature challenge
 
-```json
+```javascript
 {
 "@context": "https://irma.app/ld/signature/v2",
 "signature": [
@@ -279,7 +279,7 @@ The response is used as part of the authorization token in the [OAuth flow](rfc0
 
 Below is a complete example of how an Irma proof can be embedded in a VP:
 
-```json
+```javascript
 {
   "@context": [
     "https://www.w3.org/2018/credentials/v1"
@@ -359,7 +359,7 @@ In order to validate an UZI signed JWS, the validator MUST perform the following
 The following snippets contain examples of an UZI signed JWT with a login contract.
 
 {% code title="Header" %}
-```json
+```javascript
 {
     "typ":"JWT",
     "alg":"RS256"
@@ -368,7 +368,7 @@ The following snippets contain examples of an UZI signed JWT with a login contra
 {% endcode %}
 
 {% code title="Payload" %}
-```json
+```javascript
 {
     "iat":"1605000446",
     "message":"NL:BehandelaarLogin:v1 Ondergetekende geeft toestemming aan Demo EHR om namens Zorggroep Nuts en ondergetekende het Nuts netwerk te bevragen. Deze toestemming is geldig van maandag, 24 februari 2020 16:15:47 tot maandag, 24 februari 2020 17:15:47.",
@@ -380,7 +380,7 @@ The following snippets contain examples of an UZI signed JWT with a login contra
 
 Below is a complete example of how an UZI proof can be embedded in a VP:
 
-```json
+```javascript
 {
   "@context": [
     "https://www.w3.org/2018/credentials/v1"

@@ -10,7 +10,7 @@
 
 ### Abstract
 
-This RFC describes an interoperable, content agnostic data format for distributed networks which provides cryptographic authentication and verification of its contents and guaranteed ordering using a Directed Acyclic Graph (DAG).
+This RFC describes an interoperable, content agnostic data format for distributed networks which provides cryptographic authentication and verification of its contents and guaranteed ordering using a Directed Acyclic Graph \(DAG\).
 
 ### Status of document
 
@@ -44,9 +44,7 @@ Transactions MUST be encoded as [RFC7515 JSON Web Signature](https://tools.ietf.
 
 In addition to required header parameters as specified in RFC7515 the following requirements apply:
 
-* The signing key is indicated by **kid** or **jwk**. One of them MUST be present, but not both. If **kid** is present
-  the key must be known and looked up locally. Otherwise the key must be taken from the **jwk** header.
-
+* The signing key is indicated by **kid** or **jwk**. One of them MUST be present, but not both. If **kid** is present the key must be known and looked up locally. Otherwise the key must be taken from the **jwk** header.
 * **alg**: MUST be one of the following algorithms: `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512`.
 
   other algorithms SHALL NOT be used.
@@ -104,12 +102,9 @@ The following orders are invalid:
 
 ### 3.4. Updates & Ordering
 
-Since transactions are immutable, the only way to update the application data they contain is by creating a new transaction. 
-All updates are considered as full updates, partial updates are not supported. 
-Parallel updates of the same application data, in the form of branches, MUST be processed the same way by all nodes.
+Since transactions are immutable, the only way to update the application data they contain is by creating a new transaction. All updates are considered as full updates, partial updates are not supported. Parallel updates of the same application data, in the form of branches, MUST be processed the same way by all nodes.
 
-Consider the DAG from the previous chapter. If transaction `C` and  `D` where to update the same application data, nodes could process the transaction in a different order.
-This would create an inconsistency in the network. To fix this the following rules MUST be taken into account:
+Consider the DAG from the previous chapter. If transaction `C` and `D` where to update the same application data, nodes could process the transaction in a different order. This would create an inconsistency in the network. To fix this the following rules MUST be taken into account:
 
 * If the payloads are equal, process as normal.
 * If the payloads are not equal, create a representation that is a merger of the payloads according to rules for the specific payload.
@@ -140,15 +135,13 @@ until queue empty; take transaction from queue
 
 ### 3.6. Signature and payload verification
 
-Before interpreting a transaction's payload the JWS' signature MUST be validated. When **kid** is used to specify the
-signing key and the system knows additional usage restrictions (e.g. the key is valid from X to Y, to be checked against **sigt**),
-the system MUST assert the usage is compliant.
+Before interpreting a transaction's payload the JWS' signature MUST be validated. When **kid** is used to specify the signing key and the system knows additional usage restrictions \(e.g. the key is valid from X to Y, to be checked against **sigt**\), the system MUST assert the usage is compliant.
 
-Furthermore, since the payload is detached from the transaction itself and referred to by hash, the payload MUST be hashed
-and compared to the hash specified in the transaction, to assert that the retrieved payload is actually the expected payload.
+Furthermore, since the payload is detached from the transaction itself and referred to by hash, the payload MUST be hashed and compared to the hash specified in the transaction, to assert that the retrieved payload is actually the expected payload.
 
 ## 4. Example
 
-```
+```text
 eyJhbGciOiJFUzI1NiIsImN0eSI6ImZvby9iYXIiLCJjcml0IjpbInNpZ3QiLCJ2ZXIiLCJwcmV2cyIsImp3ayJdLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJUTXVzeXNWQTJJcHduNnZFMjhNWUQtOGtPZFN6ajZVTy1MeGE0ZWhLd0d3IiwieSI6IjdZbC1hb2ZPOC1qNHN6aVBYeGREdVVVSXdDSHlaeWtnTTJmdWlISEQxUzgifSwicHJldnMiOlsiMzk3MmRjOTc0NGY2NDk5ZjBmOWIyZGJmNzY2OTZmMmFlN2FkOGFmOWIyM2RkZTY2ZDZhZjg2YzlkZmIzNjk4NiIsImIzZjJjM2MzOTZkYTFhOTQ5ZDIxNGU0YzJmZTBmYzlmYjVmMmE2OGZmMTg2MGRmNGVmMTBjOTgzNWU2MmU3YzEiXSwic2lndCI6MTYwMzQ1Nzk5OSwidmVyIjoxfQ.NDUyZDllODlkNWJkNWQ5MjI1ZmI2ZGFlY2Q1NzllNzM4OGExNjZjNzY2MWNhMDRlNDdmZDNjZDg0NDZlNDYyMA.-jpKBZQ3sc0x34MwnbO8mSiGdUYCfQXNO91RMnvFRq0YZ5pmbKmRYg--zaie-N7wIJhIFbZyuOyJdlcPwZrELQ
 ```
+
