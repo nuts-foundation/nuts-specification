@@ -109,7 +109,7 @@ Consider the DAG from the previous chapter. If transaction `C` and `D` where to 
 * If the payloads are equal, process as normal.
 * If the payloads are not equal, create a representation that is a merger of the payloads according to rules for the specific payload.
 
-The last rule requires the payload to be immutable, so a merger is irrelevant. When updates are required, its contents MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
+When updates are required for a type of payload, its contents MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
 
 ### 3.5. Processing the DAG
 
