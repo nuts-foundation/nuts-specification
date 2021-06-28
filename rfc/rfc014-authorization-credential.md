@@ -57,7 +57,15 @@ This RFC builds upon [RFC011](rfc011-verifiable-credential.md).
 
 Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
-## 3. CredentialSubject
+## 3. Credential data model
+
+### 3.1 Credential fields
+
+The `issuer` field of the credential MUST contain the DID of the custodian.
+The `type` MUST include both the values `VerifiableCredential` and `NutsAuthorizationCredential`.
+A Bolt specification is required to specify the maximum validity of the credential.
+
+### 3.2 CredentialSubject
 
 The `credentialSubject` field contains the following:
 
@@ -82,24 +90,23 @@ The `credentialSubject` field contains the following:
 }
 ```
 
-### 3.1 Required fields
+### 3.2.1 Required fields
 
 The `id`, `legalBase` and `service` fields MUST be filled. 
 Within the `legalBase` object, `consentType` MUST either be `implied` or `explicit`. 
 When `explicit`, the `evidence` and `subject` fields MUST be filled.
 When `implied`, values MUST be added to the `restrictions` array.
 
-### 3.2 Scoping
+### 3.2.2 Scoping
 
-The `issuer` field MUST contain the DID of the custodian.
-The `credentialSubject.id` field MUST contain the DID of the actor.
+The `id` field MUST contain the DID of the actor.
 The `subject` field MAY contain the patient identifier. In the example above the *oid* for the Dutch citizenship number is used.
 The `service` field refers to a Bolt. A Bolt MUST describe the set of FHIR resources that can be accessed with the credential.
 The `restrictions` array MAY further limit access.
 When no `subject` is given, the credential MUST contain `restrictions` that refer to individual resources.
 The contents of those individual resources MUST NOT contain any personal information.
 
-### 3.3 Legal base
+### 3.2.3 Legal base
 
 The patient consent can be either implied or explicit. 
 When it's implied, this should be reflected by the type of service that is entered.
@@ -108,7 +115,7 @@ When the credential is given in the context of explicit consent, the `legalBase.
 It MUST contain a value for the `path` and `type` fields. The `path` is a relative path to the service data endpoint and the `type` contains the media type as specified by [RFC6838](https://datatracker.ietf.org/doc/html/rfc6838).
 The evidence resource MUST be accessible with an access token that was created with the corresponding credential.
 
-### 3.4 Restrictions
+### 3.2.4 Restrictions
 
 The `restrictions` object MAY be used to restrict access. The base access is provided by the policy as defined by the Bolt.
 If any restrictions are added, they override the Bolt policy. 
