@@ -276,8 +276,8 @@ A service can define an absolute endpoint URI or be a compound service.
 A service can also refer to other services.
 This is often the case when a SaaS provider defines endpoints to be used for all clients.
 
-For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing the URI. 
-For a compound service the `serviceEndpoint` MUST contain a map with absolute endpoint URIs or references to other services. 
+For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing a URL. 
+For a compound service the `serviceEndpoint` MUST contain a map with absolute endpoint URLs or references to other services. 
 References MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service. A compound service MAY refer to absolute endpoints from other DID Documents. See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards.
 
 A DID Document MAY NOT contain more than one service with the same type.
