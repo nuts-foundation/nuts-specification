@@ -367,9 +367,22 @@ An example of a deeply nested structure:
     {
       "id": "did:nuts:abc#4",
       "type": "oauth_prod",
-      "serviceEndpoint": "https:\\auth.example.com"
+      "serviceEndpoint": "https://auth.example.com"
     }
   ]
+}
+```
+
+Resolving `did:nuts:123?type=NutsCompoundServiceRef` would produce:
+
+```javascript
+{
+  
+  "id": "did:nuts:abc#1",
+  "type": "NutsCompoundServiceRef",
+  "serviceEndpoint": {
+    "oauth": "https://auth.example.com"
+  }
 }
 ```
 
