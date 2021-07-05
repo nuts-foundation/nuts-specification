@@ -271,7 +271,7 @@ All data is public knowledge. All considerations from [§10 of did-core](https:/
 ## 4. Services
 
 It is to be expected that each DID subject will add services to the DID Document. 
-Specific services will be specified in their own RFC or Bold specification. 
+Specific services will be specified in their own RFC or Bolt specification. 
 A service can define an absolute endpoint URI or be a compound service.
 A service can also refer to other services.
 This is often the case when a SaaS provider defines endpoints to be used for all clients.
@@ -279,6 +279,11 @@ This is often the case when a SaaS provider defines endpoints to be used for all
 For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing a URL. 
 For a compound service the `serviceEndpoint` MUST contain a map with absolute endpoint URLs or references to other services. 
 References MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service. A compound service MAY refer to absolute endpoints from other DID Documents. See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards.
+A valid reference:
+
+```javascript
+"did:nuts:123?type=oauth_prod"
+```
 
 A DID Document MAY NOT contain more than one service with the same type.
 
@@ -331,14 +336,13 @@ The care organization refers to it:
 
 Any `serviceEndpoint` with a value that starts with `did` is a reference to another service.
 As specified earlier, all references use the `type` query parameter.
-The origin of a reference is from the `serviceEndpoint` context, while the target is a complete `service` object.
-When a reference targets a `service`, it actually targets the `serviceEndpoint` of the service.
+When resolving a service, a reference URI MUST be replaced with the value from the `serviceEndpoint` field of the referenced service.
 
 A client doesn't care about the references. When a client queries for particular services, the references need to be resolved.
-Resolving a reference might lead to resolving more references and may lead to an infinite loop.
-Resolving a reference MUST NOT go deeper than 5 levels. Given 5 services, A through E, A references B, B references C, etc. Given the maximum depth of 5, E MUST contain an absolute endpoint URI.
+Using references MUST NOT create an infinite loop.
+Resolving a reference MUST NOT go deeper than 5 levels. Given 5 services where A ultimately references E through B, C and D (A -> B -> C -> D -> E). Given the maximum depth of 5, E MUST contain an absolute endpoint URI.
 
-Another limitation is that a reference that originates from a compound service MUST NOT resolve to another compound service. When resolving that would lead to a map of URIs nested within a map of URIs.
+Another limitation is that a reference that originates from a compound service MUST NOT resolve to another compound service. Resolving that would lead to a map of URIs nested within a map of URIs, which is invalid syntax.
 
 An example of a deeply nested structure:
 
