@@ -70,3 +70,8 @@ A PKIo certificate is costly and it's associated with a single private key. Appr
 
 In case of theft or loss of a private key and/or certificate, please consult the TSP documentation.
 
+## 6. Governance
+
+All connections mentioned in §3 MUST be accepted. A node operator MAY NOT deny a connection request other than those using a banned certificate. 
+A governance framework SHOULD be in place to determine how a certificate can be banned.
+Banning a certificate does not replace the revoking mechanism of a CA.
