@@ -78,7 +78,7 @@ The token holds a digital signature binding the identity attributes to the login
 
 ### 4.6. Time limited
 
-The token is only valid during a limited time. This period of validity must be visible in the login contact so the user is aware of the validity period.
+The token is only valid during a limited time. This period of validity must be visible in the login contract so the user is aware of the validity period.
 
 ### 4.7. Organization limited
 
@@ -318,13 +318,13 @@ Certificates on the card follow a known chain: The certificates descent from the
 The certificate contains the following attributes which can be used to identify the care giver and optionally their organization. These fields are included here for clarity. More information can be found in the the UZI CPS, section 7.1.5:
 
 * `oidCa` The OID that Identifies the certificates CA. Different CAs are used for different card types. 
-* `cartType` A single character to represent the card type:
+* `cardType` A single character to represent the card type:
   * Z: Health care professional \(Zorgverlener\)
   * N: Employee registred \(Medewerker op naam\)
   * M: Anonymous employee \(Medewerker niet op naam\)
   * S: Server
 * `orgID` Number to identify the care organization
-* `rollCode`Indicates the profession of the care professional and their specialism.
+* `roleCode`Indicates the profession of the care professional and their specialism.
 * `uziNr` The actual identifying number.
 * `givenName` First names of certificate holder.
 * `surname` Prefix and birthname of certificate holder.
@@ -333,7 +333,7 @@ The certificate contains the following attributes which can be used to identify 
 
 A convenient way of packaging data with its signature is the form of a JWS \[RFC7515\].
 
-A JWS consists of a header, payload and signature. The **header** MUST contain the the `typ` , `x5c`and `alg` fields. The type depends on the content of the payload, the `x5c` field MUST contain the certificate from the UZI card used to sign the JWS. The `alg` SHOULD contain the value `RS256` value. The **payload** can be any set of bytes.
+A JWS consists of a header, payload and signature. The **header** MUST contain the the `typ` , `x5c`and `alg` fields. The type depends on the content of the payload, the `x5c` field MUST contain the certificate from the UZI card used to sign the JWS. The `alg` MUST contain the value `RS256` value. The **payload** can be any set of bytes.
 
 The header SHOULD NOT contain any other fields.
 
