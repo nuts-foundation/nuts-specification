@@ -33,6 +33,7 @@ In this document we will provide a way of protecting RESTful APIs with use of an
 * **Client application**: The application that requires access.
 * **Resource server**: The application \(a protected resource\) that requires authorized access to its API’s.
 * **JWT bearer token**: JWT encoded bearer token contains the user’s identity, subject and custodian and is signed by the acting party. This token is used to obtain an OAuth 2 access token.
+* **Policy**: A security policy defined by a Bolt. It describes the access to and operations on resources that are allowed.
 * **Access token**: An OAuth 2 access token, provided by an authorization Server. This token is handed to the client so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
 * **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian and token validity. This mechanism is called token introspection which is described by [RFC7662](https://tools.ietf.org/html/rfc7662).
 * **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document. [RFC006](rfc006-distributed-registry.md) describes endpoint registration.
@@ -48,23 +49,23 @@ The mechanism of retrieving an access token using a JWT bearer token is based on
 
 The diagram shows the oauth flow without the registration part. It consists of three parts: obtaining the user identity, obtaining an access token and using the access token.
 
-### 3.1. Obtain user identity
+### 3.1 Obtain user identity
 
 Part of the Nuts security framework involves the user identity. Data can only be accessed when the user is identified with an approved means. See also the [Authentication Token RFC](rfc002-authentication-token.md). The signed login contract is valid for a longer period of time and can therefore be stored in the user’s session. If the contract has expired, the client application can prompt the user for a new signature. It’s up to the client application when to ask for a signature: as a login method or when elevation is needed. In the case a system is obtaining an access token, this step is skipped.
 
-### 3.2. Obtain access token
+### 3.2 Obtain access token
 
 The client application MUST obtain an access token before accessing data. This SHOULD be done right before accessing the data. An access token is only valid for seconds/minutes \(determined by the authorization server\). The client application SHOULD refresh the access token only when more data is to be requested.
 
 In order to obtain the access token, the client application MUST construct a signed JWT and send it to the registered authorization server token endpoint. The authorization server MUST validate the JWT and optionally validate if a legal base is present for the given custodian, subject and actor combination. If all is well, the authorization server SHOULD return an access token.
 
-### 3.3. Use access token
+### 3.3 Use access token
 
 When requesting data, the client application MUST add the access token to the Authorization header as a Bearer token as stated in [RFC7523](https://tools.ietf.org/html/rfc7523). The resource server MUST validate the access token with the authorization server. The resource server and authorization server together MUST decide if an access token is valid for the requested resource.
 
 ## 4. Client application
 
-### 4.1. Registration
+### 4.1 Registration
 
 #### 4.1.1 Client registration
 
@@ -101,19 +102,20 @@ Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refe
 In order for the client to resolve the authorization server endpoint it MUST look up the `oauth` service endpoint of the compound service.
 A compound service may refer to endpoint services from other DID Documents.
 
-### 4.2. Constructing the JWT
+### 4.2 Constructing the JWT
 
-#### 4.2.1. Header
+#### 4.2.1 Header
 
 * **typ**: MUST be `JWT`
 * **alg**: one of `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512` \([RFC7518](https://tools.ietf.org/html/rfc7518)\)
 * **kid**: MUST contain the identifier of a key published in the actor's DID document, listed in the `assertionMethod` section.  
 
-#### 4.2.2. Payload
+#### 4.2.2 Payload
 
 * **iss**: The issuer MUST contain the DID of the actor, thus the care organization making the request.
 * **sub**: The subject MUST contain the DID of the custodian. The custodian's DID could be used to find the relevant consent \(together with the actor and subject\).
 * **vcs**: A list of base64 encoded [Nuts Authorization Credentials](rfc014-authorization-credential.md). Optional
+* **purposeOfUse**: A list of desired usages. Corresponds to Bolts. Omitted when empty.   
 * **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the `aud` MUST be an `oauth` service identifier. That service MUST be an absolute endpoint.
 * **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
@@ -122,7 +124,7 @@ A compound service may refer to endpoint services from other DID Documents.
 
 All other claims may be ignored.
 
-#### 4.2.3. Example JWT
+#### 4.2.3 Example JWT
 
 ```javascript
 {
@@ -136,7 +138,8 @@ All other claims may be ignored.
 {
   "iss": "did:nuts:123",
   "vcs": [...Base64 encoded token credential...],
-  "sid": "urn:oid:2.16.840.1.113883.2.4.6.3:9999990",
+  "purposeOfUse": ["eTransfer"],
+  "sid": "urn:oid:2.16.840.1.113883.2.4.6.3:999999990",
   "aud": "did:nuts:456#_08934567fgjsdroiuty230467",
   "usi": {...Base64 encoded token container...},
   "osi": {...hardware token sig...},
@@ -145,7 +148,7 @@ All other claims may be ignored.
 }
 ```
 
-#### 4.2.4. Posting the JWT
+#### 4.2.4 Posting the JWT
 
 The signed JWT MUST be sent to the registered authorization server oauth endpoint using the HTTP POST method. The `urn:ietf:params:oauth:grant-type:jwt-bearer` _grant\_type_ MUST be used. This profile is described in [RFC7523](https://tools.ietf.org/html/rfc7523). The JWT MUST be present in the assertion field. The scope MUST be **nuts**. Below is a full HTTP example.
 
@@ -194,41 +197,41 @@ HTTP/1.1 200 OK
 
 ## 5. Authorization server
 
-### 5.1. Registration
+### 5.1 Registration
 
 The authorization server endpoint needs to be registered for each service that requires authentication in the care organization DID document.
 
-### 5.2. Validation
+### 5.2 Validation
 
-#### 5.2.1. Validation steps
+#### 5.2.1 Validation steps
 
 The following steps MUST all succeed. The order of execution is not relevant although the JWT signature validation SHOULD be done first.
 
-**5.2.1.1. JWT signature validation**
+**5.2.1.1 JWT signature validation**
 
 The first step is to validate the JWT, the DID in the **kid** field in the JWT header refers to the public key that is used to sign the JWT. If the signature is invalid, an **invalid\_signature** error is returned.
 
-**5.2.1.2. TLS Client certificate validation**
+**5.2.1.2 TLS Client certificate validation**
 
 The client certificate used in the TLS connection must conform the requirements as stated in [RFC008](rfc008-certificate-structure.md).
 
-**5.2.1.3. Issuer validation**
+**5.2.1.3 Issuer validation**
 
 To validate the identity of the issuer, the value of the `kid` MUST be present in the issuer's DID document under the `assertionMethod` section.
 
-**5.2.1.4. JWT validity**
+**5.2.1.4 JWT validity**
 
 The JWT **iat** and **exp** fields MUST be validated. The timestamp of validation MUST lie between these values. The exp field MAY not be more than 5 seconds after the **iat** field.
 
-**5.2.1.5. Login contract validation**
+**5.2.1.5 Login contract validation**
 
 The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the `name` and `city` of the actor. The `name` and `city` MUST exactly \(case sensitive\) match with a valid [Verifiable Credential](rfc011-verifiable-credential.md) issued to the actor. This must be a [NutsOrganizationCredential](rfc012-nuts-organization-credential.md).
 
-**5.2.1.6. Endpoint validation**
+**5.2.1.6 Endpoint validation**
 
 The **aud** field MUST match the identifier of the registered endpoint. This prevents the use of the JWT at any other endpoint. The endpoint reference is used for this. \([RFC7523](https://tools.ietf.org/html/rfc7523#section-3)\). An endpoint identifier contains a DID and a fragment.
 
-**5.2.1.7. Validate authorization credentials**
+**5.2.1.7 Validate authorization credentials**
 
 The **vcs** field contains the authorization credentials that determine the accessible resource.
 Each credential must valid according to the following rules:
@@ -245,11 +248,17 @@ It MUST be verified that the actor's request conforms to the specified policy an
 
 The **vcs** field is not needed when actor and custodian are the same.
 
-**5.2.1.8. Subject validation**
+**5.2.1.8 Subject validation**
 
 The **sub** field in the JWT MUST be a known organization. It MUST have been registered by the node operator of the authorization server and it MUST be valid at the time indicated by the **iat** field.
 
-#### 5.2.2. Error responses
+**5.2.1.9  Purpose of use**
+
+The `purposeOfUse` field is to define the scope of the access token. It contains a list of policy names. The policy names are defined by Bolts.
+All `purposeOfUse` entries from the accompanying authorization credentials MUST be listed.
+The resource server MUST be able to resolve the policy names from the access token. 
+
+#### 5.2.2 Error responses
 
 Errors are returned as described in [https://tools.ietf.org/html/rfc6749\#section-5.2](https://tools.ietf.org/html/rfc6749#section-5.2):
 
@@ -264,7 +273,7 @@ Errors are returned as described in [https://tools.ietf.org/html/rfc6749\#sectio
      }
 ```
 
-### 5.3. Access token
+### 5.3 Access token
 
 There’s no limitation of the type of access token that is issued by the authorization server. The following points do however apply to all forms of access token.
 
@@ -273,13 +282,13 @@ There’s no limitation of the type of access token that is issued by the author
 * Tokens MUST NOT be valid for more than 60 seconds.
 * The access token MUST be marked to only work for the specific vendor. So when the client application requests resources, the access token together with the TLS client certificate can be matched against the known vendor. This prevents hijacking the resulting access token.
 
-### 5.4. Rate limiting
+### 5.4 Rate limiting
 
 The access token is used in several flows including automated flows. This can cause considerable strain on the authorization server. A client application SHOULD therefore reuse tokens whenever possible. Whenever an authorization server is under heavy load, it MAY return the `429 Too many requests` status code. It then must also add the `Retry-After` header with the number of seconds the client application MUST wait. The resource server MAY also return this status code if a client application is requesting tokens when previous tokens are still valid. Given the fact that the client may be running in a clustered environment, it MUST not request more than 10 overlapping tokens. A token overlaps if the **iss**, **sub**, **sid** and **usi** fields are the same or when only the **iss** and **sub** fields are the same in the case when a token is used without subject context.
 
 ## 6. Resource server
 
-### 6.1. Access token
+### 6.1 Access token
 
 The access token MUST be present in the Authorization header as bearer token:
 
@@ -293,7 +302,7 @@ GET  /fhir/Patient/1 HTTP/1.1
 
 A token MAY be used multiple times unless the returned error code prevents it. A token MUST NOT be used when it has been expired.
 
-### 6.2. Authorization
+### 6.2 Authorization
 
 The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The resource server MUST also check if the client certificate used for the TLS connections is from the same party that requested the access token. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
 
@@ -301,7 +310,21 @@ The resource server MUST validate the validity of the access token. It MAY conta
 2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify a Nuts Authorization Credential was used in the access token request for the combination of custodian, actor, subject and resource.
 3. **The actor and custodian are the same.** It may be the case that a care organization is using multiple service providers. In that case each service provider acts on behalf of the care organization. Therefore, it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organization.
 
-### 6.3. Error codes
+In the first two cases, the resource server MUST check if the policy covers the requested resource.
+
+### 6.3 Error codes
 
 Different protocols return different types of error messages. The format will most likely also differ. This means that error messages have to be specified per use-case. If an error message supports a text-based error code, then it should support the illegal\_access\_token code. If a client receives this error code then it MUST NOT reuse the access token.
 
+## 7. Bolt requirements
+
+Different types of data require different levels of authorization.
+Because those requirements depend on the data, it's impossible for an RFC to specify these.
+This passes the requirement on to the Bolts.
+A Bolt MUST add a chapter defining the access policy.
+The policy MUST define which resources may be accessed when no restrictions are given.
+The resources MAY be seperated into 3 categories:
+
+- Personal: personal and/or medical resources.
+- Audited: non-personal resources that require user context.
+- Organization: non-personal resources that do not require user context. Server-to-server logic is possible for this category.  
