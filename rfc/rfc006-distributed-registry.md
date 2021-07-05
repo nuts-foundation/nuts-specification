@@ -270,9 +270,20 @@ All data is public knowledge. All considerations from [§10 of did-core](https:/
 
 ## 4. Services
 
-It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC or Bold specification. A service can define an absolute endpoint URI or be a compound service, referring to a set of services. This is often the case when a SaaS provider defines endpoints to be used for all clients.
+It is to be expected that each DID subject will add services to the DID Document. 
+Specific services will be specified in their own RFC or Bolt specification. 
+A service can define an absolute endpoint URI or be a compound service.
+A service can also refer to other services.
+This is often the case when a SaaS provider defines endpoints to be used for all clients.
 
-For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing the URI. For a compound service the `serviceEndpoint` MUST contain a map containing references to absolute endpoint URI services. The references MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service. A compound service MAY refer to absolute endpoints from other DID Documents. See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards.
+For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing a URL. 
+For a compound service the `serviceEndpoint` MUST contain a map with absolute endpoint URLs or references to other services. 
+References MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service. A compound service MAY refer to absolute endpoints from other DID Documents. See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards.
+A valid reference:
+
+```javascript
+"did:nuts:123?type=oauth_prod"
+```
 
 A DID Document MAY NOT contain more than one service with the same type.
 
@@ -280,8 +291,7 @@ The service identifier MUST be constructed from the DID followed by a `#` and an
 
 The id string is calculated as: `idstring = BASE-58(SHA-256(json-bytes-without-id))`
 
-Below is an example of a service registered by a care organization that uses the endpoints from a SaaS provider:
-
+Below is an example of a service registered by a care organization that uses the endpoints from a SaaS provider.
 The SaaS provider defines the actual URL:
 
 ```javascript
@@ -322,7 +332,65 @@ The care organization refers to it:
 }
 ```
 
-### 4.1. Contact information
+### 4.1 Service references
+
+Any `serviceEndpoint` with a value that starts with `did` is a reference to another service.
+As specified earlier, all references use the `type` query parameter.
+When resolving a service, a reference URI MUST be replaced with the value from the `serviceEndpoint` field of the referenced service.
+
+A client doesn't care about the references. When a client queries for particular services, the references need to be resolved.
+Using references MUST NOT create an infinite loop.
+Resolving a reference MUST NOT go deeper than 5 levels. Given 5 services where A ultimately references E through B, C and D (A -> B -> C -> D -> E). Given the maximum depth of 5, E MUST contain an absolute endpoint URI.
+
+Another limitation is that a reference that originates from a compound service MUST NOT resolve to another compound service. Resolving that would lead to a map of URIs nested within a map of URIs, which is invalid syntax.
+
+An example of a deeply nested structure:
+
+```javascript
+{
+  "@context": [ "https://www.w3.org/ns/did/v1" ],
+  "id": "did:nuts:abc",
+  "service": [
+    {
+      "id": "did:nuts:abc#1",
+      "type": "NutsCompoundServiceRef",
+      "serviceEndpoint": "did:nuts:123?type=NutsCompoundService"
+    },
+    {
+      "id": "did:nuts:abc#2",
+      "type": "NutsCompoundService",
+      "serviceEndpoint": {
+        "oauth": "did:nuts:123?type=oauth"
+      }
+    },
+    {
+      "id": "did:nuts:abc#3",
+      "type": "oauth",
+      "serviceEndpoint": "did:nuts:123?type=oauth_prod"
+    },
+    {
+      "id": "did:nuts:abc#4",
+      "type": "oauth_prod",
+      "serviceEndpoint": "https://auth.example.com"
+    }
+  ]
+}
+```
+
+Resolving `did:nuts:123?type=NutsCompoundServiceRef` would produce:
+
+```javascript
+{
+  
+  "id": "did:nuts:abc#1",
+  "type": "NutsCompoundServiceRef",
+  "serviceEndpoint": {
+    "oauth": "https://auth.example.com"
+  }
+}
+```
+
+### 4.2 Contact information
 
 A DID MAY contain a service of type `node-contact-info` that contains information which can be used to contact the operator of the node that controls the DID document. The information MUST NOT contain any personally identifiable information \(PII\) such as personal names, e-mail addresses or telephone numbers. It SHOULD contain a company/unit name, e-mail address and/or telephone number instead. The `serviceEndpoint` MUST be a map and MUST contain the `email` property. It addition it MAY contain the following properties: `tel` \(telephone number\), `name` \(company/unit name\), `web` \(website URL\). All properties MUST be formatted as string. For example:
 
