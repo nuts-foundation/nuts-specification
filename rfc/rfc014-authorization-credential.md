@@ -7,45 +7,32 @@
 |  | June 2021 |
 
 ## Nuts Authorization Credential
+
 ### Abstract
 
-A Nuts Authorization Credential describes which data an actor may access. 
-It is scoped to a specific combination of custodian, actor and service (Bolt). 
-The credential also contains the legal base on which data access may occur. 
-This allows this credential to be used for explicit consent from a patient but also in cases where consent is implied.
-A patient can consent to a referral to a specialist. This implies that relevant data is accessible to that specialist.
-This RFC adds the requirement for Bolts to define an access policy. 
-A resource server, hosted by a custodian, will use the policy and the credential to grant access to a specific resource. 
-The credential is currently only usable for FHIR based services.
+A Nuts Authorization Credential describes which data an actor may access. It is scoped to a specific combination of custodian, actor and service \(Bolt\). The credential also contains the legal base on which data access may occur. This allows this credential to be used for explicit consent from a patient but also in cases where consent is implied. A patient can consent to a referral to a specialist. This implies that relevant data is accessible to that specialist. This RFC adds the requirement for Bolts to define an access policy. A resource server, hosted by a custodian, will use the policy and the credential to grant access to a specific resource. The credential is currently only usable for FHIR based services.
 
 ### Status
 
 This document is currently a draft.
 
 ### Copyright Notice
+
 ![](../.gitbook/assets/license.png)
 
 This document is released under the [Attribution-ShareAlike 4.0 International \(CC BY-SA 4.0\) license](https://creativecommons.org/licenses/by-sa/4.0/).
 
 ## 1. Introduction
 
-Personal data (this includes medical data) is protected under the GDPR and various local legislation. 
-It's common in healthcare to receive care from multiple care organizations. 
-These organizations may not share data amongst them without a valid legal reason. 
-The GDPR sums up several legal reasons to share data. Most common are local legislation and explicit consent. 
-When data is shared between two organizations, this only matters to those organizations (and the patient). 
-Others are not allowed to see this relation. 
-Simply knowing where someone receives care may give away the illness of the patient.
-The type of data that is shared should also be limited to what is needed by the actor.
+Personal data \(this includes medical data\) is protected under the GDPR and various local legislation. It's common in healthcare to receive care from multiple care organizations. These organizations may not share data amongst them without a valid legal reason. The GDPR sums up several legal reasons to share data. Most common are local legislation and explicit consent. When data is shared between two organizations, this only matters to those organizations \(and the patient\). Others are not allowed to see this relation. Simply knowing where someone receives care may give away the illness of the patient. The type of data that is shared should also be limited to what is needed by the actor.
 
-There are various reasons why data can be shared. 
-The process of determining a valid reason happens at different places and at different times:
+There are various reasons why data can be shared. The process of determining a valid reason happens at different places and at different times:
 
-- A patient at the GP's office wants the GP to view data from the hospital.
-- A patient consents to a specific treatment or test and this treatment/test requires specific data.
-- An elderly receiving home care wants his/her GP to be able to review data from the home care organization.
-- A patient is discharged from the hospital and needs to undergo physical therapy. 
-- Etc.
+* A patient at the GP's office wants the GP to view data from the hospital.
+* A patient consents to a specific treatment or test and this treatment/test requires specific data.
+* An elderly receiving home care wants his/her GP to be able to review data from the home care organization.
+* A patient is discharged from the hospital and needs to undergo physical therapy. 
+* Etc.
 
 This RFC builds upon [RFC011](rfc011-verifiable-credential.md).
 
@@ -61,15 +48,13 @@ Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-arc
 
 ### 3.1 Credential fields
 
-The `issuer` field of the credential MUST contain the DID of the custodian.
-The `type` MUST include both the values `VerifiableCredential` and `NutsAuthorizationCredential`.
-A Bolt specification is required to specify the maximum validity of the credential.
+The `issuer` field of the credential MUST contain the DID of the custodian. The `type` MUST include both the values `VerifiableCredential` and `NutsAuthorizationCredential`. A Bolt specification is required to specify the maximum validity of the credential.
 
 ### 3.2 CredentialSubject
 
 The `credentialSubject` field contains the following:
 
-```json
+```javascript
 {
   "id": "did:nuts:SjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2",
   "legalBase": {
@@ -137,15 +122,11 @@ All restrictions and policy rules MUST use paths relative to the endpoint for th
 [§4 of RFC006](rfc006-distributed-registry.md#4-services) covers the registration of services.
 If `restrictions` are present in the credential, the resource server can compare the operation and relative path of the request to the `restrictions` present in the credential.
 
-Although Nuts Authorization Credentials are part of the OAuth flow of [RFC003](rfc003-oauth2-authorization.md), the actual checking is done at request time. This means that the resource server will have to check the policy and make a request for the restrictions from the Nuts registry. This model can be compared with an [Attribute Based Access Control (ABAC) model](https://en.wikipedia.org/wiki/Attribute-based_access_control). The Bolt policies are added to the Policy Administration Point, the Nuts node acts as Policy Information Point. The resource server is the Policy Enforcement Point. It's up to the vendor to implement the Policy Decision Point. 
+Although Nuts Authorization Credentials are part of the OAuth flow of [RFC003](rfc003-oauth2-authorization.md), the actual checking is done at request time. This means that the resource server will have to check the policy and make a request for the restrictions from the Nuts registry. This model can be compared with an [Attribute Based Access Control \(ABAC\) model](https://en.wikipedia.org/wiki/Attribute-based_access_control). The Bolt policies are added to the Policy Administration Point, the Nuts node acts as Policy Information Point. The resource server is the Policy Enforcement Point. It's up to the vendor to implement the Policy Decision Point.
 
 ## 5. Issuance & distribution
 
-A Nuts Authorization Credential is private and the transaction MAY be published over the Nuts network.
-The contents of the Credential MUST NOT be attached to the network transaction.
-Only the custodian and actor MAY retrieve the transaction payload.
-Every DID MAY issue an authorization credential.
-The VC does not have any other requirements nor does it add requirements to other VCs.
+A Nuts Authorization Credential is private and the transaction MAY be published over the Nuts network. The contents of the Credential MUST NOT be attached to the network transaction. Only the custodian and actor MAY retrieve the transaction payload. Every DID MAY issue an authorization credential. The VC does not have any other requirements nor does it add requirements to other VCs.
 
 ## 6. Supported proofs
 
@@ -153,8 +134,7 @@ Only proofs from [RFC011](rfc011-verifiable-credential.md) are supported.
 
 ## 7. Trust
 
-The Nuts Authorization Credential only impacts the actor and custodian.
-It MUST be trusted automatically.
+The Nuts Authorization Credential only impacts the actor and custodian. It MUST be trusted automatically.
 
 ## 8. Revocation
 
@@ -176,7 +156,7 @@ A Nuts Authorization Credential is always scoped to a specific Bolt.
 
 Example of a Nuts Authorization Credential with explicit consent:
 
-```json
+```javascript
 {
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
@@ -202,9 +182,10 @@ Example of a Nuts Authorization Credential with explicit consent:
   "proof": {...}
 }
 ```
+
 Example of a Nuts Authorization Credential with implied consent:
 
-```json
+```javascript
 {
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
@@ -227,3 +208,4 @@ Example of a Nuts Authorization Credential with implied consent:
   "proof": {...}
 }
 ```
+
