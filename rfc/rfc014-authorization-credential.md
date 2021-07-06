@@ -102,7 +102,7 @@ When `implied`, values MUST be added to the `restrictions` array.
 
 The `id` field MUST contain the DID of the actor.
 The `subject` field MAY contain the patient identifier. In the example above the *oid* for the Dutch citizenship number is used.
-The `purposeOfUse` field refers to a Bolt. A Bolt MUST describe the set of FHIR resources that can be accessed with the credential.
+The `purposeOfUse` field refers to an access policy. A Bolt MUST describe this policy as a set of FHIR resources that can be accessed with the credential.
 The `restrictions` array MAY further limit access.
 When no `subject` is given, the credential MUST contain `restrictions` that refer to individual resources.
 The contents of those individual resources MUST NOT contain any personal information.
@@ -131,10 +131,10 @@ A resource server uses the Nuts Authorization Credential to check the access rig
 The rules for determining access are a combination of a Bolt specific policy and any additional information from the credential.
 Identification and authentication are covered by [RFC003](rfc003-oauth2-authorization.md).
 If no `restrictions` are added to the credential, the resource server MUST follow the policy rules of the Bolt.
-The Bolt policy will list the operations and resource types that can be accessed. (See also [RFC003 §7](rfc003-oauth2-authorization.md#7-bolt-requirements))
+The Bolt policy will list the operations and resource types that can be accessed. See also [RFC003 §7](rfc003-oauth2-authorization.md#7-bolt-requirements)
 A policy MAY also require certain parameters. For example, when a `search` operation is done on a FHIR `observation` resource, the policy may have a rule that requires a query parameter using the `subject` field of the credential.
 All restrictions and policy rules MUST use paths relative to the endpoint for the given service.
-[§4 of RFC006](rfc006-distributed-registry.md#4-services) Covers the registration of services.
+[§4 of RFC006](rfc006-distributed-registry.md#4-services) covers the registration of services.
 If `restrictions` are present in the credential, the resource server can compare the operation and relative path of the request to the `restrictions` present in the credential.
 
 Although Nuts Authorization Credentials are part of the OAuth flow of [RFC003](rfc003-oauth2-authorization.md), the actual checking is done at request time. This means that the resource server will have to check the policy and make a request for the restrictions from the Nuts registry. This model can be compared with an [Attribute Based Access Control (ABAC) model](https://en.wikipedia.org/wiki/Attribute-based_access_control). The Bolt policies are added to the Policy Administration Point, the Nuts node acts as Policy Information Point. The resource server is the Policy Enforcement Point. It's up to the vendor to implement the Policy Decision Point. 

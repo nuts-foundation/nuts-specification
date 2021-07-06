@@ -254,7 +254,7 @@ The **sub** field in the JWT MUST be a known organization. It MUST have been reg
 
 **5.2.1.9  Purpose of use**
 
-The `purposeOfUse` field is to define the scope of the access token. It contains a list of policy names. The policy names are defined by Bolts.
+The `purposeOfUse` field is used to define the scope of the access token. It contains a list of policy names. The policy names are defined by Bolts.
 All `purposeOfUse` entries from the accompanying authorization credentials MUST be listed.
 The resource server MUST be able to resolve the policy names from the access token. 
 
@@ -321,10 +321,10 @@ Different protocols return different types of error messages. The format will mo
 Different types of data require different levels of authorization.
 Because those requirements depend on the data, it's impossible for an RFC to specify these.
 This passes the requirement on to the Bolts.
-A Bolt MUST add a chapter defining the access policy.
+Therefore the Bolt MUST define the access policy.
 The policy MUST define which resources may be accessed when no restrictions are given.
-The resources MAY be seperated into 3 categories:
+The resources MAY be separated into 3 categories:
 
 - Personal: personal and/or medical resources.
 - Audited: non-personal resources that require user context.
-- Organization: non-personal resources that do not require user context. Server-to-server logic is possible for this category.  
+- Organization: non-personal resources that do not require user context. (e.g. server-to-server logic)
