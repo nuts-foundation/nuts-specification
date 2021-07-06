@@ -97,9 +97,7 @@ Example of the actor's DID document:
 
 #### 4.1.2 Server registration
 
-Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refers to another service in a DID Document.
-In order for the client to resolve the authorization server endpoint it MUST look up the `oauth` service endpoint of the compound service.
-A compound service may refer to endpoint services from other DID Documents.
+Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refers to another service in a DID Document. In order for the client to resolve the authorization server endpoint it MUST look up the `oauth` service endpoint of the compound service. A compound service may refer to endpoint services from other DID Documents.
 
 ### 4.2. Constructing the JWT
 
@@ -230,8 +228,7 @@ The **aud** field MUST match the identifier of the registered endpoint. This pre
 
 **5.2.1.7. Validate authorization credentials**
 
-The **vcs** field contains the authorization credentials that determine the accessible resource.
-Each credential must valid according to the following rules:
+The **vcs** field contains the authorization credentials that determine the accessible resource. Each credential must valid according to the following rules:
 
 * The credential `issuer` equals the **sub** field of the JWT.
 * The credential `credentialSubject.id` equals the **iss** field of the JWT.
@@ -240,8 +237,7 @@ Each credential must valid according to the following rules:
 * The credential has not been revoked.
 * The credential has not expired.
 
-The credentials contain the policy and allowed resources. 
-It MUST be verified that the actor's request conforms to the specified policy and only requests allowed resources.
+The credentials contain the policy and allowed resources. It MUST be verified that the actor's request conforms to the specified policy and only requests allowed resources.
 
 The **vcs** field is not needed when actor and custodian are the same.
 
