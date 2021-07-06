@@ -147,7 +147,7 @@ The DID document has the following basic requirements:
 * the `id` MUST be generated according to the method specified at the beginning of §3
 * all key references in `capabilityInvocation`, `capabilityDelegation`, `assertionMethod`, `authentication` and `keyAgreement` MUST refer to keys listed under `verificationMethods`
 
-Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` and the public key fingerprint according to [rfc7638](https://tools.ietf.org/html/rfc7638) Each key MUST be of type `JsonWebKey2020` according to §5.3.1 of the [did-core-spec](https://www.w3.org/TR/did-core/#key-types-and-formats)
+Each key listed in `verificationMethod` MUST have an `id` equal to the DID followed by a `#` and the public key fingerprint according to [rfc7638](https://tools.ietf.org/html/rfc7638) Each key MUST be of type `JsonWebKey2020` according to the [did-spec-registry](https://www.w3.org/TR/did-core/#key-types-and-formats)
 
 The `controller` field MAY be present. This RFC follows the [did-core-spec](https://www.w3.org/TR/did-core/#did-controller).
 
@@ -188,7 +188,7 @@ All historic versions of a DID Document SHOULD be stored and queryable. This all
 
 **3.2.2.2 Document Metadata**
 
-The resolved DID Document Metadata contains the `created` and `updated` fields, in accordance with the [did-core-spec](https://www.w3.org/TR/did-core/#did-document-metadata-properties). They are derived from the underlying Nuts Documents. `created` MUST contain the `sigt` timestamp from the first version of the document. `updated` MUST contain the `sigt` timestamp of the last version of the DID Document.
+The resolved DID Document Metadata contains the `created` and `updated` fields, in accordance with the [did-core-spec](https://www.w3.org/TR/did-core/#did-document-metadata). They are derived from the underlying Nuts Documents. `created` MUST contain the `sigt` timestamp from the first version of the document. `updated` MUST contain the `sigt` timestamp of the last version of the DID Document.
 
 #### 3.2.3 Update \(Replace\)
 
