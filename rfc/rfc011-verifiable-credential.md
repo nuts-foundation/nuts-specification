@@ -96,7 +96,13 @@ VCs are not updatable, an update can be performed by revoking the current and is
 
 VC identifiers MUST be constructed as `DID#id` where `id` is unique for the given issuer.
 
-### 3.5 VC Example
+### 3.5 Active issuer
+
+A VC MUST have an active issuer at the time of usage.
+Usage includes using the VC to generate a VP or sending it along in an OAuth flow.
+If the issuer is deactivated at the time of usage, the VC MUST be regarded as invalid.
+
+### 3.6 VC Example
 
 Below is an example of a credential. **Issuer** and **Subject** are the same in the example. This specification neither requires nor prevents this.
 
