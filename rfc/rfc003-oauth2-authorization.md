@@ -12,7 +12,7 @@
 
 ### Abstract
 
-This RFC describes authorizing users and or systems in the Nuts network using the [OAuth 2.0 framework](https://oauth.net/2/). OAuth 2.0 is a widely accepted authorization framework well known from e.g. "sign-in with Google". The framework is highly customizable and accepts many _Grant types_. The most used OAuth grant types require clients to be registered up front with the authorization server, tokens to be transfered in advance and do not support zero-knowledge-proofs. In order to use OAuth in the Nuts network we must choose and configure the appropriate grant type. This RFC describes how to identify a system or a user with a custom JWT and then retrieve an access token which than can be used as bearer token for authorization at the resource server.
+This RFC describes authorizing users and or systems in the Nuts network using the [OAuth 2.0 framework](https://oauth.net/2/). OAuth 2.0 is a widely accepted authorization framework well known from w.g., "sign-in with Google". The framework is highly customizable and accepts many _Grant types_. The most used OAuth grant types require clients to be registered up front with the authorization server, tokens to be transferred in advance and do not support zero-knowledge-proofs. In order to use OAuth in the Nuts network we must choose and configure the appropriate grant type. This RFC describes how to identify a system or a user with a custom JWT and then retrieve an access token which then can be used as bearer token for authorization at the resource server.
 
 ### Status of document
 
@@ -32,8 +32,8 @@ In this document we will provide a way of protecting RESTful APIs with use of an
 
 * **Client application**: The application that requires access.
 * **Resource server**: The application \(a protected resource\) that requires authorized access to its API’s.
-* **JWT bearer token**: JWT encoded bearer token contains the user’s identity, subject and custodian and is signed by the acting party. This token is used to obtain an OAuth 2 access token.
-* **Access token**: An OAuth 2 access token, provided by an authorization Server. This token is handed to the client so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
+* **JWT Grant**: JWT grant contains the user’s identity, subject and custodian and is signed by the acting party. This grant is used as an authorization grant to obtain an OAuth 2 access token.
+* **Access token**: An OAuth 2 access token, provided by an authorization Server. This token is handed to the client, so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
 * **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian and token validity. This mechanism is called token introspection which is described by [RFC7662](https://tools.ietf.org/html/rfc7662).
 * **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document. [RFC006](rfc006-distributed-registry.md) describes endpoint registration.
 * **Compound service**: Higher level service as described by [RFC006](rfc006-distributed-registry.md).
@@ -42,7 +42,7 @@ Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-
 
 ## 3. OAuth flow
 
-The mechanism of retrieving an access token using a JWT bearer token is based on the JSON Web Token \(JWT\) Profile for OAuth 2.0 Client Authentication and Authorization Grants [\[RFC7523\]](https://tools.ietf.org/html/rfc7523).
+The mechanism of retrieving an access token using a JWT Grant is based on the JSON Web Token \(JWT\) Profile for OAuth 2.0 Client Authentication and Authorization Grants [\[RFC7523\]](https://tools.ietf.org/html/rfc7523).
 
 ![](../.gitbook/assets/nuts-oauth-authorization-flow.png)
 
@@ -122,7 +122,7 @@ All other claims may be ignored.
 
 #### 4.2.3. Example JWT
 
-```javascript
+```json
 {
   "alg": "RS256",
   "typ": "JWT",
@@ -291,7 +291,7 @@ A token MAY be used multiple times unless the returned error code prevents it. A
 
 ### 6.2. Authorization
 
-The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The resource server MUST also check if the client certificate used for the TLS connections is from the same party that requested the access token. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
+The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token, or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The resource server MUST also check if the client certificate used for the TLS connections is from the same party that requested the access token. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
 
 1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
 2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify a Nuts Authorization Credential was used in the access token request for the combination of custodian, actor, subject and resource.
