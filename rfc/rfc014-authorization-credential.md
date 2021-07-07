@@ -201,7 +201,13 @@ Example of a Nuts Authorization Credential with implied consent:
     "legalBase": {
       "consentType": "implied"
     },
-    "restrictions": ["/composition/f2aeec97-fc0d-42bf-8ca7-0548192d4231"],
+    "restrictions": [
+      {
+        "resource": "/DocumentReference/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
+        "operations": ["read"],
+        "userContext": true
+      }
+    ],
     "purposeOfUse": "eOverdracht",
     "subject": "urn:oid:2.16.840.1.113883.2.4.6.3:123456780"
   },
