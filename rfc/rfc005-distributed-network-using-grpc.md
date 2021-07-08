@@ -46,7 +46,7 @@ The protocol aims to synchronize the local DAG with that of peers by;
 
 The network is a full mesh peer-to-peer network: all participants in the network try to connect to any peer they discover.
 
-The full mesh topology is expected to be performant up to ca. 20 nodes \(source?\). When a production network is expected surpass that number of nodes, the protocol should be adjusted to form a partial mesh where nodes only connect to a maximum number of peer. For instance, an IPFS node tries to connect to 10 other nodes which are randomly distributed.
+The full mesh topology is expected to be performant up to ca. 20 nodes \(source?\). When a production network is expected surpass that number of nodes, the protocol should be adjusted to form a partial mesh where nodes only connect to a maximum number of peer. For instance, an [IPFS](https://ipfs.io/) node tries to connect to 10 other nodes which are randomly distributed.
 
 ## 5. Operation
 
@@ -205,9 +205,9 @@ The following issues must be either be solved in this RFC or acknowledged being 
 * Fast replay \(from another node\) when starting a new node
 * We need some kind of flooding detection and prevention
 * Detect dead nodes
-  * Possible solution: SWIM?
+  * Possible solution: [SWIM?](https://www.brianstorti.com/swim/)
 * Retrieve transaction payload from other nodes than the one who sent you the hash
-  * Possible solution: kademlia-ish hash distance comparison to determine which node to query for the contents? 
+  * Possible solution: [kademlia-ish](https://en.wikipedia.org/wiki/Kademlia) hash distance comparison to determine which node to query for the contents? 
 * Detect nodes that refuse to sync with you \(but keep sending different hashes\)
 * Querying a peer when the local node receives a local hash now works by just querying all transactions for that block,
 
