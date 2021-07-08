@@ -67,33 +67,60 @@ The `credentialSubject` field contains the following:
   "restrictions": [
     {
       "resource": "/DocumentReference/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
-      "operations": ["read"]
+      "operations": ["read"],
+      "userContext": true
     }
   ],
-  "service": "test-service",
+  "purposeOfUse": "test-service",
   "subject": "urn:oid:2.16.840.1.113883.2.4.6.3:123456780"
 }
 ```
 
 ### 3.2.1 Required fields
 
-The `id`, `legalBase` and `service` fields MUST be filled. Within the `legalBase` object, `consentType` MUST either be `implied` or `explicit`. When `explicit`, the `evidence` and `subject` fields MUST be filled. When `implied`, values MUST be added to the `restrictions` array.
+The `id`, `legalBase` and `purposeOfUse` fields MUST be filled. 
+Within the `legalBase` object, `consentType` MUST either be `implied` or `explicit`. 
+When `explicit`, the `evidence` and `subject` fields MUST be filled.
+When `implied`, values MUST be added to the `restrictions` array.
 
 ### 3.2.2 Scoping
 
-The `id` field MUST contain the DID of the actor. The `subject` field MAY contain the patient identifier. In the example above the _oid_ for the Dutch citizenship number is used. The `service` field refers to a Bolt. A Bolt MUST describe the set of FHIR resources that can be accessed with the credential. The `restrictions` array MAY further limit access. When no `subject` is given, the credential MUST contain `restrictions` that refer to individual resources. The contents of those individual resources MUST NOT contain any personal information.
+The `id` field MUST contain the DID of the actor.
+The `subject` field MAY contain the patient identifier. In the example above the *oid* for the Dutch citizenship number is used.
+The `purposeOfUse` field refers to an access policy. A Bolt MUST describe this policy as a set of FHIR resources that can be accessed with the credential.
+The `restrictions` array MAY further limit access.
+When no `subject` is given, the credential MUST contain `restrictions` that refer to individual resources.
+The contents of those individual resources MUST NOT contain any personal information.
 
 ### 3.2.3 Legal base
 
-The patient consent can be either implied or explicit. When it's implied, this should be reflected by the type of service that is entered. A Bolt MUST therefore also describe if it is covered by explicit or implied consent. When the credential is given in the context of explicit consent, the `legalBase.evidence` MUST be filled. It MUST contain a value for the `path` and `type` fields. The `path` is a relative path to the service data endpoint and the `type` contains the media type as specified by [RFC6838](https://datatracker.ietf.org/doc/html/rfc6838). The evidence resource MUST be accessible with an access token that was created with the corresponding credential.
+The patient consent can be either implied or explicit. 
+When it's implied, this should be reflected by the `purposeOfUse`.
+A Bolt MUST therefore also describe if it is covered by explicit or implied consent.
+When the credential is given in the context of explicit consent, the `legalBase.evidence` MUST be filled.
+It MUST contain a value for the `path` and `type` fields. The `path` is a relative path to the service data endpoint and the `type` contains the media type as specified by [RFC6838](https://datatracker.ietf.org/doc/html/rfc6838).
+The evidence resource MUST be accessible with an access token that was created with the corresponding credential.
 
 ### 3.2.4 Restrictions
 
-The `restrictions` object MAY be used to restrict access. The base access is provided by the policy as defined by the Bolt. If any restrictions are added, they override the Bolt policy. Restrictions MAY NOT grant more access rights than the policy. All entries in the `restrictions` list contain a `resource`. The `resource` fields contains the relative path to the service data endpoint. The `operations` field contains a list of operations allowed on this resource. The valid options are a subset of the [FHIR specification](http://hl7.org/fhir/stu3/http.html): `read`, `vread`,`update`,`patch`,`delete`,`history (instance)`, `create` and `search`.
+The `restrictions` object MAY be used to restrict access. The base access is provided by the policy (`purposeOfUse`) as defined by the Bolt.
+If any restrictions are added, they override the Bolt policy. 
+Restrictions MAY NOT grant more access rights than the policy.
+All entries in the `restrictions` list contain a `resource`. The `resource` fields contains the relative path to the service data endpoint. 
+The `operations` field contains a list of operations allowed on this resource. The valid options are a subset of the [FHIR specification](http://hl7.org/fhir/stu3/http.html): `read`, `vread`,`update`,`patch`,`delete`,`history (instance)`, `create` and `search`.
+The `userContext` field defines if the resource requires user context. If `true`, an authentication token MUST be present in the OAuth flow. 
 
 ## 4. Access Control
 
-A resource server uses the Nuts Authorization Credential to check the access rights of an actor. The rules for determining access are a combination of a Bolt specific policy and any additional information from the credential. Identification and authentication are covered by [RFC003](rfc003-oauth2-authorization.md). If no `restrictions` are added to the credential, the resource server MUST follow the policy rules of the Bolt. The Bolt policy will list the operations and resource types that can be accessed. A policy MAY also require certain parameters. For example, when a `search` operation is done on a FHIR `observation` resource, the policy may have a rule that requires a query parameter using the `subject` field of the credential. All restrictions and policy rules MUST use paths relative to the endpoint for the given service. The registration of services is covered by [§4 of RFC006](rfc006-distributed-registry.md#4-services). If `restrictions` are present in the credential, the resource server can compare the operation and relative path of the request to the `restrictions` present in the credential.
+A resource server uses the Nuts Authorization Credential to check the access rights of an actor.
+The rules for determining access are a combination of a Bolt specific policy and any additional information from the credential.
+Identification and authentication are covered by [RFC003](rfc003-oauth2-authorization.md).
+If no `restrictions` are added to the credential, the resource server MUST follow the policy rules of the Bolt.
+The Bolt policy will list the operations and resource types that can be accessed. See also [RFC003 §7](rfc003-oauth2-authorization.md#7-bolt-requirements)
+A policy MAY also require certain parameters. For example, when a `search` operation is done on a FHIR `observation` resource, the policy may have a rule that requires a query parameter using the `subject` field of the credential.
+All restrictions and policy rules MUST use paths relative to the endpoint for the given service.
+[§4 of RFC006](rfc006-distributed-registry.md#4-services) covers the registration of services.
+If `restrictions` are present in the credential, the resource server can compare the operation and relative path of the request to the `restrictions` present in the credential.
 
 Although Nuts Authorization Credentials are part of the OAuth flow of [RFC003](rfc003-oauth2-authorization.md), the actual checking is done at request time. This means that the resource server will have to check the policy and make a request for the restrictions from the Nuts registry. This model can be compared with an [Attribute Based Access Control \(ABAC\) model](https://en.wikipedia.org/wiki/Attribute-based_access_control). The Bolt policies are added to the Policy Administration Point, the Nuts node acts as Policy Information Point. The resource server is the Policy Enforcement Point. It's up to the vendor to implement the Policy Decision Point.
 
@@ -149,7 +176,7 @@ Example of a Nuts Authorization Credential with explicit consent:
         "type": "application/pdf"
       } 
     },
-    "service": "zorginzage",
+    "purposeOfUse": "zorginzage",
     "subject": "urn:oid:2.16.840.1.113883.2.4.6.3:123456780"
   },
   "proof": {...}
@@ -174,8 +201,14 @@ Example of a Nuts Authorization Credential with implied consent:
     "legalBase": {
       "consentType": "implied"
     },
-    "restrictions": ["/composition/f2aeec97-fc0d-42bf-8ca7-0548192d4231"],
-    "service": "eOverdracht",
+    "restrictions": [
+      {
+        "resource": "/DocumentReference/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
+        "operations": ["read"],
+        "userContext": true
+      }
+    ],
+    "purposeOfUse": "eOverdracht",
     "subject": "urn:oid:2.16.840.1.113883.2.4.6.3:123456780"
   },
   "proof": {...}
