@@ -88,10 +88,10 @@ When `explicit`, the `evidence` and `subject` fields MUST be filled.
 The `id` field MUST contain the DID of the actor.
 The `subject` field MAY contain the patient identifier. The example above uses the *oid* for the Dutch citizenship number.
 The `purposeOfUse` field refers to an access policy. A Bolt MUST describe this policy as a set of FHIR resources that can be accessed with the credential.
-The `resources` array extends on the policy.
+The `resources` array extends on the policy. It defines specific resources that may be accessed in addition to the policy.
 When no `subject` is given, the credential MUST contain `resources` that refer to individual resources.
 The contents of those individual resources MUST NOT contain any personal information.
-Without a `subject` and `resources` it would be valid to request an access token with just the `purposeOfUse` in the JWT grant.
+Without `subject` and `resources` it would be valid to request an access token with just the `purposeOfUse` in the JWT grant.
 
 ### 3.2.3 Legal base
 
