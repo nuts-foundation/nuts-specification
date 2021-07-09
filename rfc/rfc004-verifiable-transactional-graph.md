@@ -34,7 +34,7 @@ This document does not define how to transport data to other participants in a d
 * **Transaction**: node on the graph consisting of application data and metadata like signatures and references to other transactions published on a distributed network.
 * **Root transaction**: the first transaction published on a network.
 * **JWS payload**: The payload as defined by [RFC7515](https://tools.ietf.org/html/rfc7515#section-3).
-* **Transaction payload**: The actual data in the transaction.
+* **Transaction contents**: The actual data in the transaction.
 * **Head**: Transaction that is not referenced by another (newer) transaction.
 
 Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
@@ -52,7 +52,7 @@ In addition to required header parameters as specified in RFC7515 the following 
 
   other algorithms SHALL NOT be used.
 
-* **cty**: MUST contain the type of the transaction payload indicating how to interpret it.
+* **cty**: MUST contain the type of the transaction content indicating how to interpret it.
 * **crit** MUST contain the **sigt**, **ver** and **prevs** headers.
 
 The **jku**, **x5c** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the transaction.
@@ -109,10 +109,10 @@ Since transactions are immutable, the only way to update the application data th
 
 Consider the DAG from the previous chapter. If transaction `C` and `D` where to update the same application data, nodes could process the transaction in a different order. This would create an inconsistency in the network. To fix this the following rules MUST be taken into account:
 
-* If the transaction payloads are equal, process as normal. (This can be determined by the JWS payload being the same)
-* If the transaction payloads are not equal, create a representation that is a merger of the transaction payloads according to rules for the specific type.
+* If the transaction content is equal, process as normal. (This can be determined by the JWS payload being the same)
+* If the transaction content is not equal, create a representation that is a merger of the transaction content according to rules for the specific type.
 
-When updates are required for a type of transaction payload, its contents MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
+When updates are required for a type of transaction content, it MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
 
 ### 3.5. Processing the DAG
 
@@ -136,11 +136,11 @@ until queue empty; take transaction from queue
     process transaction
 ```
 
-### 3.6. Signature and transaction payload verification
+### 3.6. Signature and transaction content verification
 
-Before interpreting a transaction's payload the JWS' signature MUST be validated. When **kid** is used to specify the signing key and the system knows additional usage restrictions \(e.g. the key is valid from X to Y, to be checked against **sigt**\), the system MUST assert the usage is compliant.
+Before interpreting a transaction's content the JWS' signature MUST be validated. When **kid** is used to specify the signing key and the system knows additional usage restrictions \(e.g. the key is valid from X to Y, to be checked against **sigt**\), the system MUST assert the usage is compliant.
 
-Furthermore, since the transaction payload is detached from the transaction itself and referred to by hash, the transaction payload MUST be hashed and compared to the hash specified in the transaction, to assert that the retrieved transaction payload is actually the expected transaction payload.
+Furthermore, since the transaction content is detached from the transaction itself and referred to by hash, the transaction content MUST be hashed and compared to the hash specified in the transaction, to assert that the retrieved transaction content is actually the expected transaction content.
 
 ## 4. Example
 

@@ -109,11 +109,11 @@ The local node's DAG heads MUST be broadcast at an interval using the `AdvertHas
 
 ### 5.3. Querying Peer's DAG
 
-When the local node decides to query a peer's DAG because it differs from its own, it uses the `TransactionListQuery` message. It MUST specify the block for which to retrieve the transactions using a Unix timestamp that falls within the requested block. The receiving peer MUST respond with the `TransactionList` message containing all transactions \(without payload\) from its DAG.
+When the local node decides to query a peer's DAG because it differs from its own, it uses the `TransactionListQuery` message. It MUST specify the block for which to retrieve the transactions using a Unix timestamp that falls within the requested block. The receiving peer MUST respond with the `TransactionList` message containing all transactions \(without content\) from its DAG.
 
-### 5.4. Resolving Transaction Payload
+### 5.4. Resolving Transaction Content
 
-When the local node is missing a transaction's payload, it SHOULD query the peer that provided the transaction for the payload using the `TransactionPayloadQuery` message. The peer MUST respond with the `TransactionPayload` message, providing the actual payload in the `data` field. If the peer doesn't have the payload the `data` field MUST be left empty.
+When the local node is missing a transaction's content, it SHOULD query the peer that provided the transaction for the content using the `TransactionPayloadQuery` message. The peer MUST respond with the `TransactionPayload` message, providing the actual content in the `data` field. If the peer doesn't have the content the `data` field MUST be left empty.
 
 ### 5.5. Diagnostics
 
@@ -184,17 +184,17 @@ Countermeasures:
 
 #### Threat: Uncontrolled DAG Growth
 
-A single peer or orchestrated group of peers can quickly produce many transactions, quickly growing the DAG. Since history must be retained to verify the DAG integrity in the future, it's desirable to limit the number of faulty transactions or transactions without a meaningful payload.
+A single peer or orchestrated group of peers can quickly produce many transactions, quickly growing the DAG. Since history must be retained to verify the DAG integrity in the future, it's desirable to limit the number of faulty transactions or transactions without a meaningful content.
 
 ### 8.2. Data Manipulation
 
-#### Threat: Manipulating Transaction Payload
+#### Threat: Manipulating Transaction Content
 
-By altering a transaction's payload when responding to a payload query an attacker can hamper nodes or even steal identities \(e.g. DIDs\).
+By altering a transaction's content when responding to a payload query an attacker can hamper nodes or even steal identities \(e.g. DIDs\).
 
 Countermeasures:
 
-* Nodes MUST verify the payload hash when receiving transaction payload as specified by [RFC004 section 3.6 \(Signature and payload verification\)](rfc004-verifiable-transactional-graph.md)
+* Nodes MUST verify the payload hash when receiving transaction content as specified by [RFC004 section 3.6 \(Signature and transaction content verification\)](rfc004-verifiable-transactional-graph.md)
 
 ## 9. Issues
 
