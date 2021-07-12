@@ -32,7 +32,10 @@ This document does not define how to transport data to other participants in a d
 
 * **Application data**: data produced and consumed by the application that uses the formats described by this RFC.
 * **Transaction**: node on the graph consisting of application data and metadata like signatures and references to other transactions published on a distributed network.
-* **Root transaction** the first transaction published on a network.
+* **Root transaction**: the first transaction published on a network.
+* **JWS payload**: The payload as defined by [RFC7515](https://tools.ietf.org/html/rfc7515#section-3).
+* **Transaction contents**: The actual data in the transaction.
+* **Head**: Transaction that is not referenced by another (newer) transaction.
 
 Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
@@ -49,7 +52,7 @@ In addition to required header parameters as specified in RFC7515 the following 
 
   other algorithms SHALL NOT be used.
 
-* **cty**: MUST contain the type of the payload indicating how to interpret the payload encoded as string.
+* **cty**: MUST contain the type of the transaction content indicating how to interpret it.
 * **crit** MUST contain the **sigt**, **ver** and **prevs** headers.
 
 The **jku**, **x5c** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the transaction.
@@ -76,19 +79,19 @@ When serializing a reference to string form it MUST be hexadecimal encoded and S
 
 ### 3.3. Ordering, branching and merging
 
-Transactions MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to the previous transaction. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor. A new transaction MUST be appended to the end of the DAG by referring to the last transaction of the DAG \(_leaf_\) by including its reference in the **prevs** field.
+Transactions MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to the previous transaction. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor. A new transaction MUST be appended to the end of the DAG by referring to the last transaction of the DAG \(_head_\) by including its reference in the **prevs** field.
 
 All transactions referred to by `prev` MUST be present, since failing to do so would corrupt the DAG.
 
 As the name implies the DAG MUST be acyclic, transactions that introduce a cycle are invalid MUST be ignored. ANY following transaction that refers to the invalid transaction \(direct or indirect\) MUST be ignored as well.
 
-Since it takes some time for the transactions to be synced to all network peers \(eventual consistency\) there COULD be multiple transactions referring to the previous transactions in the **prevs** field, a phenomenon called _branching_. Since branches \(especially old and/or long ones\) may cause transactions to be reordered which hurts performance they MUST be merged as soon as possible. Branches are merged by specifying their leafs in the **prevs** field:
+Since it takes some time for the transactions to be synced to all network peers \(eventual consistency\) there COULD be multiple transactions referring to the previous transactions in the **prevs** field, a phenomenon called _branching_. Since branches \(especially old and/or long ones\) may cause transactions to be reordered which hurts performance they MUST be merged as soon as possible. Branches are merged by specifying their heads in the **prevs** field:
 
 ![DAG structure](../.gitbook/assets/rfc004-branching.svg)
 
 The first transaction in the DAG is the _root transaction_ and SHALL NOT have any **prevs** entries. There MUST only be one root transaction for a network and subsequent root transactions MUST be ignored.
 
-When processing a DAG the system MUST start at the root transaction and work its way to the leaf\(s\) processing subsequent transactions. When encountering a branch the transactions on all branches from that point up until the merge MUST be processed before processing the merge itself. Since ordering is casual processing order over parallel branches isn't important. When looking at the diagram above, the following processing orders are valid:
+When processing a DAG the system MUST start at the root transaction and work its way to the head\(s\) processing subsequent transactions. When encountering a branch the transactions on all branches from that point up until the merge MUST be processed before processing the merge itself. Since ordering is casual processing order over parallel branches isn't important. When looking at the diagram above, the following processing orders are valid:
 
 * `A -> B -> C -> D -> E -> F` \(mixed parallel order\)
 * `A -> B -> D -> C -> E -> F` \(branch D first, then branch C\)
@@ -106,10 +109,10 @@ Since transactions are immutable, the only way to update the application data th
 
 Consider the DAG from the previous chapter. If transaction `C` and `D` where to update the same application data, nodes could process the transaction in a different order. This would create an inconsistency in the network. To fix this the following rules MUST be taken into account:
 
-* If the payloads are equal, process as normal.
-* If the payloads are not equal, create a representation that is a merger of the payloads according to rules for the specific payload.
+* If the transaction content is equal, process as normal. (This can be determined by the JWS payload being the same)
+* If the transaction content is not equal, create a representation that is a merger of the transaction content according to rules for the specific type.
 
-When updates are required for a type of payload, its contents MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
+When updates are required for a type of transaction content, it MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
 
 ### 3.5. Processing the DAG
 
@@ -133,11 +136,11 @@ until queue empty; take transaction from queue
     process transaction
 ```
 
-### 3.6. Signature and payload verification
+### 3.6. Signature and transaction content verification
 
-Before interpreting a transaction's payload the JWS' signature MUST be validated. When **kid** is used to specify the signing key and the system knows additional usage restrictions \(e.g. the key is valid from X to Y, to be checked against **sigt**\), the system MUST assert the usage is compliant.
+Before interpreting a transaction's content the JWS' signature MUST be validated. When **kid** is used to specify the signing key and the system knows additional usage restrictions \(e.g. the key is valid from X to Y, to be checked against **sigt**\), the system MUST assert the usage is compliant.
 
-Furthermore, since the payload is detached from the transaction itself and referred to by hash, the payload MUST be hashed and compared to the hash specified in the transaction, to assert that the retrieved payload is actually the expected payload.
+Furthermore, since the transaction content is detached from the transaction itself and referred to by hash, the transaction content MUST be hashed and compared to the hash specified in the transaction, to assert that the retrieved transaction content is actually the expected transaction content.
 
 ## 4. Example
 
