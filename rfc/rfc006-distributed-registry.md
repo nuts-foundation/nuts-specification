@@ -223,7 +223,8 @@ Example JWS header:
 
 #### 3.2.4 Delete \(Deactivate\)
 
-DID documents cannot be deleted as in being "erased", only its contents can be removed as to prevent future changes \(deactivation\). To deactivate a DID Document, remove all contents except the `id` and `context`.
+DID documents cannot be deleted as in being "erased", only its contents can be removed as to prevent future changes \(deactivation\). To deactivate a DID Document, remove all contents except the `id` and `context`. 
+A DID Document MUST at least have one non-deactivated controller, otherwise it's to be regarded as deactivated.
 
 Deletion can not be undone.
 
