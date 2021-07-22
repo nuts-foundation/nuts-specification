@@ -98,9 +98,7 @@ VC identifiers MUST be constructed as `DID#id` where `id` is unique for the give
 
 ### 3.5 Active issuer
 
-A VC MUST have an active issuer at the time of usage.
-Usage includes using the VC to generate a VP or sending it along in an OAuth flow.
-If the issuer is deactivated at the time of usage, the VC MUST be regarded as invalid.
+A VC MUST have an active issuer at the time of usage. Usage includes using the VC to generate a VP or sending it along in an OAuth flow. If the issuer is deactivated at the time of usage, the VC MUST be regarded as invalid.
 
 ### 3.6 VC Example
 

@@ -79,71 +79,45 @@ The `credentialSubject` field contains the following:
 
 ### 3.2.1 Required fields
 
-The `id`, `legalBase` and `purposeOfUse` fields MUST be filled. 
-Within the `legalBase` object, `consentType` MUST either be `implied` or `explicit`. 
-When `explicit`, the `evidence` and `subject` fields MUST be filled.
+The `id`, `legalBase` and `purposeOfUse` fields MUST be filled. Within the `legalBase` object, `consentType` MUST either be `implied` or `explicit`. When `explicit`, the `evidence` and `subject` fields MUST be filled.
 
 ### 3.2.2 Scoping
 
-The `id` field MUST contain the DID of the actor.
-The `subject` field MAY contain the patient identifier. The example above uses the *oid* for the Dutch citizenship number.
-The `purposeOfUse` field refers to an access policy. A Bolt MUST describe this policy as a set of FHIR resources that can be accessed with the credential.
-The `resources` array extends on the policy. It defines specific resources that may be accessed in addition to the policy.
-When no `subject` is given, the credential MUST contain `resources` that refer to individual resources.
-The contents of those individual resources MUST NOT contain any personal information.
-Without `subject` and `resources` it would be valid to request an access token with just the `purposeOfUse` in the JWT grant.
+The `id` field MUST contain the DID of the actor. The `subject` field MAY contain the patient identifier. The example above uses the _oid_ for the Dutch citizenship number. The `purposeOfUse` field refers to an access policy. A Bolt MUST describe this policy as a set of FHIR resources that can be accessed with the credential. The `resources` array extends on the policy. It defines specific resources that may be accessed in addition to the policy. When no `subject` is given, the credential MUST contain `resources` that refer to individual resources. The contents of those individual resources MUST NOT contain any personal information. Without `subject` and `resources` it would be valid to request an access token with just the `purposeOfUse` in the JWT grant.
 
 ### 3.2.3 Legal base
 
-The patient consent can be either implied or explicit. 
-When it's implied, this should be reflected by the `purposeOfUse`.
-A Bolt MUST therefore also describe if it is covered by explicit or implied consent.
-When the credential is given in the context of explicit consent, the `legalBase.evidence` MUST be filled.
-It MUST contain a value for the `path` and `type` fields. The `path` is a relative path to the service data endpoint and the `type` contains the media type as specified by [RFC6838](https://datatracker.ietf.org/doc/html/rfc6838).
-The evidence resource MUST be accessible with an access token that was created with the corresponding credential.
+The patient consent can be either implied or explicit. When it's implied, this should be reflected by the `purposeOfUse`. A Bolt MUST therefore also describe if it is covered by explicit or implied consent. When the credential is given in the context of explicit consent, the `legalBase.evidence` MUST be filled. It MUST contain a value for the `path` and `type` fields. The `path` is a relative path to the service data endpoint and the `type` contains the media type as specified by [RFC6838](https://datatracker.ietf.org/doc/html/rfc6838). The evidence resource MUST be accessible with an access token that was created with the corresponding credential.
 
 ### 3.2.4 Resources
 
-The `resources` object MAY be used to extend access. The base access is provided by the policy (`purposeOfUse`) as defined by the Bolt.
-If any resources are added, they extend on the Bolt policy. 
-All entries in the `resources` list contain a `path`. The `path` field contains the relative path to the service data endpoint. 
-The `operations` field contains a list of operations allowed on this resource. The valid options are a subset of the [FHIR specification](http://hl7.org/fhir/stu3/http.html): `read`, `vread`,`update`,`patch`,`delete`,`history (instance)`, `create`, `search` and `document`.
-The `userContext` field defines if the resource requires user context. If `true`, an authentication token MUST be present in the OAuth flow. 
+The `resources` object MAY be used to extend access. The base access is provided by the policy \(`purposeOfUse`\) as defined by the Bolt. If any resources are added, they extend on the Bolt policy. All entries in the `resources` list contain a `path`. The `path` field contains the relative path to the service data endpoint. The `operations` field contains a list of operations allowed on this resource. The valid options are a subset of the [FHIR specification](http://hl7.org/fhir/stu3/http.html): `read`, `vread`,`update`,`patch`,`delete`,`history (instance)`, `create`, `search` and `document`. The `userContext` field defines if the resource requires user context. If `true`, an authentication token MUST be present in the OAuth flow.
 
 ### 3.2.6 Local parameters
 
-The `localParameters` object allows an issuer to add additional parameters to the credential.
-These parameters can help to determine access at runtime.
-The contents of `localParameters` is a custom JSON object.
-Since the contents is not specified, it has to follow a set of rules:
+The `localParameters` object allows an issuer to add additional parameters to the credential. These parameters can help to determine access at runtime. The contents of `localParameters` is a custom JSON object. Since the contents is not specified, it has to follow a set of rules:
 
-- The parameters MAY NOT have any influence on the subject (actor) of the credential.
+* The parameters MAY NOT have any influence on the subject \(actor\) of the credential.
+
   The subject MUST be able to use the credential as if the parameters weren't there.
-- The parameters MAY NOT alter the behaviour, specification or functionality of a Bolt.
-- A Bolt MAY NOT require use of the parameters.
-- Parameters MAY NOT contain personal data. 
-- The parameters are only of value to the issuer. This would imply that parameters are only useful in the case where the custodian is the issuer.
+
+* The parameters MAY NOT alter the behaviour, specification or functionality of a Bolt.
+* A Bolt MAY NOT require use of the parameters.
+* Parameters MAY NOT contain personal data. 
+* The parameters are only of value to the issuer. This would imply that parameters are only useful in the case where the custodian is the issuer.
 
 Example:
 
-```json
+```javascript
 {
   "language": "NL",
   "internalIDs": ["1987gskljh42989hkpjh"]
 }
-
 ```
 
 ## 4. Access Control
 
-A resource server uses the Nuts Authorization Credential to check the access rights of an actor.
-The rules for determining access are a combination of a Bolt specific policy and any additional information from the credential.
-Identification and authentication are covered by [RFC003](rfc003-oauth2-authorization.md).
-The Bolt policy will list the operations and resource types that can be accessed. See also [RFC003 §7](rfc003-oauth2-authorization.md#7-bolt-requirements)
-A policy MAY also require certain parameters. For example, when a `search` operation is done on a FHIR `observation` resource, the policy may have a rule that requires a query parameter using the `subject` field of the credential.
-All restrictions and policy rules MUST use paths relative to the endpoint for the given service.
-[§4 of RFC006](rfc006-distributed-registry.md#4-services) covers the registration of services.
-If `resources` are present in the credential, the resource server can compare the operation and relative path of the request to the `resources` present in the credential.
+A resource server uses the Nuts Authorization Credential to check the access rights of an actor. The rules for determining access are a combination of a Bolt specific policy and any additional information from the credential. Identification and authentication are covered by [RFC003](rfc003-oauth2-authorization.md). The Bolt policy will list the operations and resource types that can be accessed. See also [RFC003 §7](rfc003-oauth2-authorization.md#7-bolt-requirements) A policy MAY also require certain parameters. For example, when a `search` operation is done on a FHIR `observation` resource, the policy may have a rule that requires a query parameter using the `subject` field of the credential. All restrictions and policy rules MUST use paths relative to the endpoint for the given service. [§4 of RFC006](rfc006-distributed-registry.md#4-services) covers the registration of services. If `resources` are present in the credential, the resource server can compare the operation and relative path of the request to the `resources` present in the credential.
 
 Although Nuts Authorization Credentials are part of the OAuth flow of [RFC003](rfc003-oauth2-authorization.md), the actual checking is done at request time. This means that the resource server will have to check the policy and make a request for the restrictions from the Nuts registry. This model can be compared with an [Attribute Based Access Control \(ABAC\) model](https://en.wikipedia.org/wiki/Attribute-based_access_control). The Bolt policies are added to the Policy Administration Point, the Nuts node acts as Policy Information Point. The resource server is the Policy Enforcement Point. It's up to the vendor to implement the Policy Decision Point.
 
@@ -240,3 +214,4 @@ Example of a Nuts Authorization Credential with implied consent:
   "proof": {...}
 }
 ```
+

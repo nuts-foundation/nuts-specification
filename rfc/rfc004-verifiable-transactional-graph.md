@@ -35,7 +35,7 @@ This document does not define how to transport data to other participants in a d
 * **Root transaction**: the first transaction published on a network.
 * **JWS payload**: The payload as defined by [RFC7515](https://tools.ietf.org/html/rfc7515#section-3).
 * **Transaction contents**: The actual data in the transaction.
-* **Head**: Transaction that is not referenced by another (newer) transaction.
+* **Head**: Transaction that is not referenced by another \(newer\) transaction.
 
 Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
@@ -109,7 +109,7 @@ Since transactions are immutable, the only way to update the application data th
 
 Consider the DAG from the previous chapter. If transaction `C` and `D` where to update the same application data, nodes could process the transaction in a different order. This would create an inconsistency in the network. To fix this the following rules MUST be taken into account:
 
-* If the transaction content is equal, process as normal. (This can be determined by the JWS payload being the same)
+* If the transaction content is equal, process as normal. \(This can be determined by the JWS payload being the same\)
 * If the transaction content is not equal, create a representation that is a merger of the transaction content according to rules for the specific type.
 
 When updates are required for a type of transaction content, it MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)

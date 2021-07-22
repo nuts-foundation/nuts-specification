@@ -124,7 +124,7 @@ All other claims may be ignored.
 
 #### 4.2.3 Example JWT
 
-```json
+```javascript
 {
   "alg": "RS256",
   "typ": "JWT",
@@ -135,9 +135,9 @@ All other claims may be ignored.
 ```yaml
 {
   "iss": "did:nuts:123",
+  "sub": "did:nuts:456"
   "vcs": [...Base64 encoded token credential...],
   "purposeOfUse": ["eTransfer"],
-  "sid": "urn:oid:2.16.840.1.113883.2.4.6.3:999999990",
   "aud": "did:nuts:456#_08934567fgjsdroiuty230467",
   "usi": {...Base64 encoded token container...},
   "osi": {...hardware token sig...},
@@ -248,11 +248,9 @@ The **vcs** field is not needed when actor and custodian are the same.
 
 The **sub** field in the JWT MUST be a known organization. It MUST have been registered by the node operator of the authorization server and it MUST be valid at the time indicated by the **iat** field.
 
-**5.2.1.9  Purpose of use**
+**5.2.1.9 Purpose of use**
 
-The `purposeOfUse` field is used to define the scope of the access token. It contains a list of policy names. The policy names are defined by Bolts.
-All `purposeOfUse` entries from the accompanying authorization credentials MUST be listed.
-The resource server MUST be able to resolve the policy names from the access token. 
+The `purposeOfUse` field is used to define the scope of the access token. It contains a list of policy names. The policy names are defined by Bolts. All `purposeOfUse` entries from the accompanying authorization credentials MUST be listed. The resource server MUST be able to resolve the policy names from the access token.
 
 #### 5.2.2 Error responses
 
@@ -314,13 +312,9 @@ Different protocols return different types of error messages. The format will mo
 
 ## 7. Bolt requirements
 
-Different types of data require different levels of authorization.
-Because those requirements depend on the data, it's impossible for an RFC to specify these.
-This passes the requirement on to the Bolts.
-Therefore the Bolt MUST define the access policy.
-The policy MUST define which resources may be accessed when no restrictions are given.
-The resources MAY be separated into 3 categories:
+Different types of data require different levels of authorization. Because those requirements depend on the data, it's impossible for an RFC to specify these. This passes the requirement on to the Bolts. Therefore the Bolt MUST define the access policy. The policy MUST define which resources may be accessed when no restrictions are given. The resources MAY be separated into 3 categories:
 
-- Personal: personal and/or medical resources.
-- Audited: non-personal resources that require user context.
-- Organization: non-personal resources that do not require user context. (e.g. server-to-server logic)
+* Personal: personal and/or medical resources.
+* Audited: non-personal resources that require user context.
+* Organization: non-personal resources that do not require user context. \(e.g. server-to-server logic\)
+
