@@ -100,7 +100,12 @@ VC identifiers MUST be constructed as `DID#id` where `id` is unique for the give
 
 A VC MUST have an active issuer at the time of usage. Usage includes using the VC to generate a VP or sending it along in an OAuth flow. If the issuer is deactivated at the time of usage, the VC MUST be regarded as invalid.
 
-### 3.6 VC Example
+### 3.6 Transaction requirements
+
+If a VC issuer is a Nuts DID Subject and the VC is published via a transaction according to [RFC004](rfc004-verifiable-transactional-graph.md) and [RFC005](rfc005-distributed-network-using-grpc.md) then the transaction MUST refer to the correct transaction as specified by [RFC004](rfc004-verifiable-transactional-graph.md#36-signature-verification).
+This ensures the correct ordering of transactions.
+
+### 3.7 VC Example
 
 Below is an example of a credential. **Issuer** and **Subject** are the same in the example. This specification neither requires nor prevents this.
 

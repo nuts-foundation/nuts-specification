@@ -409,7 +409,7 @@ Since the information is self-proclaimed and not authenticated or verified in an
 
 §3.4 of [RFC004](rfc004-verifiable-transactional-graph.md) requires each payload type to describe how conflicts are resolved when parallel transactions are encountered. A DID Document is not a CRDT, but its contents are. The paragraphs below describe how each of the elements should be treated in case of a conflict. First we describe the mechanism of detecting and resolving conflicts. DID Documents do not refer to their previous version in any way. The transactions described in [RFC004](rfc004-verifiable-transactional-graph.md) do refer to previous transactions. This system can be used to detect conflicts and to resolve them. For DID Documents additional transactional requirements are added:
 
-* Updates to DID Documents MUST refer in their transaction to the transaction of the previous version. They SHOULD also refer to the latest transactions as described by [RFC005](rfc005-distributed-network-using-grpc.md).
+* Updates to DID Documents MUST refer in their transaction to the transaction of the previous version (see [RFC004](rfc004-verifiable-transactional-graph.md#36-signature-verification)). They SHOULD also refer to the latest transactions as described by [RFC005](rfc005-distributed-network-using-grpc.md).
 * In case of a conflict, the conflict can be resolved with an additional transaction referring to the all the conflicting transactions.
 
 ## 5.1 Conflict detection
