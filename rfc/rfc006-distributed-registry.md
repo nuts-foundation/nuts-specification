@@ -112,8 +112,6 @@ A Create operation for a DID Document puts the following additional requirements
 
 * `jwk` MUST be present
 * `cty` MUST contain the value `application/json+did-document`
-* `tiv` MUST be absent or `0`
-* `tid` MUST be absent
 
 The `kid` field of the `jwk` header parameter MUST be prefixed by the `id` of the DID document. In order for the contents to be accepted in the Verifiable Data Registry, the JWK MUST match the `capabilityInvocation` key in the DID document with the same identifier. The `kid` field from the JWK MUST match the `id` from the verification key in the DID document.
 
@@ -203,7 +201,6 @@ Changes to DID documents can only be accepted if the update is signed with a cap
 The following requirements on the JWS header parameter apply:
 
 * `kid` MUST hold the reference to the correct key.
-* `tid` and `tiv` MUST be filled according to [RFC004](rfc004-verifiable-transactional-graph.md).
 
 Example JWS header:
 
@@ -216,8 +213,6 @@ Example JWS header:
   "sigt": "2020-01-06T15:00:00Z",
   "ver": "1",
   "prevs": ["148b3f9b46787220b1eeb0fc483776beef0c2b3e"],
-  "tid": "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-  "tiv": "1"
 }
 ```
 
