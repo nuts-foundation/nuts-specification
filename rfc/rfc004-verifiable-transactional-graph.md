@@ -142,7 +142,7 @@ Before interpreting a transaction's content the JWS' signature MUST be validated
 Resolving the **kid** based on the signature timestamp (**sigt**) can cause problems and even adds attack vectors.
 The main reason behind this, is that the signature time doesn't set the order of transactions.
 Transaction B can be signed with a key introduced in transaction A. Transaction B depends on A, this dependency can't be solved with the signature time.
-This dependency can be solved by simply referring to the transaction that introduced the **kid**.
+This dependency can be solved by referring to the transaction that introduced the **kid**.
 If a ``kid`` is present in the JWS, the `prevs` MUST contain a transaction reference of which the transaction content includes the key entry with the **kid** as identifier.
 If the resolved transaction contents is not the latest version, this may indicate a broken installation or a stolen private key.
 
@@ -157,4 +157,3 @@ Since the transaction content is detached from the transaction itself and referr
 ```text
 eyJhbGciOiJFUzI1NiIsImN0eSI6ImZvby9iYXIiLCJjcml0IjpbInNpZ3QiLCJ2ZXIiLCJwcmV2cyIsImp3ayJdLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJUTXVzeXNWQTJJcHduNnZFMjhNWUQtOGtPZFN6ajZVTy1MeGE0ZWhLd0d3IiwieSI6IjdZbC1hb2ZPOC1qNHN6aVBYeGREdVVVSXdDSHlaeWtnTTJmdWlISEQxUzgifSwicHJldnMiOlsiMzk3MmRjOTc0NGY2NDk5ZjBmOWIyZGJmNzY2OTZmMmFlN2FkOGFmOWIyM2RkZTY2ZDZhZjg2YzlkZmIzNjk4NiIsImIzZjJjM2MzOTZkYTFhOTQ5ZDIxNGU0YzJmZTBmYzlmYjVmMmE2OGZmMTg2MGRmNGVmMTBjOTgzNWU2MmU3YzEiXSwic2lndCI6MTYwMzQ1Nzk5OSwidmVyIjoxfQ.NDUyZDllODlkNWJkNWQ5MjI1ZmI2ZGFlY2Q1NzllNzM4OGExNjZjNzY2MWNhMDRlNDdmZDNjZDg0NDZlNDYyMA.-jpKBZQ3sc0x34MwnbO8mSiGdUYCfQXNO91RMnvFRq0YZ5pmbKmRYg--zaie-N7wIJhIFbZyuOyJdlcPwZrELQ
 ```
-
