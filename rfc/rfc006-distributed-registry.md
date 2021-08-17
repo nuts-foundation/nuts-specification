@@ -111,7 +111,7 @@ A DID document can only be updated or deactivated by one of its controllers. The
 A Create operation for a DID Document puts the following additional requirements on the JWS header parameters:
 
 * `jwk` MUST be present
-* `cty` MUST contain the value `application/json+did-document`
+* `cty` MUST contain the value `application/did+json`
 
 The `kid` field of the `jwk` header parameter MUST be prefixed by the `id` of the DID document. In order for the contents to be accepted in the Verifiable Data Registry, the JWK MUST match the `capabilityInvocation` key in the DID document with the same identifier. The `kid` field from the JWK MUST match the `id` from the verification key in the DID document.
 
@@ -120,7 +120,7 @@ Example JWS header
 ```javascript
 {
   "alg": "PS256",
-  "cty": "application/json+did-document",
+  "cty": "application/did+json",
   "jwk": {
     "crv": "P-256",
     "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
@@ -207,7 +207,7 @@ Example JWS header:
 ```javascript
 {
   "alg": "PS256",
-  "cty": "application/json+did-document",
+  "cty": "application/did+json",
   "kid": "did:nuts:123#_TKzHv2jFIyvdTGF1Dsgwngfdg3SH6TpDv0Ta1aOEkw",
   "crit": ["sigt", "ver", "prevs"],
   "sigt": "2020-01-06T15:00:00Z",
