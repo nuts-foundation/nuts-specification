@@ -203,7 +203,7 @@ Example of a Nuts Authorization Credential with implied consent:
     },
     "resources": [
       {
-        "resource": "/DocumentReference/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
+        "path": "/DocumentReference/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
         "operations": ["read"],
         "userContext": true
       }
