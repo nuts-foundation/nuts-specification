@@ -267,11 +267,20 @@ All data is public knowledge. All considerations from [§10 of did-core](https:/
 
 It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC or Bolt specification. A service can define an absolute endpoint URI or be a compound service. A service can also refer to other services. This is often the case when a SaaS provider defines endpoints to be used for all clients.
 
-For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing a URL. For a compound service the `serviceEndpoint` MUST contain a map with absolute endpoint URLs or references to other services. References MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service. A compound service MAY refer to absolute endpoints from other DID Documents. See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards. A valid reference:
+For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing a URL. For a compound service the `serviceEndpoint` MUST contain a map with absolute endpoint URLs or references to other services. A reference to the endpoint of another service MUST follow this pattern:
+
+```
+<DID>/serviceEndpoint?type=<serviceType>
+```
+
+For example:
 
 ```javascript
-"did:nuts:123?type=oauth_prod"
+"did:nuts:123/serviceEndpoint?type=oauth_prod"
 ```
+
+Where `<DID>` is the DID of the document that contains the referenced service and `<serviceType>` the type of the service the reference points to. Other query parameters, paths or fragments SHALL NOT be used. References SHALL NOT be resolved recursively; only 1 level of references is allowed. 
+See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards.
 
 A DID Document MAY NOT contain more than one service with the same type.
 
