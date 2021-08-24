@@ -69,7 +69,7 @@ where the `verificationMethod` must be a valid assertionMethod ID from the DID D
 * compute the sha256 of the `raw_proof`, store as `hash_proof`:`hash_proof = sha256(raw_proof)`.
 * concatenate  `hash_proof` with `raw_proof` and store as `payload`.
 * construct the JWS `header` as `{"alg":"ES256","b64":false,"crit":["b64"]}` where `alg` MUST contain the right algorithm.
-* construct a challenge by base64 encoding the header and payload and join with a `.`: `challenge = base64_rawurlencode(header) + '.' + base64_rawurlencode(payload)`  
+* construct a challenge by base64 encoding the header and payload and join with a `.`: `challenge = base64_rawurlencode(header) + '.' + base64_rawurlencode(hash_vc)`  
 * sign the bytes from the previous step with the private key corresponding to the `kid`: `sig = sign(challenge, privateKey(kid))`
 * create `jws` as `header + ".." + base64_rawurlencode(sig)`
 * place the result in the `jws` field of the `proof`:
