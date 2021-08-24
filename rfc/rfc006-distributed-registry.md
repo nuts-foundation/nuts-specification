@@ -265,13 +265,9 @@ All data is public knowledge. All considerations from [§10 of did-core](https:/
 
 ## 4. Services
 
-It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC or Bolt specification. A service can define an absolute endpoint URI or be a compound service. A service can also refer to other services. This is often the case when a SaaS provider defines endpoints to be used for all clients.
+It is to be expected that each DID subject will add services to the DID Document. Specific services will be specified in their own RFC or Bolt specification. A service can define an absolute endpoint URI, a compound service or a reference to another service. This is often the case when a SaaS provider defines endpoints to be used for all clients.
 
-For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing a URL. For a compound service the `serviceEndpoint` MUST contain a map with absolute endpoint URLs or references to other services. References MUST be by query and not by fragment. Only `type` can be used as query param and it refers to the `type` field in a service. A compound service MAY refer to absolute endpoints from other DID Documents. See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards. A valid reference:
-
-```javascript
-"did:nuts:123?type=oauth_prod"
-```
+For an absolute endpoint URI the `serviceEndpoint` MUST be a string containing a URL. For a compound service the `serviceEndpoint` MUST contain a map with absolute endpoint URLs and/or references to other services. See [§3.2 of did-core](https://www.w3.org/TR/did-core/#did-url-syntax) for DID URL syntax and [RFC3986](https://tools.ietf.org/html/rfc3986) for generic URL standards.
 
 A DID Document MAY NOT contain more than one service with the same type.
 
@@ -321,7 +317,7 @@ The care organization refers to it:
 
 ### 4.1 Service references
 
-Any `serviceEndpoint` with a value that starts with `did` is a reference to another service. As specified earlier, all references use the `type` query parameter. When resolving a service, a reference URI MUST be replaced with the value from the `serviceEndpoint` field of the referenced service.
+Any `serviceEndpoint` with a value that starts with `did:` is a reference to another service. A reference MUST use the `type` query parameter to specify the type of the referenced service. The URI path MUST be set to `/serviceEndpoint` indicating it refers the `serviceEndpoint` field of the service. Other query parameters, paths or fragments SHALL NOT be used. When resolving a service, a reference URI MUST be replaced with the value from the `serviceEndpoint` field of the referenced service.
 
 A client doesn't care about the references. When a client queries for particular services, the references need to be resolved. Using references MUST NOT create an infinite loop. Resolving a reference MUST NOT go deeper than 5 levels. Given 5 services where A ultimately references E through B, C and D \(A -&gt; B -&gt; C -&gt; D -&gt; E\). Given the maximum depth of 5, E MUST contain an absolute endpoint URI.
 
@@ -337,19 +333,19 @@ An example of a deeply nested structure:
     {
       "id": "did:nuts:abc#1",
       "type": "NutsCompoundServiceRef",
-      "serviceEndpoint": "did:nuts:123?type=NutsCompoundService"
+      "serviceEndpoint": "did:nuts:123/serviceEndpoint?type=NutsCompoundService"
     },
     {
       "id": "did:nuts:abc#2",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauth": "did:nuts:123?type=oauth"
+        "oauth": "did:nuts:123/serviceEndpoint?type=oauth"
       }
     },
     {
       "id": "did:nuts:abc#3",
       "type": "oauth",
-      "serviceEndpoint": "did:nuts:123?type=oauth_prod"
+      "serviceEndpoint": "did:nuts:123/serviceEndpoint?type=oauth_prod"
     },
     {
       "id": "did:nuts:abc#4",
@@ -360,7 +356,7 @@ An example of a deeply nested structure:
 }
 ```
 
-Resolving `did:nuts:123?type=NutsCompoundServiceRef` would produce:
+Resolving `did:nuts:123/serviceEndpoint?type=NutsCompoundServiceRef` would produce:
 
 ```javascript
 {
