@@ -233,7 +233,7 @@ The **aud** field MUST match the identifier of the registered endpoint. This pre
 
 The **vcs** field contains the list of verifiable credentials of any type.
 
-If a credential has the `NutsAuthorizationCredential` type it determines whether the accessible resource and is valid according to the following rules (based on [RFC014](rfc014-authorization-credential.md)):
+If a credential has the `NutsAuthorizationCredential` type it determines whether the accessible resource and is valid according to the following rules \(based on [RFC014](rfc014-authorization-credential.md)\):
 
 * The credential `issuer` equals the **sub** field of the JWT.
 * The credential `credentialSubject.id` equals the **iss** field of the JWT.
