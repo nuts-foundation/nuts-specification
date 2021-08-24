@@ -140,11 +140,11 @@ until queue empty; take transaction from queue
 
 Before interpreting a transaction's content the JWS' signature MUST be validated. Almost all transactions will use the **kid** to identify the key used to sign the transaction.
 Resolving the **kid** based on the signature timestamp (**sigt**) can cause problems and even adds attack vectors.
-The main reason behind this, is that the signature time doesn't set the order of transactions.
+The main reason behind this, is that the signature time doesn't determine the order of transactions.
 Transaction B can be signed with a key introduced in transaction A. Transaction B depends on A, this dependency can't be solved with the signature time.
 This dependency can be solved by referring to the transaction that introduced the **kid**.
 If a ``kid`` is present in the JWS, the `prevs` MUST contain a transaction reference of which the transaction content includes the key entry with the **kid** as identifier.
-If the resolved transaction contents is not the latest version, this may indicate a broken installation or a stolen private key.
+If the resolved transaction contents is not the latest version, this may indicate a broken installation or a stolen private key. These transactions can't be blocked since this would just add other attack vectors. A node operator SHOULD determine what the best course of action is.
 
 > **_NOTE:_**  It would be solvable with a central notary or voting scheme that determines the transaction order. This would make the system more complex.  
 
