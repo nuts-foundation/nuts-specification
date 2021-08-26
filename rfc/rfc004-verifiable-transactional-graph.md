@@ -43,7 +43,7 @@ Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-arc
 
 Transactions MUST be encoded as [RFC7515 JSON Web Signature](https://tools.ietf.org/html/rfc7515). It MUST be serialized in compact \([RFC7515 section 7.1](https://tools.ietf.org/html/rfc7515#section-7.1)\) serialization form.
 
-### 3.1. JWS implementation
+### 3.1 JWS implementation
 
 In addition to required header parameters as specified in RFC7515 the following requirements apply:
 
@@ -71,17 +71,17 @@ The contents then MAY be stored next to or apart from the transaction itself \(b
 
 There SHOULD be only 1 signature on the JWS. If there are multiple signatures all signatures except the first one MUST be ignored.
 
-### 3.2. Transaction Reference
+### 3.2 Transaction Reference
 
 The transaction reference uniquely identifies a transaction and is used to refer to it. It MUST be calculated by taking the bytes of the JWS EXACTLY as received and hashing it using SHA-256.
 
 When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
-### 3.3. Ordering, branching and merging
+### 3.3 Ordering, branching and merging
 
 Transactions MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to the previous transaction. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor. A new transaction MUST be appended to the end of the DAG by referring to the last transaction of the DAG \(_head_\) by including its reference in the **prevs** field.
 
-All transactions referred to by `prev` MUST be present, since failing to do so would corrupt the DAG.
+All transactions referred to by `prevs` MUST be present, since failing to do so would corrupt the DAG.
 
 As the name implies the DAG MUST be acyclic, transactions that introduce a cycle are invalid MUST be ignored. ANY following transaction that refers to the invalid transaction \(direct or indirect\) MUST be ignored as well.
 
@@ -103,7 +103,7 @@ The following orders are invalid:
 * `A -> B -> D -> F -> C -> E` \(merger processed before all previous were processed\)
 * `A -> B -> D -> E -> C -> F` \(branch C is processed out-of-order\)
 
-### 3.4. Updates & Ordering
+### 3.4 Updates & Ordering
 
 Since transactions are immutable, the only way to update the application data they contain is by creating a new transaction. All updates are considered as full updates, partial updates are not supported. Parallel updates of the same application data, in the form of branches, MUST be processed the same way by all nodes.
 
@@ -114,7 +114,7 @@ Consider the DAG from the previous chapter. If transaction `C` and `D` where to 
 
 When updates are required for a type of transaction content, it MUST be composed of [conflict-free replicated data types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
 
-### 3.5. Processing the DAG
+### 3.5 Processing the DAG
 
 Processing the DAG can be seen as planning tasks required for construction: some tasks can happen in parallel \(laying floors and installing electricity\), some tasks must happen sequentially \(foundation must be poured before building the walls\). This is the same for transactions on the DAG: transactions on a branch MUST be processed sequentially but processing order of parallel branches is unspecified, and before processing a merging transaction all **prevs** \(branches\) must have been processed.
 
@@ -136,15 +136,24 @@ until queue empty; take transaction from queue
     process transaction
 ```
 
-### 3.6. Signature and transaction content verification
+### 3.6 Signature verification
 
-Before interpreting a transaction's content the JWS' signature MUST be validated. When **kid** is used to specify the signing key and the system knows additional usage restrictions \(e.g. the key is valid from X to Y, to be checked against **sigt**\), the system MUST assert the usage is compliant.
+Before interpreting a transaction's content the JWS' signature MUST be validated. Almost all transactions will use the **kid** to identify the key used to sign the transaction.
+Resolving the **kid** based on the signature timestamp (**sigt**) can cause problems and even adds attack vectors.
+The main reason behind this, is that the signature time doesn't determine the order of transactions.
+Transaction B can be signed with a key introduced in transaction A. Transaction B depends on A, this dependency can't be solved with the signature time.
+This dependency can be solved by referring to the transaction that introduced the **kid**.
+If a ``kid`` is present in the JWS, the `prevs` MUST contain a transaction reference of which the transaction content includes the key entry with the **kid** as identifier.
+If the resolved transaction contents is not the latest version, this may indicate a broken installation or a stolen private key. These transactions can't be blocked since this would just add other attack vectors. A node operator SHOULD determine what the best course of action is.
 
-Furthermore, since the transaction content is detached from the transaction itself and referred to by hash, the transaction content MUST be hashed and compared to the hash specified in the transaction, to assert that the retrieved transaction content is actually the expected transaction content.
+> **_NOTE:_**  It would be solvable with a central notary or voting scheme that determines the transaction order. This would make the system more complex.  
+
+### 3.7 Transaction content verification
+
+Since the transaction content is detached from the transaction itself and referred to by hash, the transaction content MUST be hashed and compared to the hash specified in the transaction, to assert that the retrieved transaction content is actually the expected transaction content.
 
 ## 4. Example
 
 ```text
 eyJhbGciOiJFUzI1NiIsImN0eSI6ImZvby9iYXIiLCJjcml0IjpbInNpZ3QiLCJ2ZXIiLCJwcmV2cyIsImp3ayJdLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJUTXVzeXNWQTJJcHduNnZFMjhNWUQtOGtPZFN6ajZVTy1MeGE0ZWhLd0d3IiwieSI6IjdZbC1hb2ZPOC1qNHN6aVBYeGREdVVVSXdDSHlaeWtnTTJmdWlISEQxUzgifSwicHJldnMiOlsiMzk3MmRjOTc0NGY2NDk5ZjBmOWIyZGJmNzY2OTZmMmFlN2FkOGFmOWIyM2RkZTY2ZDZhZjg2YzlkZmIzNjk4NiIsImIzZjJjM2MzOTZkYTFhOTQ5ZDIxNGU0YzJmZTBmYzlmYjVmMmE2OGZmMTg2MGRmNGVmMTBjOTgzNWU2MmU3YzEiXSwic2lndCI6MTYwMzQ1Nzk5OSwidmVyIjoxfQ.NDUyZDllODlkNWJkNWQ5MjI1ZmI2ZGFlY2Q1NzllNzM4OGExNjZjNzY2MWNhMDRlNDdmZDNjZDg0NDZlNDYyMA.-jpKBZQ3sc0x34MwnbO8mSiGdUYCfQXNO91RMnvFRq0YZ5pmbKmRYg--zaie-N7wIJhIFbZyuOyJdlcPwZrELQ
 ```
-
