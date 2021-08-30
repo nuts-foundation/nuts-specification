@@ -113,7 +113,7 @@ Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refe
 * **iss**: The issuer MUST contain the DID of the actor, thus the care organization making the request.
 * **sub**: The subject MUST contain the DID of the custodian. The custodian's DID could be used to find the relevant consent \(together with the actor and subject\).
 * **vcs**: A list of [Verifiable Credentials](rfc011-verifiable-credential.md). Optional
-* **purposeOfUse**: A string containing the desired usage. Corresponds to a Bolt. Omitted when empty.   
+* **purposeOfUse**: A string containing the desired usage. Corresponds to a Bolt.   
 * **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the `aud` MUST be an `oauth` service identifier. That service MUST be an absolute endpoint.
 * **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
 * **osi**: Ops signature, optional, reserved for future use.
@@ -251,7 +251,7 @@ The **sub** field in the JWT MUST be a known organization. It MUST have been reg
 
 **5.2.1.9 Purpose of use**
 
-The `purposeOfUse` field is used to define the scope of the access token. It contains a Bolt policy/service name. The `purposeOfUse` entries from the accompanying authorization credentials MUST match. The resource server MUST be able to resolve the policy name from the access token. 
+The `purposeOfUse` field MUST contain the scope of the access token. It contains a Bolt policy/service name. The `purposeOfUse` entries from the accompanying authorization credentials MUST match. The resource server MUST be able to resolve the policy name from the access token.
 
 #### 5.2.2 Error responses
 
