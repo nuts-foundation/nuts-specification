@@ -62,8 +62,8 @@ In addition to the registered header parameters, the following headers MUST be p
 * **sigt**: \(signing time\) MUST contain the signing time of the transaction as Unix time since epoch encoded as NumericValue.
 * **ver**: MUST contain the format version of the transaction as number. For this version of the format the version MUST be 1.
 * **prevs**: \(previous transactions\) MUST contain the references \(see section 3.2\) of the preceding transactions \(see section 3.4\).
-
-  When it's a root transaction the field SHALL NOT have any entries.
+  * When it's a root transaction the field SHALL NOT have any entries.
+  * When creating a transaction it MUST only contain transactions that the local node has successfully processed, to avoid publishing unprocessable transactions.
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
