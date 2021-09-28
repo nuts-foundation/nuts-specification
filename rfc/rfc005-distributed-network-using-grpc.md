@@ -115,6 +115,9 @@ When the local node decides to query a peer's DAG because it differs from its ow
 
 When the local node is missing a transaction's content, it SHOULD query the peer that provided the transaction for the content using the `TransactionPayloadQuery` message. The peer MUST respond with the `TransactionPayload` message, providing the actual content in the `data` field. If the peer doesn't have the content the `data` field MUST be left empty.
 
+When the transaction's payload can't be resolved from the peer that provided the transaction, the node MAY broadcast the `TransactionPayloadQuery` to resolve it from one of its other peers.
+Nodes MUST avoid broadcasting this message too often, otherwise it might put stress the network.
+
 ### 5.5. Diagnostics
 
 To provide insight into the state of the network, and the DAG for informational purposes and to aid analysis of anomalies, nodes SHOULD broadcast diagnostic information to its peers using the `Diagnostics` message. If broadcasting, the node MUST do this at least every minute, but it MUST NOT broadcast more often than every 5 seconds \(to avoid producing too much chatter\). A node MAY choose not to include some of the specified fields.
