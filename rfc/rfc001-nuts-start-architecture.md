@@ -28,10 +28,10 @@ This document describes the general principles of all related Nuts architecture.
 
 ## 2. Terminology
 
-* **Actor**: The care organization that, in the context of a specific subject, wants to access medical data of a subject available at a custodian.
-* **Custodian**: The care organization that, in the context of a specific subject, is responsible for storing the medical data.
+* **Actor / Requester**: The care organization that, in the context of a specific subject, wants to access medical data of a subject available at a custodian.
+* **Custodian / Authorizer**: The care organization that, in the context of a specific subject, is responsible for storing the medical data.
 * **Digital signature**: A cryptographic signature e.g. specified in [RFC5280](https://tools.ietf.org/html/rfc5280) or [RFC7515](https://tools.ietf.org/html/rfc7515). Specifically not the digital version of the wet signature.
-* **Legal Base**: Grounds for medical data exchange given by the subject conforming to national and international legislation. By default no medical data may be exchanged.
+* **Legal Base**: Grounds for medical data exchange given by the subject conforming to national and international legislation. By default, no medical data may be exchanged.
 * **Node**: A piece of software implementing the Nuts specification.
 * **Service provider**: An organization providing software services which support care organizations in their daily work.
 * **Subject**: The subject of the medical data, usually the patient, client or civilian.
