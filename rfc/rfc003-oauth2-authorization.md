@@ -32,11 +32,11 @@ In this document we will provide a way of protecting RESTful APIs with use of an
 
 * **Client application**: The application that requires access.
 * **Resource server**: The application \(a protected resource\) that requires authorized access to its API’s.
-* **JWT Grant**: JWT grant contains the user’s identity, subject and custodian and is signed by the acting party. This grant is used as an authorization grant to obtain an OAuth 2 access token.
+* **JWT Grant**: JWT grant contains the user’s identity, subject and authorizer and is signed by the acting party. This grant is used as an authorization grant to obtain an OAuth 2 access token.
 * **Policy**: A security policy defined by a Bolt. It describes the access to and operations on resources that are allowed.
 * **Access token**: An OAuth 2 access token, provided by an authorization Server. This token is handed to the client, so it can authorize itself to a resource server. The contents of the token are opaque to the client. This means that the client does not need to know anything about the content or structure of the token itself.
-* **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The resource server can exchange the access token for a JSON document with the user’s identity, subject, custodian and token validity. This mechanism is called token introspection which is described by [RFC7662](https://tools.ietf.org/html/rfc7662).
-* **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **custodian**, **actor**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document. [RFC006](rfc006-distributed-registry.md) describes endpoint registration.
+* **Authorization server**: The authorization server checks the user’s identity and credentials and creates the access token. The authorization server is trusted by the resource server. The authorization server supports introspection according to [RFC7662]
+* **Request context**: The context of a request identified by the access token. The access token refers to this context. The context consists of the **authorizer**, **requester**,  **Endpoint reference**: every registered endpoint has a unique reference which is calculated as the hash of the registration document. [RFC006](rfc006-distributed-registry.md) describes endpoint registration.
 * **Compound service**: Higher level service as described by [RFC006](rfc006-distributed-registry.md).
 
 Other terminology is taken from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
@@ -57,7 +57,7 @@ Part of the Nuts security framework involves the user identity. Data can only be
 
 The client application MUST obtain an access token before accessing data. This SHOULD be done right before accessing the data. An access token is only valid for seconds/minutes \(determined by the authorization server\). The client application SHOULD refresh the access token only when more data is to be requested.
 
-In order to obtain the access token, the client application MUST construct a signed JWT and send it to the registered authorization server token endpoint. The authorization server MUST validate the JWT and optionally validate if a legal base is present for the given custodian, subject and actor combination. If all is well, the authorization server SHOULD return an access token.
+In order to obtain the access token, the client application MUST construct a signed JWT and send it to the registered authorization server token endpoint. The authorization server MUST validate the JWT and optionally validate if a legal base is present for the given authorizer, subject and requester combination. If all is well, the authorization server SHOULD return an access token.
 
 ### 3.3 Use access token
 
@@ -71,9 +71,9 @@ When requesting data, the client application MUST add the access token to the Au
 
 In common OAuth2 flows an OAuth client must be registered with the authorization server with its client id and client secret. This way the authorization server knows which requests are made by which party. The registration normally involves manual steps of registering and approving. In a network of trust with countless combinations of authorization servers and clients, this approach does not scale well.
 
-So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its signature to a known care provider. The key used to sign the JWT is identified by a key identifier \(`kid`\) which can be resolved through the Verifiable Data Registry as defined in [RFC006](rfc006-distributed-registry.md). The key MUST be listed in the `assertionMethod` section of the actor's DID document. The actor is identified by the `iss` field of the JWT.
+So instead of client secrets, the Nuts OAuth flow binds the request via the JWT using its signature to a known care provider. The key used to sign the JWT is identified by a key identifier \(`kid`\) which can be resolved through the Verifiable Data Registry as defined in [RFC006](rfc006-distributed-registry.md). The key MUST be listed in the `assertionMethod` section of the requester's DID document. The requester is identified by the `iss` field of the JWT.
 
-Example of the actor's DID document:
+Example of the requester's DID document:
 
 ```javascript
 {
@@ -106,12 +106,12 @@ Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refe
 
 * **typ**: MUST be `JWT`
 * **alg**: one of `PS256`, `PS384`, `PS512`, `ES256`, `ES384` or `ES512` \([RFC7518](https://tools.ietf.org/html/rfc7518)\)
-* **kid**: MUST contain the identifier of a key published in the actor's DID document, listed in the `assertionMethod` section.  
+* **kid**: MUST contain the identifier of a key published in the requester's DID document, listed in the `assertionMethod` section.  
 
 #### 4.2.2 Payload
 
-* **iss**: The issuer MUST contain the DID of the actor, thus the care organization making the request.
-* **sub**: The subject MUST contain the DID of the custodian. The custodian's DID could be used to find the relevant consent \(together with the actor and subject\).
+* **iss**: The issuer MUST contain the DID of the requester, thus the care organization making the request.
+* **sub**: The subject MUST contain the DID of the authorizer. The authorizer's DID could be used to find the relevant consent \(together with the requester and subject\).
 * **vcs**: A list of [Verifiable Credentials](rfc011-verifiable-credential.md). Optional
 * **purposeOfUse**: A list of desired usages. Corresponds to Bolts. Omitted when empty.   
 * **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the `aud` MUST be an `oauth` service identifier. That service MUST be an absolute endpoint.
@@ -223,7 +223,7 @@ The JWT **iat** and **exp** fields MUST be validated. The timestamp of validatio
 
 **5.2.1.5 Login contract validation**
 
-The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the `name` and `city` of the actor. The `name` and `city` MUST exactly \(case sensitive\) match with a valid [Verifiable Credential](rfc011-verifiable-credential.md) issued to the actor. This must be a [NutsOrganizationCredential](rfc012-nuts-organization-credential.md).
+The **usi** field in the JWT contains the signed login contract. If present it MUST validate according to the [Authentication Token RFC](rfc002-authentication-token.md). The login contract MUST contain the `name` and `city` of the requester. The `name` and `city` MUST exactly \(case sensitive\) match with a valid [Verifiable Credential](rfc011-verifiable-credential.md) issued to the requester. This must be a [NutsOrganizationCredential](rfc012-nuts-organization-credential.md).
 
 **5.2.1.6 Endpoint validation**
 
@@ -241,9 +241,9 @@ If a credential has the `NutsAuthorizationCredential` type it determines whether
 * The credential has not been revoked.
 * The credential has not expired.
 
-It MUST be verified that the actor's request conforms to the specified policy and only requests allowed resources.
+It MUST be verified that the requester's request conforms to the specified policy and only requests allowed resources.
 
-The **vcs** field is not needed when actor and custodian are the same.
+The **vcs** field is not needed when requester and authorizer are the same.
 
 **5.2.1.8 Subject validation**
 
@@ -302,8 +302,8 @@ A token MAY be used multiple times unless the returned error code prevents it. A
 The resource server MUST validate the validity of the access token. It MAY contact the authorization server to validate the token, or it MAY use existing knowledge to validate the token. For example a JWT can be validated by using the registered public key of the authorization server. The resource server MUST also check if the client certificate used for the TLS connections is from the same party that requested the access token. The next step is to validate if the token may be used to access the requested resource. There are three different cases that MUST be supported:
 
 1. **The requested resource does not contain patient information.** Certain resources do not contain patient information and may therefore be exchanged without user context. Resources that fall in this category MUST be marked as such in the specific use case specification.
-2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify a Nuts Authorization Credential was used in the access token request for the combination of custodian, actor, subject and resource.
-3. **The actor and custodian are the same.** It may be the case that a care organization is using multiple service providers. In that case each service provider acts on behalf of the care organization. Therefore, it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(actor and custodian\) MAY use different identifiers for the same care organization.
+2. **The requested resource belongs to a patient.** In this case the resource server MUST validate that user context is present, e.g. an access token has been requested with the _usi_ field. The resource server MUST also verify a Nuts Authorization Credential was used in the access token request for the combination of authorizer, requester, subject and resource.
+3. **The requester and authorizer are the same.** It may be the case that a care organization is using multiple service providers. In that case each service provider acts on behalf of the care organization. Therefore, it's not needed to provide user context. It's up to the service providers to provide the correct enforcement of roles and any auditing duties. Each of the service providers \(requester and authorizer\) MAY use different identifiers for the same care organization.
 
 In the first two cases, the resource server MUST check if the policy covers the requested resource.
 
