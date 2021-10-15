@@ -111,6 +111,8 @@ The local node's DAG heads MUST be broadcast at an interval using the `AdvertHas
 
 When the local node decides to query a peer's DAG because it differs from its own, it uses the `TransactionListQuery` message. It MUST specify the block for which to retrieve the transactions using a Unix timestamp that falls within the requested block. The receiving peer MUST respond with the `TransactionList` message containing all transactions \(without content\) from its DAG.
 
+If the response message exceeds the maximum Protobuf message size (as defined by section 8.1) it MUST be split in multiple messages. The messages MUST be sent in correct DAG walking order: transactions in a message may only follow transactions in the same message or preceding ones.
+
 ### 5.4. Resolving Transaction Content
 
 When the local node is missing a transaction's content, it SHOULD query the peer that provided the transaction for the content using the `TransactionPayloadQuery` message. The peer MUST respond with the `TransactionPayload` message, providing the actual content in the `data` field. If the peer doesn't have the content the `data` field MUST be left empty.
