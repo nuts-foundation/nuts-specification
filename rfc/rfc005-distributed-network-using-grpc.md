@@ -150,7 +150,7 @@ Connections MUST be secured using TLS v1.2 \(or higher\) with both client- and s
 
 ## 7. Protobuf Definition
 
-Please review the protobuf spec at: [https://github.com/nuts-foundation/nuts-node/blob/master/network/transport/network.proto](https://github.com/nuts-foundation/nuts-node/blob/master/network/transport/network.proto)
+Please review the protobuf spec at: [https://github.com/nuts-foundation/nuts-node/blob/master/network/protocol/v1/transport/network.proto](https://github.com/nuts-foundation/nuts-node/blob/master/network/transport/network.proto)
 
 ## 8. Security Considerations
 
