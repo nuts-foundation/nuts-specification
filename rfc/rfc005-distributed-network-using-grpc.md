@@ -115,7 +115,10 @@ If the response message exceeds the maximum Protobuf message size (as defined by
 
 ### 5.4. Resolving Transaction Content
 
-When the local node is missing a transaction's content, it SHOULD query the peer that provided the transaction for the content using the `TransactionPayloadQuery` message. The peer MUST respond with the `TransactionPayload` message, providing the actual content in the `data` field. If the peer doesn't have the content the `data` field MUST be left empty.
+When the local node is missing a transaction's content, it SHOULD query the peer that provided the transaction for the content using the `TransactionPayloadQuery` message.
+It MAY NOT query the peer for the content if the transaction contains the `to` field. Transactions with this field can only be queried with higher level protocol versions.
+The peer MUST respond with the `TransactionPayload` message, providing the actual content in the `data` field. If the peer doesn't have the content the `data` field MUST be left empty.
+The peer MUST respond with an empty `data` field if the transaction for the requested content contains a `to` field.
 
 When the transaction's payload can't be resolved from the peer that provided the transaction, the node MAY broadcast the `TransactionPayloadQuery` to resolve it from one of its other peers.
 Nodes MUST avoid broadcasting this message too often, otherwise it might put stress the network.
