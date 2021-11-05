@@ -48,7 +48,7 @@ For the first point TLS and certificates will be used as basis.
 ## 2. Terminology
 
 * **DID**: [Decentralized Identifiers](https://www.w3.org/TR/did-core/).
-* **SAN**: [subject alternative name](https://datatracker.ietf.org/doc/html/rfc4985)
+* **SAN**: [subject alternative name](https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6)
 * **Service provider**: organization that runs the Nuts node and manages private keys for other organizations.
 * **VC**: [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
 
@@ -67,9 +67,9 @@ X509v3 extensions:
 ```
 
 This domain is checked by a client that connects to a server with that domain. The certificate the server uses must match the domain the client dialed.
-Only entries of type `DNS` are to be considered.
-Multiple DNS entries may exist in a certificate and wildcard domains are also possible.
-The value of the SAN, `example.com` in the example is used to link DIDs to certificates.
+Only identities of type `dNSName` are to be considered.
+Multiple identities may exist in a certificate and wildcard domains are also possible.
+The value of the identity, `example.com` in the example is used to link DIDs to certificates.
 
 ### 3.2 DID Document
 
