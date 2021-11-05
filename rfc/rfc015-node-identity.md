@@ -37,12 +37,11 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 When all participants of a network share the same public data, there's no need to know which node services a particular organization.
 This changes when data becomes private. Private data needs to be routed to the correct node.
 In order for that to work, there's a need to identify each node and link that identity to services organizations.
-[RFC014](rfc014-authorization-credential.md) describes that Nuts authorization credentials need to remain private.
 
 Two things need to be resolved:
 
 1. Node identity for peers that are connected. Network connections are the only interaction a node has to another node, so the connecting peer needs to be identified.
-2. DIDs need to be linked to DIDs that have a node identity.
+2. The DID subject that needs to receive the private data needs to be linked to a DID that has a node identity.
 
 For the first point TLS and certificates will be used as basis.
 
@@ -68,6 +67,7 @@ X509v3 extensions:
 ```
 
 This domain is checked by a client that connects to a server with that domain. The certificate the server uses must match the domain the client dialed.
+Only entries of type `DNS` are to be considered.
 Multiple DNS entries may exist in a certificate and wildcard domains are also possible.
 The value of the SAN, `example.com` in the example is used to link DIDs to certificates.
 
