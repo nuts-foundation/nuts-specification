@@ -4,7 +4,7 @@
 | :--- | :--- |
 | Nuts foundation | R.G. Krul |
 | Request for Comments: 004 | Nedap |
-|  | September 2020 |
+| Updated by: RFC016 | September 2020 |
 
 ## Verifiable Transactional Graph
 
