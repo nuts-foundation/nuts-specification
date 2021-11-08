@@ -12,15 +12,12 @@
 
 This RFC describes how to identify a node in the network. Node identification is required for exchanging private data.
 Measures to keep data private can range from encrypting data to sending data over a specific connection.
-The TLS connection and certificate exchange form the basis of the node identification.
-The *Subject Alternative Name* of the certificate is matched against the *serviceEndpoint* of a DID Document service.
+Mutual TLS authentication form the basis of the node identification.
+The *Subject Alternative Name* of the certificate is matched against the *serviceEndpoint* of a specific service.
 The requirement for the additional service in the DID Document also makes it possible to find other nodes and thus enable service discovery of Nuts nodes.
 
-Private data, like authorization credentials, have DIDs as issuer and subject. To enable private addressing, a DID will be encrypted with its public encryption key.
-Only the owner of the private key can decrypt this. Doing this on the individual DID level will be very inefficient.
-Each node would have to try all the private keys it manages to find out if a piece of data is addressed to it.
-To make this more efficient this RFC links individual DIDs to the service provider DID.
-An encrypted address would then only have to be decrypted with the service provider DID.
+Concepts like private addressing can greatly benefit from targeting specific nodes instead of individual DIDs.
+This RFC links individual DIDs to the service provider DID.
 
 ### Status
 
@@ -84,17 +81,17 @@ The service has a `serviceEndpoint` that defines the gRPC endpoint of a node.
 }
 ```
 
-The `type` MUST be `NutsComm`. 
+The `type` MUST be `NutsComm`. Inter-node communication uses gRPC over HTTP/2.
 The `serviceEndpoint` MUST start with `grpc://` and end with the correct port number, `:5555` in this example.
 
 ### 3.3 Connecting identity
 
-To determine the connecting identity, a `DID` metadata header SHOULD be sent by each node upon establishing a connection. 
+To determine the connecting identity, a `DID` metadata header MAY be sent by each node upon establishing a connection. 
 See [RFC005](rfc005-distributed-network-using-grpc.md) for more information about sending headers. If no such a header is sent, the connected peer remains anonymous.
 The validating node will resolve the DID document of the sent DID and will compare the `serviceEndpoint` of the `NutsComm` service with the SAN of the certificate that is related to the connection.
 A single match is sufficient when multiple DNS entries are available in the SAN extension. If no match is found the connected peer remains anonymous.
 
-This description is true for both client and the server.
+This description applies to both client and server.
 
 ## 4. Service provider
 
@@ -106,7 +103,7 @@ Addressing the service provider can greatly reduce the effort of the service pro
 A great example for this is [V2 protocol?](rfc015-node-identity.md) where the added `to` header on the transaction is encrypted with the DID encryption key of the service provider.
 Decrypting such a header is a trial and error proces where the number of tries is reduced by a factor of hundreds.
 
-To find the correct service provider for a DID, the DID Document must link to the DID Document of the service provider.
+To find the correct service provider for a DID, the DID Document MUST link to the DID Document of the service provider.
 The `NutsComm` service is reused for this purpose. It'll contain a reference instead of an actual endpoint.
 
 ```
