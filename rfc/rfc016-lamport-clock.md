@@ -42,8 +42,8 @@ Changes for the version 2 transactions:
 
 * The **ver** protected header MUST be 2.
 * The **lc** protected header is added. It MUST be a positive number constructed as follows:
-  * if the transaction has no entries in **prevs**, it has a lc value that is equal to **sigt**.
-  * otherwise, the value is equal to `max(prev1, ... prevN)+1`.
+  * if the transaction has no entries in **prevs**, it's' lc value is **0**.
+  * otherwise, the value MUST be equal to `max(prev1, ... prevN)+1`.
 
 ## 4. Changes to version 1
 
