@@ -15,6 +15,8 @@
 * [RFC012 Nuts Organization Credential](rfc/rfc012-nuts-organization-credential.md)
 * [RFC013 Verifiable Credential IRMA Proof Type](rfc/rfc013-vc-irma-proof.md)
 * [RFC014 Nuts Authorization Credential](rfc/rfc014-authorization-credential.md)
+* [RFC015 Node identity](rfc/rfc015-node-identity.md)
+* [RFC016 Transaction Lamport clock](rfc/rfc016-lamport-clock.md)
 
 ## templates
 
