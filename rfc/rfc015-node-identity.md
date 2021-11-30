@@ -100,7 +100,7 @@ When addressing an organization, it's usually sufficient to address the service 
 The same holds for encrypting data for an organization: the service provider has access to their private key to decrypt the data.
 Addressing the service provider can greatly reduce the effort of the service provider to handle the data.
 
-A great example for this is [V2 protocol?](rfc015-node-identity.md) where the added `to` header on the transaction is encrypted with the DID encryption key of the service provider.
+A great example for this is the [RFC017 v2 network protocol](rfc017-distributed-network-grpc-v2.md) where the added `to` header on the transaction is encrypted with the DID encryption key of the service provider.
 Decrypting such a header is a trial and error proces where the number of tries is reduced by a factor of hundreds.
 
 To find the correct service provider for a DID, the DID Document MUST link to the DID Document of the service provider.
