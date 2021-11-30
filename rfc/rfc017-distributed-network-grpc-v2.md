@@ -43,6 +43,6 @@ The node DID SHOULD be authenticated when received, so that exchanges that requi
 As specified by RFC015, the node MUST authenticate the peer's node DID as follows:
 
 1. Resolve peer's node DID to its corresponding DID document.
-2. Assert that one of the `NutsComm` endpoint's host (including the port) matches (one of) the `dNSName` SANs in the peer's TLS client certificate.
+2. Assert that one of the `NutsComm` endpoint's host matches (one of) the `dNSName` SANs in the peer's TLS client certificate.
 
 ## X. Private Transactions
