@@ -1,12 +1,12 @@
-# RFC017 Distributed Network using gRPC v2
+# RFC017 Distributed Network Protocol (v2) using gRPC
 
 |  |  |
 | :--- | :--- |
 | Nuts foundation | R.G. Krul |
 | Request for Comments: 017 |  |
-| Updates: RFC0-5 | December 2021 |
+| Updates: RFC017 | December 2021 |
 
-## Transaction Lamport clock
+## Distributed Network Protocol (v2) using gRPC
 
 ### Abstract
 
