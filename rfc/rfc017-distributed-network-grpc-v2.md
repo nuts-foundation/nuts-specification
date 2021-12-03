@@ -4,14 +4,13 @@
 | :--- | :--- |
 | Nuts foundation | R.G. Krul |
 | Request for Comments: 017 |  |
-| Updates: RFC017 | December 2021 |
+| Replaces: RFC005 | December 2021 |
 
 ## Distributed Network Protocol (v2) using gRPC
 
 ### Abstract
 
-This RFC specifies a new gRPC-based distributed network protocol. It succeeds version 1 of the protocol as defined by [RFC005](rfc005-distributed-network-using-grpc.md).
-At first, it will provide additions/optimizations over version 1, when feature complete it will replace it.
+This RFC specifies a new gRPC-based distributed network protocol. It replaces version 1 of the protocol as defined by [RFC005](rfc005-distributed-network-using-grpc.md).
 
 ### Status of document
 
@@ -37,8 +36,9 @@ Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-arc
 ## X. Authenticating node identity
 
 Particular exchanges (private transactions) might require authentication of the peer's identity. This identity (a.k.a. node identity) is specified by [RFC015 Node identity](rfc015-node-identity.md).
-If a node has configured a node DID, it MUST send it as `nodeDID` gRPC header when establishing inbound or outbound connections.
-The node DID SHOULD be authenticated when received, so that exchanges that require authentication can proceed without interruption. 
+If a node has a node DID and wishes create an authenticated connection, it MUST send the DID as `nodeDID` gRPC header when establishing inbound or outbound connections.
+If authentication fails, the authenticating side MUST close the connection with the following error: `nodeDID authentication failed`.
+The received node DID MUST be authenticated upon receiving, to directly inform the peer should its configuration be incorrect. 
 
 As specified by RFC015, the node MUST authenticate the peer's node DID as follows:
 
