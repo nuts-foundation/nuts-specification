@@ -58,11 +58,11 @@ The verifier is a service provider that, in the context of this RFC, verifies a 
 
 ### 4.1. Human readable
 
-The login contract must be human readable so the user can make a conscious decision about what it’s agreeing to.
+The login contract must be human-readable so the user can make a conscious decision about what it’s agreeing to.
 
 ### 4.2. Machine readable
 
-The login contract must also be machine readable. This means that the variation in different contracts must be limited. A fixed set of contracts provides an easy fix.
+The login contract must also be machine-readable. This means that the variation in different contracts must be limited. A fixed set of contracts provides an easy fix.
 
 ### 4.3. Single party verification
 
@@ -71,10 +71,11 @@ A verifier must be able to verify the token without contacting external services
 ### 4.4. User identification
 
 The token must hold the correct attributes on the user identity for the specific scope the token is to be used for.
+This data is shared with a different legal context (eg: different organization) and is therefore subject to legislation.
 
 ### 4.5. Cryptographically signed
 
-The token holds a digital signature binding the identity attributes to the login contract. This also makes the token tamper proof.
+The token holds a digital signature binding the identity attributes to the login contract. This also makes the token tamper-proof.
 
 ### 4.6. Time limited
 
