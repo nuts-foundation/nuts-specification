@@ -14,7 +14,7 @@ This RFC describes an interoperable, content agnostic data format for distribute
 
 ### Status of document
 
-This document is currently a draft.
+###### This document is currently a draft.
 
 ### Copyright Notice
 
@@ -64,6 +64,10 @@ In addition to the registered header parameters, the following headers MUST be p
 * **prevs**: \(previous transactions\) MUST contain the references \(see section 3.2\) of the preceding transactions \(see section 3.4\).
   * When it's a root transaction the field SHALL NOT have any entries.
   * When creating a transaction it MUST only contain transactions that the local node has successfully processed, to avoid publishing unprocessable transactions.
+
+The following protected headers MAY be present:
+
+* **to**: MUST contain the encrypted address of the recipient \(used for private transactions, see section 3.8\).
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
@@ -152,8 +156,26 @@ If the resolved transaction contents is not the latest version, this may indicat
 
 Since the transaction content is detached from the transaction itself and referred to by hash, the transaction content MUST be hashed and compared to the hash specified in the transaction, to assert that the retrieved transaction content is actually the expected transaction content.
 
+### 3.8 Private Transactions
+
+Private transactions are transactions that contain sensitive payload, intended for a specific recipient.
+Although they're private in nature, they are still part of the DAG like non-private transactions.
+The recipient of the transaction MUST be specified as `to` header in the JWS.
+
+To mitigate correlation attacks \(see appendix A\) the `to` header MUST be encrypted with a public key belonging to the recipient.
+When receiving a transaction containing a `to` header, the receiver then try to decrypt it with its encryption keys.
+If it can be decrypted and the decrypted `to` header matches its own address, the system is the intended recipient and the payload can be retrieved.
+
+For encryption of the `to` header the ECIES encryption algorithm MUST be used.
+
 ## 4. Example
 
 ```text
 eyJhbGciOiJFUzI1NiIsImN0eSI6ImZvby9iYXIiLCJjcml0IjpbInNpZ3QiLCJ2ZXIiLCJwcmV2cyIsImp3ayJdLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJUTXVzeXNWQTJJcHduNnZFMjhNWUQtOGtPZFN6ajZVTy1MeGE0ZWhLd0d3IiwieSI6IjdZbC1hb2ZPOC1qNHN6aVBYeGREdVVVSXdDSHlaeWtnTTJmdWlISEQxUzgifSwicHJldnMiOlsiMzk3MmRjOTc0NGY2NDk5ZjBmOWIyZGJmNzY2OTZmMmFlN2FkOGFmOWIyM2RkZTY2ZDZhZjg2YzlkZmIzNjk4NiIsImIzZjJjM2MzOTZkYTFhOTQ5ZDIxNGU0YzJmZTBmYzlmYjVmMmE2OGZmMTg2MGRmNGVmMTBjOTgzNWU2MmU3YzEiXSwic2lndCI6MTYwMzQ1Nzk5OSwidmVyIjoxfQ.NDUyZDllODlkNWJkNWQ5MjI1ZmI2ZGFlY2Q1NzllNzM4OGExNjZjNzY2MWNhMDRlNDdmZDNjZDg0NDZlNDYyMA.-jpKBZQ3sc0x34MwnbO8mSiGdUYCfQXNO91RMnvFRq0YZ5pmbKmRYg--zaie-N7wIJhIFbZyuOyJdlcPwZrELQ
 ```
+
+## Appendix A: Correlation Attacks on Private Transactions
+
+Because relating multiple private transactions, deriving information from their context and metadata, like the creator of the transaction),
+
+The used encryption algorithm must also ensure a different ciphertext is produced every time the address is encrypted, even when the same encryption key is used.
