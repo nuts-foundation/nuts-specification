@@ -72,7 +72,6 @@ A verifier must be able to verify the token without contacting external services
 
 The token must hold the correct attributes on the user identity for the specific scope the token is to be used for.
 This data is shared with a different legal context (eg: different organization) and is therefore subject to legislation.
-A citizen service number or social security number for example can not be used.
 
 ### 4.5. Cryptographically signed
 
