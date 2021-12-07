@@ -176,6 +176,15 @@ eyJhbGciOiJFUzI1NiIsImN0eSI6ImZvby9iYXIiLCJjcml0IjpbInNpZ3QiLCJ2ZXIiLCJwcmV2cyIs
 
 ## Appendix A: Correlation Attacks on Private Transactions
 
-Because relating multiple private transactions, deriving information from their context and metadata, like the creator of the transaction),
+When multiple encrypted documents, intended to be anonymous, contain (encrypted or not) data that is the same for every encrypted document,
+they could be related to each other, deriving information from their context. E.g., sender, time of sending, etc.
+In the context of Nuts: a care organization might issue multiple `NutsAuthorizationCredential`s (meant for giving access to EHR records) at once, to a set of care organizations.
+If the recipients are publicly readable, this gives knowledge of the name, physical location and care type of the organizations that have access.
+Given enough public knowledge and/or information from other contexts, one could ultimately pinpoint the set of issues VCs to a person (e.g. a relative or a celebrity).
 
-The used encryption algorithm must also ensure a different ciphertext is produced every time the address is encrypted, even when the same encryption key is used.
+To mitigate this attack, given a plaintext and encryption key, every subsequent encryption operation (with the same plaintext and key) must yield a new, random ciphertext.
+
+Still, this does not make correlation attacks impossible, just harder.
+E.g.: in small networks, the number of care organizations might be so small, that one could guess the receiving organization with relatively large accuracy.
+Especially when they are issued (and re-issued after they expire) by an automated process.
+This problem gets smaller when the network grows.
