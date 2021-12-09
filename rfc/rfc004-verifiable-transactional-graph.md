@@ -163,36 +163,29 @@ Private transactions MUST be added to the DAG like non-private transactions.
 The recipients MUST be specified as array that contains the node DIDs of the recipients, encrypted separately for each recipient.
 To construct the data to be encrypted, the plaintext recipients MUST be joined by a newline (`\n`)
 
-Given 2 recipients `did:nuts:recipient-A` and `did:nuts:recipient-B`.
+The recipient list MUST be encrypted for each recipient and the ciphertext specified as array as `pal` header in the JWS.
+
+Given 2 recipients `did:nuts:recipient-A` and `did:nuts:recipient-B`:
 
 ```
 encoded_recipients = join("did:nuts:recipient-A", "did:nuts:recipient-B", "\\n")
 
-to = []
+pal = []
 
 for each recipient
   encrypted_recipients = ecies_encrypt(encoded_recipients, recipient.encryption_public_key)
-  to = append(to, encrypted_recipients)
+  pal = append(to, encrypted_recipients)
 
-transaction.to = to
+transaction.pal = pal
 ```
 
-The recipient list MUST be encrypted for each recipient and specified as `to` header in the JWS. 
+To decrypt the header, the process above is applied in reverse. If one of the decrypted values match the local node's DID,
+it indicates the local node is (one of) the intended recipient, and it SHOULD try to retrieve the contents.
 
-The recipients list MUST be encrypted with a public encryption key (`keyAgreement` key in DID documents) of each recipient. 
+The encryption key to be used MUST be one of the elliptic curve public encryption keys (`keyAgreement` key in DID documents) of the recipient.
+For encryption of the `pal` header the ECIES encryption algorithm MUST be used.
 
-
-Given the recipients `["did:nuts:recipient-A", "did:nuts:recipient-B"]`
-
-When receiving a transaction containing a `to` header, the receiver then try to decrypt it with its encryption keys.
-If it can be decrypted and the decrypted `to` header matches its own address, the system is the intended recipient and the content can be retrieved.
-
-For encryption of the `to` header the ECIES encryption algorithm MUST be used.
-
-Transport implementations serving transaction contents MUST take care to properly authenticate the requester (of transaction content),
-to avoid leaking the private transaction content to attackers.
-
-See appendix A on the reasoning behind encrypting the `to` header.
+See appendix A on the reasoning behind encrypting the `pal` header.
 
 ## 4. Example
 
