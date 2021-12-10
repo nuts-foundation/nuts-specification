@@ -165,7 +165,7 @@ The `XOR` value MUST be calculated over the transaction references in the range 
 
 ### 4.2.4 Transaction Range Query
 
-If a `TransactionSet` message results in a `TransactionListQuery` message, the local node MAY also send a `TransactionRangeQuery` message.
+If the IBLT from a `TransactionSet` message could be deconstructed, the local node MAY also send a `TransactionRangeQuery` message.
 This is only needed if the `LC` value of the `TransactionSet` message is equal or larger than `512*ceil(LC_req/512)`. 
 This means the peer has additional transactions outside the IBLT range.
 The `TransactionRangeQuery` message contains a `begin` and `end` parameter indicating a request for transactions which LC value is between those parameters.
