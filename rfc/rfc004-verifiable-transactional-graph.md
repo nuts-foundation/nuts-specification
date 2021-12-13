@@ -67,7 +67,7 @@ In addition to the registered header parameters, the following headers MUST be p
 
 The following protected headers MAY be present:
 
-* **to**: MUST contain the encrypted address of the recipient \(used for private transactions, see section 3.8\).
+* **pal**: MUST contain the encrypted address of the recipient \(used for private transactions, see section 3.8\).
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
@@ -182,7 +182,8 @@ transaction.pal = pal
 To decrypt the header, the process above is applied in reverse. If one of the decrypted values match the local node's DID,
 it indicates the local node is (one of) the intended recipient, and it SHOULD try to retrieve the contents.
 
-The encryption key to be used MUST be one of the elliptic curve public encryption keys (`keyAgreement` key in DID documents) of the recipient.
+The encryption key to be used MUST be an elliptic curve of the recipient.
+In the context of DIDs, it MUST be the first `keyAgreement` key in the recipient's DID document.  
 For encryption of the `pal` header the ECIES encryption algorithm MUST be used.
 
 See appendix A on the reasoning behind encrypting the `pal` header.
