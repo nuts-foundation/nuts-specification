@@ -14,7 +14,7 @@ This RFC describes an interoperable, content agnostic data format for distribute
 
 ### Status of document
 
-This document is currently a draft.
+###### This document is currently a draft.
 
 ### Copyright Notice
 
@@ -53,7 +53,7 @@ In addition to required header parameters as specified in RFC7515 the following 
   other algorithms SHALL NOT be used.
 
 * **cty**: MUST contain the type of the transaction content indicating how to interpret it.
-* **crit** MUST contain the **sigt**, **ver** and **prevs** headers.
+* **crit** MUST contain the **sigt**, **ver**, **prevs** and **pal** headers.
 
 The **jku**, **x5c** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the transaction.
 
@@ -64,6 +64,10 @@ In addition to the registered header parameters, the following headers MUST be p
 * **prevs**: \(previous transactions\) MUST contain the references \(see section 3.2\) of the preceding transactions \(see section 3.4\).
   * When it's a root transaction the field SHALL NOT have any entries.
   * When creating a transaction it MUST only contain transactions that the local node has successfully processed, to avoid publishing unprocessable transactions.
+
+The following protected headers MAY be present:
+
+* **pal**: MUST contain the encrypted addresses of the participants \(used for private transactions, see section 3.8\).
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
@@ -152,8 +156,57 @@ If the resolved transaction contents is not the latest version, this may indicat
 
 Since the transaction content is detached from the transaction itself and referred to by hash, the transaction content MUST be hashed and compared to the hash specified in the transaction, to assert that the retrieved transaction content is actually the expected transaction content.
 
+### 3.8 Private Transactions
+
+Private transactions are transactions that contain sensitive content, intended for specific entities that participate in the transaction.
+Private transactions MUST be added to the DAG like non-private transactions.
+The participants MUST be specified as array that contains the node DIDs of the participants, encrypted separately for each participant.
+To construct the data to be encrypted, the plaintext participants MUST be joined by a newline (`\n`)
+
+The participant list MUST be encrypted for each participant and the ciphertext specified as array as `pal` header in the JWS.
+
+Given 2 participants `did:nuts:participant-A` and `did:nuts:participant-B`:
+
+```
+encoded_participants = join("did:nuts:participant-A", "did:nuts:participant-B", "\\n")
+
+pal = []
+
+for each participant
+  encrypted_participants = ecies_encrypt(encoded_participants, participant.encryption_public_key)
+  pal = append(pal, encrypted_participants)
+
+transaction.pal = pal
+```
+
+To decrypt the header, the process above is applied in reverse. If one of the decrypted values match the local node's DID,
+it indicates the local node is (one of) the intended participant, and it SHOULD try to retrieve the contents.
+
+The encryption key to be used MUST be an elliptic curve of the participant.
+In the context of DIDs, it MUST be the first `keyAgreement` key in the participant's DID document.  
+For encryption of the `pal` header the ECIES encryption algorithm MUST be used.
+
+See appendix A on the reasoning behind encrypting the `pal` header.
+
 ## 4. Example
 
 ```text
 eyJhbGciOiJFUzI1NiIsImN0eSI6ImZvby9iYXIiLCJjcml0IjpbInNpZ3QiLCJ2ZXIiLCJwcmV2cyIsImp3ayJdLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJUTXVzeXNWQTJJcHduNnZFMjhNWUQtOGtPZFN6ajZVTy1MeGE0ZWhLd0d3IiwieSI6IjdZbC1hb2ZPOC1qNHN6aVBYeGREdVVVSXdDSHlaeWtnTTJmdWlISEQxUzgifSwicHJldnMiOlsiMzk3MmRjOTc0NGY2NDk5ZjBmOWIyZGJmNzY2OTZmMmFlN2FkOGFmOWIyM2RkZTY2ZDZhZjg2YzlkZmIzNjk4NiIsImIzZjJjM2MzOTZkYTFhOTQ5ZDIxNGU0YzJmZTBmYzlmYjVmMmE2OGZmMTg2MGRmNGVmMTBjOTgzNWU2MmU3YzEiXSwic2lndCI6MTYwMzQ1Nzk5OSwidmVyIjoxfQ.NDUyZDllODlkNWJkNWQ5MjI1ZmI2ZGFlY2Q1NzllNzM4OGExNjZjNzY2MWNhMDRlNDdmZDNjZDg0NDZlNDYyMA.-jpKBZQ3sc0x34MwnbO8mSiGdUYCfQXNO91RMnvFRq0YZ5pmbKmRYg--zaie-N7wIJhIFbZyuOyJdlcPwZrELQ
 ```
+
+## Appendix A: Design decisions
+
+### A.1 Correlation Attacks on Private Transactions
+
+When multiple encrypted documents, intended to be anonymous, contain (encrypted or not) data that is the same for every encrypted document,
+they could be related to each other, deriving information from their context. E.g., sender, time of sending, etc.
+In the context of Nuts: a care organization might issue multiple `NutsAuthorizationCredential`s (meant for giving access to EHR records) at once, to a set of care organizations.
+If the participants are publicly readable, this gives knowledge of the name, physical location and care type of the organizations that have access.
+Given enough public knowledge and/or information from other contexts, one could ultimately pinpoint the set of issues VCs to a person (e.g. a relative or a celebrity).
+
+To mitigate this attack, given a plaintext and encryption key, every subsequent encryption operation (with the same plaintext and key) must yield a new, random ciphertext.
+
+Still, this does not make correlation attacks impossible, just harder.
+E.g.: in small networks, the number of care organizations might be so small, that one could guess the receiving organization with relatively large accuracy.
+Especially when they are issued (and re-issued after they expire) by an automated process.
+This problem gets smaller when the network grows.
