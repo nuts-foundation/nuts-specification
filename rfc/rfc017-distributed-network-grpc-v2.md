@@ -121,8 +121,8 @@ The protocol generally operates as follows:
 
 3. When receiving the message, the local node subtracts the given IBLT from its own IBLT for the given range:
    * If not deconstructable, go to 1 and send values based on a smaller Lamport Clock value.
-   * If deconstructable, send a request for missing transactions
-   * If the peers highest Lamport Clock value is higher that the LC value sent in 1, then request transactions by Lamport Clock value:
+   * If deconstructable, send a request for missing transactions.
+   * If the peers highest Lamport Clock value is higher than the LC value sent in 1, then request transactions by Lamport Clock value:
      * Lamport Clock start value.
      * Lamport Clock end value.
 
