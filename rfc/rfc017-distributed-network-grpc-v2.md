@@ -196,8 +196,8 @@ When this happens randomly, it wouldn't be such a problem, but it's also an atta
 An attacker could craft pairs of transactions that would trigger other nodes into requesting large amounts of transactions. 
 This type of attack is called the [birthday attack](https://en.wikipedia.org/wiki/Birthday_attack).
 The only way to protect against this type of attack is to make the set large enough that the cost to the attacker would become to big.
-For an IBLT with 64 buckets and 4 hashes, the change for a collision is 50% after adding ~5133 keys.
+For an IBLT with 64 buckets and 4 hashes, the change for a collision is 50% after adding ~5000 keys.
 This would be trivial for current computers.
-Expanding this to 1024 buckets and 5 hashes, reaching a 50% chance for a collision is only achieved after adding more than 42 million keys.
+Expanding this to 1024 buckets and 5 hashes, reaching a 50% chance for a collision is only achieved after adding more than 40 million keys.
 This is still not much, but the keys used for the collision have to be created by real signed transactions.
-Even on modern hardware, 42 million signing operations would take minutes. Even a 6th hash can be added later to multiply that amount by 32.
+Even on modern hardware, 40 million signing operations would take minutes. A 6th hash can be added later to require more than 1 billion keys for a 50% chance of collision.
