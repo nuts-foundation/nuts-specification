@@ -189,9 +189,9 @@ All transactions in the `TransactionList` message MUST be sorted by LC value (lo
 
 For a small network, 1024 buckets and 5 hashes is quite heavy. 
 For a nation-wide network this would be reasonable.
-The reason for these parameters is the chance of a collision: a different transaction that results in the exact same buckets as another transaction.
-If there's a collision, it would not be possible to deconstruct an IBLT since there'll be too many buckets that still have a count of 2.
-In the protocol this would mean an entire range of transactions would have to be sent.
+These parameters are chosen to reduce the chance of a collision: two different transactions that are hashed into the exact same buckets.
+If there is a collision in the _set difference_, it is not be possible to deconstruct an IBLT.
+In the protocol described here, this would mean that an entire range of transactions would have to be sent.
 When this happens randomly, it wouldn't be such a problem, but it's also an attack vector.
 An attacker could craft pairs of transactions that would trigger other nodes into requesting large amounts of transactions. 
 This type of attack is called the [birthday attack](https://en.wikipedia.org/wiki/Birthday_attack).
