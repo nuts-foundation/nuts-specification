@@ -70,7 +70,7 @@ The XOR value is used to quickly determine if two nodes have processed the exact
 
 #### 4.1.2 Invertible Bloom Lookup Table
 
-The IBLT is a data structure capable of finding differences in sets.
+The IBLT is a data structure capable of finding differences between sets.
 The performance of this data structure is not impacted by the number of entries, but only by the size of the set difference.
 This allows two nodes to compare the entire set of transactions with a relative small data structure.
 
