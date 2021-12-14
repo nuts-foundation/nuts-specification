@@ -77,7 +77,7 @@ This allows two nodes to compare the entire set of transactions with a relative 
 An IBLT has several parameters that define its characteristics. When comparing two IBLTs, these parameters MUST be the same.
 An overview of the parameters:
 
-* **#buckets**: defines the size of the IBLT, much like the size of a bloom filter. The larger the size, the bigger the set difference can be. 
+* **buckets**: defines the size of the IBLT, much like the size of a bloom filter. The larger the size, the bigger the set difference can be. 
 * **Hk**: each key is hashed to select the buckets the key is inserted to. The hash function is applied on the previous output to create extra hash values. This continues until k different values are found. The hash function, its seed and the value for k MUST all be the same for the entire network.
 * **Hc**: each key is hashed to a checksum which is used to validate the inserted key during the deconstruction phase. 
 * **data types**: the data types for *count*, *val_sum* and *hash_sum* MUST match ((un)signed, byte-size).
