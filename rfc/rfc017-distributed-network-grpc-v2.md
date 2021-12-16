@@ -227,11 +227,11 @@ The protocol generally operates as follows:
 3. When receiving the message, Alice subtracts Bob's IBLT from her own IBLT for the given range (§6.2.3):
    * If not decodable, go to 1 and send values based on the previous page.
    * If decodable, send a request for missing transactions
-   * If Bob's highest Lamport Clock value is higher than the LC value sent in 1, then request transactions by Lamport Clock value:
+   * If Bob's highest Lamport Clock value is higher than the LC value sent in 1, then request transactions by Lamport Clock value (§6.2.4):
      * Lamport Clock start value.
      * Lamport Clock end value.
 
-4. When receiving a request for transactions, Bob responds with a message including the requested transactions (§6.2.4 and §5.2.2).
+4. When receiving a request for transactions, Bob responds with a message including the requested transactions.
 
 5. After adding Bob's transactions to the DAG (making sure its cryptographic signature is valid), query the payload if it's missing.
 
@@ -252,6 +252,7 @@ This might look exactly like the `Gossip` message, but the type of response is d
 When a peer receives a `State` message and the `XOR` differs, it SHOULD respond with a `TransactionSet` message.
 The sent `LC` value falls within the bounds of a page.
 The response IBLT MUST be calculated over the transactions leading up to and including that page.
+If the peer's highest Lamport Clock value is lower, it MUST use the IBLT covering the entire DAG.
 Next to the IBLT data, the `TransactionSet` message MUST contain the original `LC` value as `LC_req`, a new `LC` value indicating the highest LC value from the peer.
 This is a response type message so it MUST contain the `conversationID`.
 
@@ -259,11 +260,13 @@ This is a response type message so it MUST contain the `conversationID`.
 
 For every `TransactionSet` message a node receives, it MUST check if the `LC_req` value matches the `LC` value from the original request.
 
-The IBLT in the `TransactionSet` message contains every transaction of the peer in the LC range of `0-LC_req`. The node MUST lookup/compute the IBLT for this range and subtract it from the IBLT of the peer. Decoding the resulting IBLT will list the transaction refs the peer has and the local node misses. 
-
+The IBLT in the `TransactionSet` message contains every transaction of the peer in the LC range of `0-min(LC, LC_req)`. The node MUST lookup/compute the IBLT for this range and subtract it from the IBLT of the peer. Decoding the resulting IBLT will list the transaction refs the peer has and the local node misses. 
 These transactions MUST be queried by using the `TransactionListQuery` message (see §5.2.2). 
 
-If the decoding fails, the local node sends a new `State` message. The `LC` value MUST be the `end` of the page before the page that included `LC_req`. 
+If the decoding fails, the local node sends a new `State` message. 
+The IBLT subtraction used the range `0-min(LC, LC_req)`.
+The new request MUST be for one page lower.
+The `LC` value MUST be the `end` of that previous page. 
 The `XOR` value MUST be calculated over the transaction references in the range starting with 0 and ending with the new `LC` value.
 
 #### 6.2.4 Transaction Range Query
