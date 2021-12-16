@@ -30,8 +30,8 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 ## 2. Terminology
  
 * **DAG** \(Directed Acyclic Graph\): graph formed of all transactions. It provides casual ordering for transactions and means to efficiently compare the local DAG with those of peers. See [RFC004](rfc004-verifiable-transactional-graph.md) for details.
-* **Invertible Bloom Lookup Table (IBLT)**: A bloom filter where instead of just a 0 or 1, a count, key_sum and hash_sum is stored per bucket. Original paper: https://arxiv.org/pdf/1101.2245 or https://www.ics.uci.edu/~eppstein/pubs/EppGooUye-SIGCOMM-11.pdf.
-* **Lamport Clock (LC)**: Monotonically increasing clock as defined in [RFC016](rfc016-lamport-clock.md).
+* **Invertible Bloom Lookup Table (IBLT)**: A bloom filter where instead of just a 0 or 1, a count, key_sum and hash_sum is stored per bucket. [Original paper](https://www.ics.uci.edu/~eppstein/pubs/EppGooUye-SIGCOMM-11.pdf).
+* **Lamport Clock (LC)**: Logical clock as defined in [RFC016](rfc016-lamport-clock.md).
 * **Node**: local Nuts software system acting \(a.k.a. _Nuts Node_\).
 * **Node identity**: (a.k.a. node DID) the DID a node uses to identify itself on the Nuts network. Multiple logical nodes (e.g. a cluster) may share the same node identity.
 * **Peer**: remote Nuts node that communicates with the local node.
@@ -56,16 +56,21 @@ As specified by RFC015, the node MUST authenticate the peer's node DID as follow
 
 ## 4. Set reconciliation protocol
 
+One of the problems in a distributed network is how to make sure every node has processed all transactions.
+When two nodes haven't processed the same set of transactions, the second problem is how to efficiently synchronize the missing transactions.
+The higher the efficiency, the more transactions the entire network can process.
+The protocol described here is a compromise on efficiency and fairness. It's able to quickly determine a set of missing transactions, but also doesn't favour any node.
+
+
 ### 4.1 Data requirements
 
 The protocol requires an XOR value and IBLT structure to be sent in a message. 
 These are to be calculated over different transaction ranges based on LC value.
-Both data structures have associative properties allowing for optimized data storage.
 
 #### 4.1.1 XOR
 
-The exclusive-or (XOR) value is calculated over all transactions reference within a range.
-The length of the XOR value is therefore the same as the transaction reference length (SHA256: 32 bytes).
+The exclusive-or (XOR) value is calculated over all transaction references within a range.
+The size of the XOR value is therefore the same as the transaction reference size (SHA256: 32 bytes).
 The XOR value is used to quickly determine if two nodes have processed the exact same set of transactions.
 
 #### 4.1.2 Invertible Bloom Lookup Table
@@ -74,12 +79,14 @@ The IBLT is a data structure capable of finding differences between sets.
 The performance of this data structure is not impacted by the number of entries, but only by the size of the set difference.
 This allows two nodes to compare the entire set of transactions with a relative small data structure.
 
-An IBLT has several parameters that define its characteristics. When comparing two IBLTs, these parameters MUST be the same.
+An IBLT has several parameters that define its characteristics.
+The transaction reference is used as *key*.
+When comparing two IBLTs, these parameters MUST be the same.
 An overview of the parameters:
 
 * **buckets**: defines the size of the IBLT, much like the size of a bloom filter. The larger the size, the bigger the set difference can be. 
-* **Hk**: each key is hashed to select the buckets the key is inserted to. The hash function is applied on the previous output to create extra hash values. This continues until k different values are found. The hash function, its seed and the value for k MUST all be the same for the entire network.
-* **Hc**: each key is hashed to a checksum which is used to validate the inserted key during the deconstruction phase.
+* **Hk**: each key is hashed to select the buckets the key is inserted to. The hash function is applied recursively to create extra hash values. This continues until k different values are found. The hash function, its seed and the value for `k` MUST all be the same for the entire network.
+* **Hc**: each key is hashed to a checksum which is used to validate the inserted key during the decode phase. The hash function and its seed MUST all be the same for the entire network.
 * **data types**: the data types for *count*, *val_sum* and *hash_sum* MUST match ((un)signed, byte-size).
 
 The following parameters are used:
@@ -87,21 +94,27 @@ The following parameters are used:
 * **buckets**: 1024
 * **Hc**: [murmur3](https://en.wikipedia.org/wiki/MurmurHash), 8 bytes, seed: 0x00
 * **Hk**: murmur3, 4 bytes, seed: 0x01, k = 6 
-* **key sum size**: 32 bytes
-* **bucket count field**: 4 bytes
+* **val_sum field size**: 32 bytes
+* **count field size**: 4 bytes
 
 See Appendix A.1 for an explanation.
 
-### 4.1.3 IBLT page size
+#### 4.1.3 IBLT page size
 
 Calculating an IBLT is relatively cheap, but it grows linearly with the number of transactions. This would harm performance of larger networks.
 The immutable nature of transactions make it possible to store intermediate IBLTs and use those as an optimization.
 The LC range parameters of the protocol should be adjusted accordingly to optimize use of these intermediate IBLTs.
 Therefore, they should not be chosen freely.
 
-Any LC value used in the protocol MUST be a multiple of 512 (minus 1, because the LC is 0 based). 
-The use of inclusive or exclusive range parameters must make sure that `end-start` is a multiple of 512.
-In the context of an IBLT this size will be referred to as the `IBLT page size` or `PSIZE` for short.
+To simplify the description of the protocol we introduce a new term: **page**.
+A page contains transaction references for a range of LC values. Each page is a multiple of 512.
+The first page includes transactions with LC values between 0 (inclusive) and 512 (exclusive).
+When a *next* or *previous* page is mentioned, this means 512 has to be added/reduced from the `begin` and `end` values of an LC range.
+
+#### 4.1.4 IBLT decoding
+
+When decoding an IBLT as described in [the original paper](https://arxiv.org/pdf/1101.2245 or https://www.ics.uci.edu/~eppstein/pubs/EppGooUye-SIGCOMM-11.pdf), the result is two sets of values: those that are missing in set A and those that are missing in set B. For this protocol only one of those sets is of interest, the other can be ignored.
+This also makes it more likely the IBLT can be decoded.
 
 ### 4.2 Operation
 
@@ -118,13 +131,13 @@ The protocol generally operates as follows:
     * When the XOR is the same and the LC value equals BOB's highest Lamport Clock value: no action required.
     * When different, send a message containing:
       * LC value sent by Alice
-      * the IBLT that includes the Lamport Clock range of 0-LC
+      * the IBLT that includes the Lamport Clock range of 0-LC(Alice)
       * Bob's highest Lamport Clock value
 
 3. When receiving the message, Alice subtracts Bob's IBLT from her own IBLT for the given range (§4.2.3):
-   * If not deconstructable, go to 1 and send values based on a lower Lamport Clock value.
-   * If deconstructable, send a request for missing transactions
-   * If Bob's highest Lamport Clock value is higher that the LC value sent in 1, then request transactions by Lamport Clock value:
+   * If not decodable, go to 1 and send values based on the previous page.
+   * If decodable, send a request for missing transactions
+   * If Bob's highest Lamport Clock value is higher than the LC value sent in 1, then request transactions by Lamport Clock value:
      * Lamport Clock start value.
      * Lamport Clock end value.
 
@@ -136,47 +149,51 @@ A node MUST make sure to only add transactions of which all previous transaction
 
 The sections below specify the details of the protocol operation and maps it to the gRPC messages. See the section "Protobuf Definition" for a full specification of the protobuf/gRPC contract.
 
-### 4.2.1 Broadcasting
+#### 4.2.1 Broadcasting the state
 
-The local node's DAG state MUST be broadcast at an interval using the `AdvertState` message, by default every 2 seconds. The interval MAY be adjusted by the node operator but MUST conform to the limits \(min/max interval\) defined by the network. It is advised to keep it relatively short because it directly influences the speed by which new transactions are retrieved.
+todo:
+The local node's DAG state MUST be broadcast at an interval using the `State` message, by default every 2 seconds. The interval MAY be adjusted by the node operator but MUST conform to the limits \(min/max interval\) defined by the network. It is advised to keep it relatively short because it directly influences the speed by which new transactions are retrieved.
 
-The `AdvertState` message contains a `XOR` value, an `LC` value and a `token`. The `token` is scoped to a connection and is required in the response from the peer.
+The `State` message contains a `XOR` value, an `LC` value and a `token`. The `token` is scoped to a connection and is required in the response from the peer.
 The `LC` value MUST equals the highest Lamport Clock value of all transaction references included in the `XOR` calculation.
 If no transactions are present, an all-zero `XOR` and `LC` of 0 is sent.
 A node is free to choose how the `token` is created as long as it's able to satisfy the requirements of §4.2.3.
 It MUST be valid for at least 10 seconds.
 
-### 4.2.2 IBLT response
+#### 4.2.2 IBLT response
 
-When a peer receives an `AdvertState` message and the `XOR` differs, it SHOULD respond with a `TransactionSet` message.
-The upper bound of the response IBLT MUST be the equal to `PSIZE*ceil(LC/PSIZE)` where `LC` is the value from the `AdvertState` message and `ceil` is a function that rounds a double up to the nearest integer.
-If `LC` equals zero, `PSIZE` is used.
-This upper bound is exclusive, the lower bound is inclusive and always 0.
-Next to the IBLT data, the `TransactionSet` message MUST contain the original `LC` value as `LC_req`, a new `LC` value indicating the highest LC value from the peer and the `token` value from the `AdvertState` message.
+When a peer receives an `State` message and the `XOR` differs, it SHOULD respond with a `TransactionSet` message.
+The sent `LC` value falls within the bounds of a page.
+The response IBLT MUST be calculated over the transactions leading up to and including that page.
+Next to the IBLT data, the `TransactionSet` message MUST contain the original `LC` value as `LC_req`, a new `LC` value indicating the highest LC value from the peer and the `token` value from the `State` message.
 
-### 4.2.3 Transaction List Query
+#### 4.2.3 Transaction List Query
 
 For every `TransactionSet` message a node receives, it MUST check the `token` value in the message and compare it to its own administration.
 If the `token` doesn't exist or if the `LC_req` value doesn't match, the node MUST ignore the message.
 
-The IBLT in the `TransactionSet` message contains every transaction of the peer in the LC range of `0-LC_req`. The node MUST lookup/compute the IBLT for this range and subtract it from the IBLT of the peer. Deconstruction of the resulting IBLT will list the transaction refs the peer has and the local node misses. 
+The IBLT in the `TransactionSet` message contains every transaction of the peer in the LC range of `0-LC_req`. The node MUST lookup/compute the IBLT for this range and subtract it from the IBLT of the peer. Decoding the resulting IBLT will list the transaction refs the peer has and the local node misses. 
 
 These transactions MUST be queried by using the `TransactionListQuery` message. It contains all missing transaction references.
 The message MUST contain a `token` that is to be used in the response.
 
-If the deconstruction fails, the local node sends a new `AdvertState` message. The `LC` value MUST be `PSIZE*floor((LC_req-1)/PSIZE)` where `floor` is a function that rounds a double down to the nearest integer. 
+If the decoding fails, the local node sends a new `State` message. The `LC` value MUST be the `end` of the page before the page that included `LC_req`. 
 The `XOR` value MUST be calculated over the transaction references in the range starting with 0 and ending with the new `LC` value.
 
-### 4.2.4 Transaction Range Query
+#### 4.2.4 Transaction Range Query
 
-If the IBLT from a `TransactionSet` message could be deconstructed, the local node MAY also send a `TransactionRangeQuery` message.
-This is only needed if the `LC` value of the `TransactionSet` message is equal or larger than `PSIZE*ceil(LC_req/PSIZE)`. 
+If the IBLT from a `TransactionSet` message could be decoded, the local node MAY also send a `TransactionRangeQuery` message.
+This is only needed if the page containing the `LC` value of the `TransactionSet` message comes after the page containing `LC_req`. 
 This means the peer has additional transactions outside the IBLT range.
-The `TransactionRangeQuery` message contains a `begin` and `end` parameter indicating a request for transactions which LC value is between those parameters.
-The `begin` MUST be set to `PSIZE*ceil(LC_req/PSIZE)` and the end MUST be set to `LC`. Both are inclusive.
+If the `LC_req` value is in the latest page of the local node, it SHOULD query all pages leading up to the `LC` value.
+If the `LC_req` value is NOT in the latest page of the local node, then it MUST only query the next page.
+
+The `TransactionRangeQuery` message contains a `start` (inclusive) and `end` (exclusive) parameter corresponding to that requested page(s).
 The message MUST contain a `token` that is to be used in the response.
 
-### 4.2.5 Transaction List
+If decoding fails and the IBLT covered the first page, the local node MUST query the first page.
+
+#### 4.2.5 Transaction List
 
 The `TransactionList` message contains a list of transactions and the `token` from either the `TransactionListQuery` or `TransactionRangeQuery`.
 Each transaction in the message MUST relate to the original request. Transactions that resulted from a `TransactionListQuery` MUST have been present in that message.
@@ -184,6 +201,10 @@ Transactions that resulted from a `TransactionRangeQuery` MUST have an LC value 
 If this is not true, the entire message MUST be ignored.
 A `TransactionList` message MAY be broken up into smaller messages, each message should confirm to these rules. Each part MUST also use the same `token`.
 All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
+
+## 5 Gossip
+
+coming
 
 ## X. Private Transactions
 
@@ -199,9 +220,26 @@ In the protocol described here, this would mean that an entire range of transact
 When this happens randomly, it wouldn't be such a problem, but it's also an attack vector.
 An attacker could craft pairs of transactions that would trigger other nodes into requesting large amounts of transactions. 
 This type of attack is called the [birthday attack](https://en.wikipedia.org/wiki/Birthday_attack).
-The only way to protect against this type of attack is to make the set large enough that the cost to the attacker would become to big.
-For an IBLT with 64 buckets and 4 hashes, the change for a collision is 50% after adding ~5000 keys.
+The only way to protect against this type of attack is to make the set large enough that the cost to the attacker would become to high.
+For an IBLT with 64 buckets and 4 hashes, the chance for a collision is 50% after adding ~5000 keys.
 This would be trivial for current computers.
 Expanding this to 1024 buckets and 6 hashes, reaching a 50% chance for a collision is only achieved after adding more than a billion keys.
 This is still not much, but the keys used for the collision have to be created by real signed transactions.
 Even on modern hardware, this could take an hour.
+
+### A.2 The right message for the right situation
+
+The protocol uses a variety of message to synchronize all transactions over nodes.
+Together they cover all known situations.
+
+If all nodes are operating correctly, the gossip protocol is the most efficient in synchronizing all the transactions.
+It will not be able to deal with situations where a node is offline or when nodes can no longer reach each other.
+It can be used frequent and uses small messages.
+
+If a node has been offline for some time, the combination of an IBLT and a range query will synchronize the node efficiently.
+The IBLT will resolve all missing transactions for the node's latest page and the range query will sycnhronize all the missing pages. Those pages will include all transactions that have been created during the period the nodes was offline.
+
+If a node has not been offline, but its communication has been interrupted, it will have created new transactions.
+The Lamport Clock values will overlap with the transactions of the rest of the network.
+The IBLT will be able to determine missing transactions. 
+If the difference in transactions is to big, the protocol will reduce the range the IBLT covers until an IBLT has been found that can resolve the transaction set difference.
