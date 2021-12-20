@@ -58,7 +58,7 @@ As specified by RFC015, the node MUST authenticate the peer's node DID as follow
 
 Certain messages in the protocol are a response to a certain request. To make sure a response corresponds to a certain request, a `conversationID` is added to the request. Response type messages MUST add the same `conversationID` in the response.
 The `conversationID` is scoped to a connection.
-A node is free to choose the form of a `conversationID`.
+A node is free to choose the form of a `conversationID`, it MUST be unique during the lifetime of the connection.
 It MUST be valid for at least 10 seconds and no longer than 30 seconds.
 
 If a node receives a response with a `conversationID`, it MUST match its contents with the original request.
@@ -115,7 +115,7 @@ The list of transaction references MUST be tracked per connection.
 If no new transactions have been added/received or for the first message for a connection, an empty list is sent.
 The list MUST not contain more than 100 transactions.
 This could create a backlog of messages at the sending node's side. 
-A node SHOULD take precautions on keeping this backlog to a minimum, eg it SHOULD reduce the inflow of new transactions.
+A node SHOULD take precautions on keeping this backlog below maximum, eg it SHOULD reduce the inflow of new transactions.
 
 The `LC` value MUST equal the highest Lamport Clock value of all transaction references included in the `XOR` calculation.
 If no transactions are present, an all-zero `XOR` and `LC` of 0 is sent.
@@ -130,7 +130,7 @@ If the values are equal, no further action is required.
 If they are not equal, the transaction list MUST be filtered. All known transaction references MUST be removed.
 The resulting list contains all transaction the node is missing.
 The node MUST send a `TransactionListQuery` message containing the list of missing transaction references.
-This message MUST also add a `conversationID`.
+This message MUST also add a new `conversationID`.
 
 If the resulting list of transactions is empty and the `LC` value in the message is equal to or higher than the highest Lamport Clock value of the node, then the node MUST send a `State` message. See §6.2.1.
 
@@ -138,10 +138,10 @@ If the resulting list of transactions is empty and the `LC` value in the message
 
 When a node receives a `TransactionListQuery` message, it MUST respond with a `TransactionList` message.
 This is a response type message so it MUST include the sent `conversationID`.
-Each transaction in the message MUST have been requested. Transactions that resulted from a `TransactionListQuery` MUST have been present in that message.
+Transactions that resulted from a `TransactionListQuery` MUST have been present in that message.
 Unknown transactions references SHOULD be ignored.
 Transactions that resulted from a `TransactionRangeQuery` MUST have an LC value that is within the requested range.
-When a `TransactionList` message is received and this is not true, the entire message MUST be ignored.
+If any of these requirements are not met, the entire message MUST be ignored.
 
 A `TransactionList` message MAY be broken up into smaller messages, each message should confirm to these rules. Each part MUST also use the same `conversationID`.
 All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
@@ -155,12 +155,12 @@ depends on private tx chaptr
 One of the problems in a distributed network is how to make sure every node has processed all transactions.
 When two nodes haven't processed the same set of transactions, the second problem is how to efficiently synchronize the missing transactions.
 The higher the efficiency, the more transactions the entire network can process.
-This part of the protocol is used to synchronize transactions that are missed by the gossip protocol. 
+This part of the protocol is used to synchronize transactions that are missed by the gossip protocol (e.g. due to nodes being offline/network partitions). 
 
 ### 6.1 Data requirements
 
 The protocol requires an XOR value and IBLT structure to be sent in a message.
-The XOR value has already ben explained in §5.1.1.
+The XOR value has already been explained in §5.1.1.
 These are calculated over different transaction ranges based on LC value.
 
 #### 6.1.1 Invertible Bloom Lookup Table
@@ -240,7 +240,7 @@ A node MUST make sure to only add transactions of which all previous transaction
 #### 6.2.1 Broadcasting the state
 
 The `State` message is sent as response to various conditions of the gossip protocol (see §5).
-The `State` message MUST contain a `conversationID`.
+The `State` message MUST contain a new `conversationID`.
 The `State` message contains a `XOR` value and an `LC`.
 The `LC` value MUST equal the highest Lamport Clock value of all transaction references included in the `XOR` calculation.
 If no transactions are present, an all-zero `XOR` and `LC` of 0 is sent.
@@ -311,13 +311,13 @@ The protocol uses a variety of message to synchronize all transactions over node
 Together they cover all situations.
 
 If all nodes are operating correctly, the gossip protocol is the most efficient in synchronizing all the transactions.
-It will not be able to deal with situations where a node is offline or when nodes can no longer reach each other.
-It can be used frequent and uses small messages.
+It will not be able to deal with situations where a node has been offline or when nodes can no longer reach each other.
+It can be used frequently because it uses small messages.
 
 If a node has been offline for some time, the combination of an IBLT and a range query will synchronize the node efficiently.
-The IBLT will resolve all missing transactions for the node's latest page and the range query will synchronize all the missing pages. Those pages will include all transactions that have been created during the period the nodes was offline.
+The IBLT will resolve all missing transactions for the node's latest page and the range query will synchronize all the missing pages. Those pages will include all transactions that have been created during the period the node was offline.
 
-If a node has not been offline, but its communication has been interrupted, it will have created new transactions.
+If a node has not been offline, but its communication has been interrupted, it might have created new transactions that aren't synchronized with the rest of the network.
 The Lamport Clock values will overlap with the transactions of the rest of the network.
 The IBLT will be able to determine missing transactions. 
-If the difference in transactions is to big, the protocol will reduce the range the IBLT covers until an IBLT has been found that can resolve the transaction set difference.
+If the difference in transactions is too big, the protocol will reduce the range the IBLT covers until an IBLT has been found that can resolve the transaction set difference.
