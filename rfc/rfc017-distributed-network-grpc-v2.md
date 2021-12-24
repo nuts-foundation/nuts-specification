@@ -110,7 +110,7 @@ A node MUST make sure to only add transactions of which all previous transaction
 A node's new transaction references MUST be broadcast at an interval using the `Gossip` message, by default every 2 seconds. The interval MAY be adjusted by the node operator but MUST conform to the limits (min/max interval) defined by the network. It is advised to keep it relatively short because it directly influences the speed by which new transactions are retrieved.
 
 The `Gossip` message MUST contain an `XOR` value, an `LC` value and a list of transaction references (`transactions`).
-The list MUST contain all new transaction references since the last `Gossip` message.
+The list MUST contain transaction references added to the DAG since the last `Gossip` message.
 The list of transaction references MUST be tracked per connection.
 If no new transactions have been added/received or for the first message for a connection, an empty list is sent.
 The list MUST not contain more than 100 transactions.
