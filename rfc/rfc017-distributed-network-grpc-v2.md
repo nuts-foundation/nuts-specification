@@ -465,3 +465,10 @@ If such an error occurs, the node must log the error for analysis by an operator
 A lot of the response type messages only state a node SHOULD send a response or a followup and not a MUST. This is because a node might have a reason to stop/pause processing.
 A node might be to busy doing something else, or it might be doing a migration or backup. Because nodes communicate with multiple nodes, a single busy node should not matter that much.
 If all nodes send at best-effort, that will be enough due to the number of nodes available.
+
+## X. Service Discovery
+
+Although a (or multiple) trusted bootstrap node is required for initially connecting to the network, nodes SHOULD discover new peers by searching for `NutsComm` endpoints in the received DID documents.
+This SHOULD be done after the initial DAG sync is completed, to avoid connecting to non-existing endpoints resolved from older versions of DID documents.
+
+TODO: What if a node were to publish a competitor's NutsComm endpoint in its DID document, causing implementations to ignore the competitor's endpoint (because the malicious node's DID document is processed first)
