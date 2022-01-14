@@ -276,7 +276,7 @@ This is only needed if the page containing the `LC` value of the `TransactionSet
 This means the peer has additional transactions outside the IBLT range.
 If the `LC_req` value is in the latest page of the local node, it SHOULD query all pages leading up to the `LC` value.
 If the `LC_req` value is NOT in the latest page of the local node, then it MUST only query the next page.
-This last requirement prevents a node from querying the entire DAG while only some historic transactions are missing.
+This last requirement prevents a node from querying the entire DAG while only some historic transactions are missing or when a page contains collisions.
 
 The `TransactionRangeQuery` message contains a `start` (inclusive) and `end` (exclusive) parameter corresponding to the requested page(s).
 The message MUST contain a `conversationID`.
