@@ -115,7 +115,7 @@ The list of transaction references MUST be tracked per connection.
 If no new transactions have been added/received or for the first message for a connection, an empty list is sent.
 The list MUST not contain more than 100 transactions.
 This could create a backlog of messages at the sending node's side. 
-A node SHOULD take precautions on keeping this backlog below maximum, eg it SHOULD reduce the inflow of new transactions.
+A node SHOULD take precautions to keep this backlog to a minimum.
 
 The `LC` value MUST equal the highest Lamport Clock value of all transaction references included in the `XOR` calculation.
 If no transactions are present, an all-zero `XOR` and `LC` of 0 is sent.
