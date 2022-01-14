@@ -143,7 +143,7 @@ Unknown transactions references SHOULD be ignored.
 Transactions that resulted from a `TransactionRangeQuery` MUST have an LC value that is within the requested range.
 If any of these requirements are not met, the entire message MUST be ignored.
 
-A `TransactionList` message MAY be broken up into smaller messages, each message should confirm to these rules. Each part MUST also use the same `conversationID`.
+A `TransactionList` message MAY be broken up into smaller messages, each message should conform to these rules. Each part MUST also use the same `conversationID`.
 All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
 
 #### 5.2.4 Transaction Payload query
