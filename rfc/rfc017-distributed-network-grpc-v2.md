@@ -287,20 +287,28 @@ If decoding fails and the IBLT covered the first page, the local node MUST use a
 ## 7. Private Transactions
 
 When the node receives a transaction that contains a `pal` header, the transaction is considered private.
-This means the transaction contents can only be retrieved by (and should only be shared with) the participants listed in the `pal` header.
+This means the transaction payload can only be retrieved by the participants listed in the `pal` header.
+Transaction payload SHALL NOT be shared with other parties than listed in the `pal` header.
 Since the `pal` header is encrypted (see [RFC004](rfc004-verifiable-transactional-graph.md)) to preserve anonymity of the participants,
 it must be decrypted first using the node's `keyAgreement` keys from its DID document.
 If the local node can decrypt the `pal` header, it means the transaction is (also) intended for the local node.
 See [RFC004](rfc004-verifiable-transactional-graph.md) for more information on how to encrypt/decrypt the `pal` header.
 
-To retrieve the contents of the private transaction, the node MUST send a `TransactionPayloadQuery` to one (or more) of the nodes listed in the `pal` header.
-It COULD decide to broadcast the message to all nodes in the `pal` header (except the local node), because not all nodes (in the `pal` header) might have the contents yet (or never will).
+To retrieve the payload of the private transaction, the node MUST send a `TransactionPayloadQuery` to one (or more) of the nodes listed in the `pal` header.
+It COULD decide to broadcast the message to all nodes in the `pal` header (except the local node), because not all nodes (in the `pal` header) might have the payload yet (or never will).
 
 When a `TransactionPayloadQuery` for a private transaction is received, the node MUST decrypt its `pal` header and verify that the requesting peer is listed as participant.
 
-Both `TransactionPayloadQuery` and its success response (`TransactionPayload` with the transaction contents) MUST only be sent over an authenticated connection.
-If a node receives a `TransactionPayloadQuery` for a private transaction over an unauthenticated connection,
-it MUST respond with `TransactionPayload` with the transaction reference set, but empty contents (indicating the node might not have the requested TX).
+Both `TransactionPayloadQuery` and its success response (`TransactionPayload` with the transaction payload) MUST only be sent over an authenticated connection.
+
+The local node MUST respond with an empty `TransactionPayload` message (for a private transaction) in the following situations:
+
+- When the connection is unauthenticated.
+- When the requesting party is not listed in the `pal` header.
+- When the node doesn't have the transaction payload.
+
+In an empty `TransactionPayload` response message the transaction reference MUST be set. The payload field MUST be left unset.
+This way attackers can't derive information from the local node's error response.
 
 ## Appendix A: Design decisions
 
