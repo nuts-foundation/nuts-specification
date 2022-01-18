@@ -301,14 +301,15 @@ When a `TransactionPayloadQuery` for a private transaction is received, the node
 
 Both `TransactionPayloadQuery` and its success response (`TransactionPayload` with the transaction payload) MUST only be sent over an authenticated connection.
 
-The local node MUST respond with an empty `TransactionPayload` message (for a private transaction) in the following situations:
+The local node SHOULD respond with an empty `TransactionPayload` message (for a private transaction) in the following situations:
 
 - When the connection is unauthenticated.
 - When the requesting party is not listed in the `pal` header.
 - When the node doesn't have the transaction payload.
 
 In an empty `TransactionPayload` response message the transaction reference MUST be set. The payload field MUST be left unset.
-This way attackers can't derive information from the local node's error response.
+
+See Appendix A.3 for the reasoning behind the empty `TransactionPayload` response.
 
 ## Appendix A: Design decisions
 
@@ -346,3 +347,11 @@ If a node has not been offline, but its communication has been interrupted, it m
 The Lamport Clock values will overlap with the transactions of the rest of the network.
 The IBLT will be able to determine missing transactions. 
 If the difference in transactions is too big, the protocol will reduce the range the IBLT covers until an IBLT has been found that can resolve the transaction set difference.
+
+### A.3 Unfulfillable `TransactionPayloadRequest` responses
+
+When a node receives a payload query (for a private transaction) it can't fulfill (e.g. it doesn't have the payload), or mustn't fulfill (e.g. requesting party is not a participant),
+the response must be the same regardless the reason. This can be either an empty `TransactionPayloadResponse` message (with only the reference set) or simply no response at all.
+However, the node must take care to use the same type of response at all times (so either empty responses, or no response).
+This way, attackers can't derive information about the kind of response they receive.
+E.g., they can't determine whether the node does not have the transaction payload, or that the attacker isn't allowed to request the transaction payload.
