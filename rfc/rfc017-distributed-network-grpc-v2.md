@@ -283,7 +283,33 @@ The message MUST contain a `conversationID`.
 
 If decoding fails and the IBLT covered the first page, the local node MUST use a `TransactionRangeQuery` message to query the first page.
 
-## X. Private Transactions
+
+## 7. Private Transactions
+
+When the node receives a transaction that contains a `pal` header, the transaction is considered private.
+This means the transaction payload can only be retrieved by the participants listed in the `pal` header.
+Transaction payload SHALL NOT be shared with other parties than listed in the `pal` header.
+Since the `pal` header is encrypted (see [RFC004](rfc004-verifiable-transactional-graph.md)) to preserve anonymity of the participants,
+it must be decrypted first using the node's `keyAgreement` keys from its DID document.
+If the local node can decrypt the `pal` header, it means the transaction is (also) intended for the local node.
+See [RFC004](rfc004-verifiable-transactional-graph.md) for more information on how to encrypt/decrypt the `pal` header.
+
+To retrieve the payload of the private transaction, the node MUST send a `TransactionPayloadQuery` to one (or more) of the nodes listed in the `pal` header.
+It COULD decide to broadcast the message to all nodes in the `pal` header (except the local node), because not all nodes (in the `pal` header) might have the payload yet (or never will).
+
+When a `TransactionPayloadQuery` for a private transaction is received, the node MUST decrypt its `pal` header and verify that the requesting peer is listed as participant.
+
+Both `TransactionPayloadQuery` and its success response (`TransactionPayload` with the transaction payload) MUST only be sent over an authenticated connection.
+
+The local node SHOULD respond with an empty `TransactionPayload` message (for a private transaction) in the following situations:
+
+- When the connection is unauthenticated.
+- When the requesting party is not listed in the `pal` header.
+- When the node doesn't have the transaction payload.
+
+In an empty `TransactionPayload` response message the transaction reference MUST be set. The payload field MUST be left unset.
+
+See Appendix A.3 for the reasoning behind the empty `TransactionPayload` response.
 
 ## Appendix A: Design decisions
 
@@ -321,3 +347,11 @@ If a node has not been offline, but its communication has been interrupted, it m
 The Lamport Clock values will overlap with the transactions of the rest of the network.
 The IBLT will be able to determine missing transactions. 
 If the difference in transactions is too big, the protocol will reduce the range the IBLT covers until an IBLT has been found that can resolve the transaction set difference.
+
+### A.3 Unfulfillable `TransactionPayloadRequest` responses
+
+When a node receives a payload query (for a private transaction) it can't fulfill (e.g. it doesn't have the payload), or mustn't fulfill (e.g. requesting party is not a participant),
+the response must be the same regardless the reason. This can be either an empty `TransactionPayloadResponse` message (with only the reference set) or simply no response at all.
+However, the node must take care to use the same type of response at all times (so either empty responses, or no response).
+This way, attackers can't derive information about the kind of response they receive.
+E.g., they can't determine whether the node does not have the transaction payload, or that the attacker isn't allowed to request the transaction payload.
