@@ -149,7 +149,7 @@ When connecting, the node and peer MUST exchange their protocol version as `vers
 
 ### 6.5. Security
 
-Connections MUST be secured using TLS v1.2 \(or higher\) with both client- and server X.509 certificates. Refer to [RFC008 Certificate Structure](rfc008-certificate-structure.md) for requirements regarding these certificates and which Certificate Authorities should be accepted.
+Connections MUST be secured using TLS v1.3 \(or higher\) with both client- and server X.509 certificates. Refer to [RFC008 Certificate Structure](rfc008-certificate-structure.md) for requirements regarding these certificates and which Certificate Authorities should be accepted.
 
 ## 7. Protobuf Definition
 
