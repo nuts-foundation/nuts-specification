@@ -115,7 +115,7 @@ Each compound service MUST define an `oauth` serviceEndpoint. This endpoint refe
 * **vcs**: A list of [Verifiable Credentials](rfc011-verifiable-credential.md). Optional
 * **purposeOfUse**: A string containing the intended usage. Defined by a Bolt.   
 * **aud**: As per [RFC7523](https://tools.ietf.org/html/rfc7523), the `aud` MUST be an `oauth` service identifier. That service MUST be an absolute endpoint.
-* **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Base64 encoded. Optional
+* **usi**: User identity signature. The token container according to the [Authentication token RFC](rfc002-authentication-token.md). Optional
 * **osi**: Ops signature, optional, reserved for future use.
 * **exp**: Expiration, MUST NOT be later than 5 seconds after issuing since this call is only used to get an access token. It MUST NOT be after the validity of the Nuts signature validity.
 * **iat**: Issued at. NumericDate value of the time at which the JWT was issued.
@@ -139,7 +139,7 @@ All other claims may be ignored.
   "vcs": [...embedded VerifiableCredentials...],
   "purposeOfUse": "test-service",
   "aud": "did:nuts:456#_08934567fgjsdroiuty230467",
-  "usi": {...Base64 encoded token container...},
+  "usi": {...Verifiable presentation containing user identity...},
   "osi": {...hardware token sig...},
   "exp": 1578915481,
   "iat": 1578910481
