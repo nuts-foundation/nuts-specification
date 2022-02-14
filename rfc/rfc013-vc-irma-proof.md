@@ -1,10 +1,10 @@
 # RFC013 Verifiable Credential IRMA Proof Type
 
-|  |  |
-| :--- | :--- |
-| Nuts foundation | W.M. Slakhorst |
-| Request for Comments: 013 | Nedap |
-|  | May 2021 |
+|                           |                |
+|:--------------------------|:---------------|
+| Nuts foundation           | W.M. Slakhorst |
+| Request for Comments: 013 | Nedap          |
+|                           | May 2021       |
 
 ## RFC013 Verifiable Credential IRMA Proof Type
 
@@ -45,7 +45,7 @@ A Nuts network relies on trust. Verifiable Credentials only have value when thei
 This RFC introduces a new proof type. Any Verifiable Credential type that supports this proof type MUST state this in the corresponding RFC. The proof type identifier is:
 
 ```text
-NutsIrmaCredentialProof
+NutsIRMASignatureProof2022
 ```
 
 ### 3.2 CredentialSubject
@@ -74,7 +74,7 @@ All attributes in the `credentialSubject` MUST also be part of the IRMA signatur
 
 ### 3.3 Proof
 
-As stated at the beginning of this chapter, the `type` for the `proof` is `NutsIrmaCredentialProof`. The `proof` MUST also contain a `proofValue`. The `proofValue` MUST contain a base64 encoded IRMA signature. The proof does not contain a signature created with an `assertionMethod` key from the DID Document.
+As stated at the beginning of this chapter, the `type` for the `proof` is `NutsIRMASignatureProof2022`. The `proof` MUST also contain a `proofValue`. The `proofValue` MUST contain a base64 encoded IRMA signature. The proof does not contain a signature created with an `assertionMethod` key from the DID Document.
 
 ## 4. IRMA signature
 
@@ -181,7 +181,7 @@ Below is a complete example of how an Irma proof can be embedded in a Verifiable
     }
   },
   "proof": {
-    "type": "NutsIrmaCredentialProof",
+    "type": "NutsIRMASignatureProof2022",
     "proofValue": "DgYdYMUYHURJLD7xdnWRinqWCEY5u5fK...j915Lt3hMzLHoPiPQ9sSVfRrs1D"
   }
 }
@@ -241,7 +241,7 @@ VCs that are issued with an IRMA proof can be revoked by publishing the followin
   "subject": "did:nuts:t1DVVAs5fmNba8fdKoTSQNtiGcH49vicrkjZW2KRqpv#6f91673b-afa9-4d26-9e0f-00d989943275",
   "date": "2021-03-15T16:34:47.422436+01:00",
   "proof": {
-    "type": "NutsIrmaCredentialProof",
+    "type": "NutsIRMASignatureProof2022",
     "proofValue": "DgYdYMUYHURJLD7xdnWRinqWCEY5u5fK...j915Lt3hMzLHoPiPQ9sSVfRrs1D"
   }
 }
@@ -253,7 +253,7 @@ Such a revocation transaction has the following requirements:
 * the **subject** MUST match the `id` field of the VC.
 * a **reason** MAY be filled with a revocation reason.
 * the **date** MUST provide the date in RFC3339 format. From this moment in time the VC is revoked.
-* the **proof** MUST be a `NutsIrmaCredentialProof` proof.
+* the **proof** MUST be a `NutsIRMASignatureProof2022` proof.
 * the IRMA signature in the `proofValue` MUST use the same attributes as the IRMA signature in the original VC. 
 
 The transaction MUST be published on the Nuts network. The content-type is `application/vc+json;type=revocation`
