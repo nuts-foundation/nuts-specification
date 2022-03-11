@@ -59,10 +59,7 @@ The `credentialSubject` field contains the following:
   "id": "did:nuts:SjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2",
   "legalBase": {
     "consentType": "explicit",
-    "evidence": {
-      "path": "pdf/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
-      "type": "application/pdf"
-    }
+    "consentRef": "did:nuts:SjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2#1111-2222-3333"
   },
   "localParameters": {...},
   "resources": [
@@ -73,7 +70,7 @@ The `credentialSubject` field contains the following:
     }
   ],
   "purposeOfUse": "test-service",
-  "subject": "urn:oid:2.16.840.1.113883.2.4.6.3:123456780"
+  "subject": "123456780"
 }
 ```
 
@@ -83,13 +80,12 @@ The `id`, `legalBase` and `purposeOfUse` fields MUST be filled. Within the `lega
 
 ### 3.2.2 Scoping
 
-The `id` field MUST contain the DID of the actor. The `subject` field MAY contain the patient identifier. The example above uses the _oid_ for the Dutch citizenship number. The `purposeOfUse` field refers to an access policy. A Bolt MUST describe this policy as a set of FHIR resources that can be accessed with the credential. The `resources` array extends on the policy. It defines specific resources that may be accessed in addition to the policy. When no `subject` is given, the credential MUST contain `resources` that refer to individual resources. The contents of those individual resources MUST NOT contain any personal information. Without `subject` and `resources` it would be valid to request an access token with just the `purposeOfUse` in the JWT grant.
+The `id` field MUST contain the DID of the actor. The `subject` field MAY contain the patient identifier. The example above uses the Dutch citizenship number. The `purposeOfUse` field refers to an access policy. A Bolt MUST describe this policy as a set of FHIR resources that can be accessed with the credential. The `resources` array extends on the policy. It defines specific resources that may be accessed in addition to the policy. When no `subject` is given, the credential MUST contain `resources` that refer to individual resources. The contents of those individual resources MUST NOT contain any personal information. Without `subject` and `resources` it would be valid to request an access token with just the `purposeOfUse` in the JWT grant.
 
 ### 3.2.3 Legal base
 
 The patient consent can be either implied or explicit. When it's implied, this should be reflected by the `purposeOfUse`. A Bolt MUST therefore also describe if it is covered by explicit or implied consent. 
-When `legalBase.evidence` is filled, it MUST contain a value for the `path` and `type` fields. The `path` is a relative path to the service data endpoint and the `type` contains the media type as specified by [RFC6838](https://datatracker.ietf.org/doc/html/rfc6838). 
-The evidence resource MUST be accessible with an access token that was created with the corresponding credential.
+When `legalBase.consentRef` is filled, it MUST point to a verifiable credential proving the subject gave consent.
 
 ### 3.2.4 Resources
 
@@ -170,10 +166,7 @@ Example of a Nuts Authorization Credential with explicit consent:
     "id": "did:nuts:SjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2",
     "legalBase": {
       "consentType": "explicit",
-      "evidence": {
-        "path": "pdf/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
-        "type": "application/pdf"
-      } 
+      "consentRef": "did:nuts:SjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2#203984760jk"
     },
     "purposeOfUse": "zorginzage",
     "subject": "urn:oid:2.16.840.1.113883.2.4.6.3:123456780"
