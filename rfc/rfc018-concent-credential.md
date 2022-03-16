@@ -35,7 +35,7 @@ This RFC builds upon [RFC011](rfc011-verifiable-credential.md).
 ## 2. Terminology
 
 * **DID**: [Decentralized Identifiers](https://www.w3.org/TR/did-core/).
-* **Policy**: A security policy defined by a Bolt. It describes the access to and operations on resources that are allowed. 
+* **Policy**: An access policy defined by a Bolt. It describes the access to and operations on resources that are allowed. 
 * **VC**: [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
 * **VP**: Verifiable Presentation as described in the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
 
@@ -45,7 +45,8 @@ Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-arc
 
 ### 3.1 Credential fields
 
-The `issuer` field of the credential MUST contain the DID of the actor (also the witness). The `type` MUST include both the values `VerifiableCredential` and `NutsConsentCredential`. A Bolt specification is required to specify the maximum validity of the credential.
+The `issuer` field of the credential MUST contain the DID of the actor. The `type` MUST include both the values `VerifiableCredential` and `NutsConsentCredential`.
+Bolts that use this credential MUST specify the maximum validity of the credential.
 
 ### 3.2 CredentialSubject
 
@@ -60,6 +61,8 @@ The `credentialSubject` field contains the following:
 }
 ```
 
+`id` contains the DID of the actor. `custodian` contains the DID of the custodian for whom the request is ment. `purposeOfUse` contains the purpose of use as specified by the Bolt using this RFC. `subject` contains the citizen service number.
+
 ### 3.2.1 Required fields
 
 All fields in `credentialSubject` are required.
@@ -70,11 +73,11 @@ The combination of the fields within `credentialSubject` scope the consent for a
 
 ## 4. Issuance & distribution
 
-A Nuts Consent Credential is private and is intended to be used by the holder when needed. In most cases the issuer will also be the holder. The VC MUST not be published on the network. Every DID MAY issue an consent credential. The VC does not have any other requirements nor does it add requirements to other VCs.
+A Nuts Consent Credential is private and is intended to be used by the holder when needed. The VC MUST not be published on the network. Any DID MAY issue an consent credential. The VC does not have any other requirements nor does it add requirements to other VCs.
 
 ## 5. Supported proofs
 
-The VC MUST contain two proofs. One proof will be a proof as described by [RFC011](rfc011-verifiable-credential.md). This is the proof the issuer has witnessed the contents and signs it with its assertion method key. The other proof is the proof of the person giving consent. The following paragraphs list the different usable proofs.
+The VC MUST contain two proofs. One proof will be a proof as described by [RFC011](rfc011-verifiable-credential.md). This is the proof the issuer has verified the contents and signs it with its assertion method key. The other proof is the proof of the person giving consent. The following paragraphs list the different usable proofs.
 
 ### 5.1 NutsPaperProof2022
 
@@ -89,11 +92,11 @@ This proof represents a paper document recorded by the issuer. It does not conta
 }
 ```
 
-The `type` MUST be `NutsPaperProof2022`. `created` MUST be a valid datetime. The `expires` field is optionally. If filled, the `expirationDate` of the credential MAY NOT exceed this date. The `description` field is required and should contain a short and human readable description on how the consent has been recorded by the witness. Bolts may put constraints on its length when used by the holder.
+The `type` MUST be `NutsPaperProof2022`. `created` MUST be a valid datetime. The `expires` field is optionally. If filled, the `expirationDate` of the credential MAY NOT exceed this date. The `description` field is required and should contain a short and human readable description on how the consent has been recorded by the actor. Bolts may put constraints on its length when used by the holder.
 
 ## 6. Trust
 
-The Nuts Authorization Credential only impacts the actor and custodian. It MUST be trusted automatically.
+The Nuts Consent Credential only impacts the actor, subject and custodian. It MUST be trusted automatically.
 
 ## 7. Revocation
 
@@ -101,7 +104,7 @@ The Nuts Consent Credential follows revocation rules as stated by [RFC011](rfc01
 
 ## 8. Use cases
 
-The Nuts Consent Credential MAY be used in any BOLT that requires Nuts Authorization Credentials based on implicent consent.
+The Nuts Consent Credential MAY be used in any Bolt that requires Nuts Authorization Credentials based on explicit consent.
 
 ## 9. Privacy considerations
 
