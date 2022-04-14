@@ -272,7 +272,7 @@ The `XOR` value MUST be calculated over the transaction references in the range 
 #### 6.2.4 Transaction Range Query
 
 If the IBLT from a `TransactionSet` message can be decoded, the local node MAY also send a `TransactionRangeQuery` message.
-The peer MUST respond with `TransactionList` message, containing the requested transactions.
+The peer SHOULD respond with `TransactionList` message, containing the requested transactions.
 This is only needed if the page containing the `LC` value of the `TransactionSet` message comes after the page containing `LC_req`. 
 This means the peer has additional transactions outside the IBLT range.
 If the `LC_req` value is in the latest page of the local node, it SHOULD query all pages leading up to the `LC` value.
