@@ -267,7 +267,7 @@ If the decoding fails, the local node sends a new `State` message.
 The IBLT subtraction used the range `0-min(LC, LC_req)`.
 The new request MUST be for one page lower.
 The `LC` value MUST be the `end` of that previous page. 
-The `XOR` value MUST be calculated over the transaction references in the range starting with 0 and ending with the new `LC` value.
+The `XOR` value MUST still be calculated over all transaction references on the local node.
 
 #### 6.2.4 Transaction Range Query
 
