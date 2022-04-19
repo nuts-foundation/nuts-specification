@@ -103,7 +103,7 @@ The protocol generally operates as follows:
 
 4. After adding Alice's transactions to the DAG (making sure its cryptographic signature is valid), Bob SHOULD query the payload if it's missing. If Bob is missing transactions referenced by the received transactions, it sends a `State` message.
 
-A node MUST make sure to only add transactions of which all previous transactions are present. If previous transactions are missing, Bob will send a `State` message.
+A node MUST make sure to only add transactions of which all previous transactions are present.
 
 #### 5.2.1 Broadcasting new transactions
 
@@ -239,16 +239,13 @@ A node MUST make sure to only add transactions of which all previous transaction
 
 The `State` message is sent as response to various conditions of the gossip protocol (see §5).
 The `State` message MUST contain a new `conversationID`.
-The `State` message contains an `XOR` value and an `LC`.
+The `State` message contains the `XOR` value and an `LC` of the local DAG.
 The `LC` value MUST equal the highest Lamport Clock value of all transaction references included in the `XOR` calculation.
 If no transactions are present, an all-zero `XOR` and `LC` of 0 is sent.
-
-This might look exactly like the `Gossip` message, but the type of response is different, so it is a different type of message.
 
 #### 6.2.2 IBLT response
 
 When a peer receives a `State` message and the `XOR` differs, it SHOULD respond with a `TransactionSet` message.
-This is a response type message, so it MUST include the sent `conversationID`.
 The sent `LC` value falls within the bounds of a page.
 The response IBLT MUST be calculated over the transactions leading up to and including that page.
 If the peer's highest Lamport Clock value is lower, it MUST use the IBLT covering the entire DAG.
@@ -257,7 +254,7 @@ This is a response type message so it MUST contain the `conversationID`.
 
 #### 6.2.3 Transaction List Query
 
-For every `TransactionSet` message a node receives, it MUST check if the `LC_req` value matches the `LC` value from the original request.
+For every `TransactionSet` message a node receives, it MUST check if the `LC_req` value matches the `LC` value from the original request. The `TransactionSet` message MUST also contain the `conversationID` from the original `State` message.
 
 The IBLT in the `TransactionSet` message contains every transaction of the peer in the LC range of `0-min(LC, LC_req)`. The node MUST lookup/compute the IBLT for this range and subtract it from the IBLT of the peer. Decoding the resulting IBLT will list the transaction refs the peer has and the local node misses. 
 These transactions MUST be queried by using the `TransactionListQuery` message (see §5.2.2). 
