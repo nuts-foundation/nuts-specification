@@ -90,18 +90,18 @@ The protocol generally operates as follows:
 1. Alice sends at a set interval (§5.2.1):
    * XOR of all known transaction references.
    * The highest LC value.
-   * A list of transaction references since the previous message. If no previous message has been send, the list is empty.
+   * A list of transaction references since the previous message. If no previous message has been sent, the list is empty.
 
 2. When receiving Alice's message, Bob compares the XOR value from Alice with its own (§5.2.2):
    * When the XOR is the same: no action required.
    * When different:
       * Remove all known transaction references from the list.
       * Request the remaining transactions.
-      * If the remaining list is empty and the LC value is equal or higher than Bob's highest LC value, Bob sends a `State` message as defined in Chapter 6. 
+      * Bob calculates a new XOR value combining its own XOR value and the newly requested transactions hashes. If this new XOR value differs and if Alice's LC is equal or higher thatBob's highest LC value, Bob sends a `State` message as defined in Chapter 6. 
 
 3. Alice responds with the requested transactions (§5.2.3).
 
-4. After adding Alice's transactions to the DAG (making sure its cryptographic signature is valid), Bob SHOULD query the payload if it's missing.
+4. After adding Alice's transactions to the DAG (making sure its cryptographic signature is valid), Bob SHOULD query the payload if it's missing. If Bob is missing transactions referenced by the received transactions, it sends a `State` message.
 
 A node MUST make sure to only add transactions of which all previous transactions are present. If previous transactions are missing, Bob will send a `State` message.
 
@@ -132,12 +132,12 @@ The resulting list contains all transaction the node is missing.
 The node MUST send a `TransactionListQuery` message containing the list of missing transaction references.
 This message MUST also add a new `conversationID`.
 
-If the resulting list of transactions is empty and the `LC` value in the message is equal to or higher than the highest Lamport Clock value of the node, then the node MUST send a `State` message. See §6.2.1.
+The node then calculates a temporary XOR value by applying TX hashes from the filtered list to its own XOR value. If the temprorary XOR value doesn't match the XOR value of the peer and the `LC` value in the message is equal to or higher than the highest Lamport Clock value of the node, then the node MUST send a `State` message. See §6.2.1.
 
 #### 5.2.3 Transaction List
 
 When a node receives a `TransactionListQuery` message, it MUST respond with a `TransactionList` message.
-This is a response type message so it MUST include the sent `conversationID`.
+This is a response type message, so it MUST include the sent `conversationID`.
 Transactions that resulted from a `TransactionListQuery` MUST have been present in that message.
 Unknown transactions references SHOULD be ignored.
 Transactions that resulted from a `TransactionRangeQuery` MUST have an LC value that is within the requested range.
@@ -146,9 +146,7 @@ If any of these requirements are not met, the entire message MUST be ignored.
 A `TransactionList` message MAY be broken up into smaller messages, each message should conform to these rules. Each part MUST also use the same `conversationID`.
 All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
 
-#### 5.2.4 Transaction Payload query
-
-depends on private tx chaptr
+If a transaction can not be processed due to missing previous transaction, the node MUST send a `State` message. It SHOULD also stop processing any firther transactions from the list.
 
 ## 6. Set reconciliation protocol
 
@@ -213,7 +211,7 @@ All messages and values mentioned in this chapter are scoped to a single connect
 
 The protocol generally operates as follows:
 
-1. Alice sends at a set interval (§6.2.1):
+1. Alice sends a state message in response to a gossip message when conditions require so (§6.2.1):
     * XOR of all known transaction references.
     * Highest Lamport Clock value over all transactions (LC).
     
@@ -241,15 +239,16 @@ A node MUST make sure to only add transactions of which all previous transaction
 
 The `State` message is sent as response to various conditions of the gossip protocol (see §5).
 The `State` message MUST contain a new `conversationID`.
-The `State` message contains a `XOR` value and an `LC`.
+The `State` message contains an `XOR` value and an `LC`.
 The `LC` value MUST equal the highest Lamport Clock value of all transaction references included in the `XOR` calculation.
 If no transactions are present, an all-zero `XOR` and `LC` of 0 is sent.
 
-This might look exactly like the `Gossip` message, but the type of response is different so it is a different type of message.
+This might look exactly like the `Gossip` message, but the type of response is different, so it is a different type of message.
 
 #### 6.2.2 IBLT response
 
 When a peer receives a `State` message and the `XOR` differs, it SHOULD respond with a `TransactionSet` message.
+This is a response type message, so it MUST include the sent `conversationID`.
 The sent `LC` value falls within the bounds of a page.
 The response IBLT MUST be calculated over the transactions leading up to and including that page.
 If the peer's highest Lamport Clock value is lower, it MUST use the IBLT covering the entire DAG.
