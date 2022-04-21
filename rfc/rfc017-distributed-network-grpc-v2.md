@@ -316,6 +316,7 @@ Internal errors that occur in the node during message handling MUST NOT be retur
 Only the following custom errors may be returned by the local node:
 
 * `internal error`: the node encountered an internal error during message handling.
+* `message not supported`: the node does not support the message type contained in the envelope. Indicates a protocol implementation incompatibility between the node and the peer.
 
 See Appendix A.4 for the reasoning behind not disclosing internal errors. 
 
