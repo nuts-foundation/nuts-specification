@@ -308,6 +308,15 @@ In an empty `TransactionPayload` response message the transaction reference MUST
 
 See Appendix A.3 for the reasoning behind the empty `TransactionPayload` response.
 
+8. Errors
+
+Internal errors that occur in the node during message handling MUST NOT be returned to the peers. 
+Only the following custom errors may be returned by the local node:
+
+* `internal error`: the node encountered an internal error during message handling.
+
+See Appendix A.4 for the reasoning behind not disclosing internal errors. 
+
 ## Appendix A: Design decisions
 
 ### A.1 IBLT parameters
@@ -352,3 +361,9 @@ the response must be the same regardless the reason. This can be either an empty
 However, the node must take care to use the same type of response at all times (so either empty responses, or no response).
 This way, attackers can't derive information about the kind of response they receive.
 E.g., they can't determine whether the node does not have the transaction payload, or that the attacker isn't allowed to request the transaction payload.
+
+### A.4 Preventing internal errors disclosing internal state
+
+Internal errors (e.g. disk is full, file does not exist, private key not found, out of memory) can provide attackers with information about the internal state of the node,
+which can then be used to execute an attack. As such, the node must take care to not disclose internal errors to the attacker.
+If such an error occurs, the node must log the error for analysis by an operator and send a generic error message back to the client.
