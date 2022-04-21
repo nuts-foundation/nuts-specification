@@ -65,6 +65,9 @@ If a node receives a response with a `conversationID`, it MUST match its content
 If a `conversationID` is unknown or if the response doesn't match the requirements, the message MUST be ignored.
 The individual messages describe the requirements.
 
+A node SHOULD limit the number of conversations to a single node when these conversations contain overlapping data.
+It's up to the implementation on how to mark a conversation as done and remove it from its administration.
+
 ## 5. Gossip protocol
 
 The most efficient protocol for synchronizing transactions over nodes is to simply send new transactions to all nodes.
@@ -136,15 +139,21 @@ If the resulting list of transactions is empty and the `LC` value in the message
 
 #### 5.2.3 Transaction List
 
-When a node receives a `TransactionListQuery` message, it MUST respond with a `TransactionList` message.
+When a node receives a `TransactionListQuery` message, it SHOULD respond with a `TransactionList` message.
 This is a response type message so it MUST include the sent `conversationID`.
 Transactions that resulted from a `TransactionListQuery` MUST have been present in that message.
 Unknown transactions references SHOULD be ignored.
 Transactions that resulted from a `TransactionRangeQuery` MUST have an LC value that is within the requested range.
 If any of these requirements are not met, the entire message MUST be ignored.
+If the resulting list of transactions is empty, a node MAY ignore the message and not send a `TransactionList` message.
+If the list is not empty, it MUST send a response.
+All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
+All transactions without a `pal` header MUST be added with their payload.
+If a payload is missing for a transaction, the sender of the `TransactionList` message MUST not add that transaction and any other requested transaction with an LC value equals or higher that that transaction.
+The same is true for the receiver of the `TransactionList` message: if a transaction is received without a payload and it does not contain a `pal` header, it MUST stop processing the message. 
+Any transaction till that point MAY still be added.
 
 A `TransactionList` message MAY be broken up into smaller messages, each message should conform to these rules. Each part MUST also use the same `conversationID`.
-All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
 
 #### 5.2.4 Transaction Payload query
 
