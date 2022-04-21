@@ -146,6 +146,7 @@ The Nuts Authorization Credential MUST be used in the Nuts OAuth flow as stated 
 ## 10. Privacy considerations
 
 The credential will most likely contain a citizen service number and MUST therefore be private to the actor and custodian.
+[RFC017 §7](rfc017-distributed-network-grpc-v2.md#7-private-transactions) describes how private transactions are distributed via the Distributed Network Protocol (v2) using gRPC.
 
 ## 11. Services
 
