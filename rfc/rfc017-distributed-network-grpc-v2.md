@@ -148,9 +148,8 @@ If any of these requirements are not met, the entire message MUST be ignored.
 If the resulting list of transactions is empty, a node MAY ignore the message and not send a `TransactionList` message.
 If the list is not empty, it MUST send a response.
 All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
-All transactions without a `pal` header MUST be added with their payload.
-If a payload is missing for a transaction, the sender of the `TransactionList` message MUST not add that transaction and any other requested transaction with an LC value equals or higher that that transaction.
-The same is true for the receiver of the `TransactionList` message: if a transaction is received without a payload and it does not contain a `pal` header, it MUST stop processing the message. 
+All transactions without a `pal` header MUST be added with their payload. Transactions with a `pal` header are discussed in [§7](rfc017-distributed-network-grpc-v2.md#7-private-transactions).
+If a transaction is received without a payload and it does not contain a `pal` header, it MUST stop processing the message. 
 Any transaction till that point MAY still be added.
 
 A `TransactionList` message MAY be broken up into smaller messages, each message should conform to these rules. Each part MUST also use the same `conversationID`.
