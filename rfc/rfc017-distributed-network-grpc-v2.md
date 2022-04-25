@@ -310,7 +310,14 @@ In an empty `TransactionPayload` response message the transaction reference MUST
 
 See Appendix A.3 for the reasoning behind the empty `TransactionPayload` response.
 
-8. Errors
+## 8. Diagnostics
+
+To provide insight into the state of the network, and the DAG for informational purposes and to aid analysis of anomalies,
+nodes SHOULD broadcast diagnostic information to its peers using the `Diagnostics` message.
+If broadcasting, the node MUST do this at least every minute, but it MUST NOT broadcast more often than every 5 seconds \(to avoid producing too much chatter\).
+A node MAY choose not to include any of the specified fields.
+
+## 9. Errors
 
 Internal errors that occur in the node during message handling MUST NOT be returned to the peers. 
 Only the following custom errors may be returned by the local node:
@@ -318,7 +325,7 @@ Only the following custom errors may be returned by the local node:
 * `internal error`: the node encountered an internal error during message handling.
 * `message not supported`: the node does not support the message type contained in the envelope. Indicates a protocol implementation incompatibility between the node and the peer.
 
-See Appendix A.4 for the reasoning behind not disclosing internal errors. 
+See Appendix A.4 for the reasoning behind not disclosing internal errors.
 
 ## Appendix A: Design decisions
 
