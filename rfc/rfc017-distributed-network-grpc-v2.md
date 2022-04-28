@@ -24,8 +24,10 @@ This document is currently a draft.
 
 This document is released under the [Attribution-ShareAlike 4.0 International \(CC BY-SA 4.0\) license](https://creativecommons.org/licenses/by-sa/4.0/).
 
-## 1.  Introduction
+## 1. Introduction
 
+Please see the [protobuf definition](https://raw.githubusercontent.com/nuts-foundation/nuts-node/master/network/transport/v2/protocol.proto)
+for the messages that are referred to in this RFC.
 
 ## 2. Terminology
  
@@ -93,32 +95,34 @@ The protocol generally operates as follows:
 1. Alice sends at a set interval (§5.2.1):
    * XOR of all known transaction references.
    * The highest LC value.
-   * A list of transaction references since the previous message. If no previous message has been send, the list is empty.
+   * A list of transaction references since the previous message. If no previous message has been sent, the list is empty.
 
 2. When receiving Alice's message, Bob compares the XOR value from Alice with its own (§5.2.2):
    * When the XOR is the same: no action required.
    * When different:
       * Remove all known transaction references from the list.
       * Request the remaining transactions.
-      * If the remaining list is empty and the LC value is equal or higher than Bob's highest LC value, Bob sends a `State` message as defined in Chapter 6. 
+      * Bob calculates a new XOR value combining its own XOR value and the newly requested transactions hashes. If this new XOR value differs and if Alice's LC is equal or higher thatBob's highest LC value, Bob sends a `State` message as defined in Chapter 6. 
 
 3. Alice responds with the requested transactions (§5.2.3).
 
-4. After adding Alice's transactions to the DAG (making sure its cryptographic signature is valid), Bob SHOULD query the payload if it's missing.
+4. After adding Alice's transactions to the DAG (making sure its cryptographic signature is valid), Bob SHOULD query the payload if it's missing. If Bob is missing transactions referenced by the received transactions, it sends a `State` message.
 
-A node MUST make sure to only add transactions of which all previous transactions are present. If previous transactions are missing, Bob will send a `State` message.
+A node MUST make sure to only add transactions of which all previous transactions are present.
 
 #### 5.2.1 Broadcasting new transactions
 
 A node's new transaction references MUST be broadcast at an interval using the `Gossip` message, by default every 2 seconds. The interval MAY be adjusted by the node operator but MUST conform to the limits (min/max interval) defined by the network. It is advised to keep it relatively short because it directly influences the speed by which new transactions are retrieved.
 
 The `Gossip` message MUST contain an `XOR` value, an `LC` value and a list of transaction references (`transactions`).
-The list MUST contain transaction references added to the DAG since the last `Gossip` message.
+The list MUST contain transaction references added to the DAG since the last `Gossip` message. 
+This includes transactions received from other nodes.
 The list of transaction references MUST be tracked per connection.
 If no new transactions have been added/received or for the first message for a connection, an empty list is sent.
 The list MUST not contain more than 100 transactions.
 This could create a backlog of messages at the sending node's side. 
 A node SHOULD take precautions to keep this backlog to a minimum.
+A node SHOULD filter out transactions received from a peer to prevent sending duplicates. If Alice sends transaction A, B and C to Bob then Bob SHOULD not send A, B and C to Alice.
 
 The `LC` value MUST equal the highest Lamport Clock value of all transaction references included in the `XOR` calculation.
 If no transactions are present, an all-zero `XOR` and `LC` of 0 is sent.
@@ -135,12 +139,12 @@ The resulting list contains all transaction the node is missing.
 The node MUST send a `TransactionListQuery` message containing the list of missing transaction references.
 This message MUST also add a new `conversationID`.
 
-If the resulting list of transactions is empty and the `LC` value in the message is equal to or higher than the highest Lamport Clock value of the node, then the node MUST send a `State` message. See §6.2.1.
+The node then calculates a temporary XOR value by applying TX hashes from the filtered list to its own XOR value. If the temprorary XOR value doesn't match the XOR value of the peer and the `LC` value in the message is equal to or higher than the highest Lamport Clock value of the node, then the node MUST send a `State` message. See §6.2.1.
 
 #### 5.2.3 Transaction List
 
 When a node receives a `TransactionListQuery` message, it SHOULD respond with a `TransactionList` message.
-This is a response type message so it MUST include the sent `conversationID`.
+This is a response type message, so it MUST include the sent `conversationID`.
 Transactions that resulted from a `TransactionListQuery` MUST have been present in that message.
 Unknown transactions references SHOULD be ignored.
 Transactions that resulted from a `TransactionRangeQuery` MUST have an LC value that is within the requested range.
@@ -154,9 +158,7 @@ Any transaction till that point MAY still be added.
 
 A `TransactionList` message MAY be broken up into smaller messages, each message should conform to these rules. Each part MUST also use the same `conversationID`.
 
-#### 5.2.4 Transaction Payload query
-
-depends on private tx chaptr
+If a transaction can not be processed due to missing previous transaction, the node MUST send a `State` message. It SHOULD also stop processing any firther transactions from the list.
 
 ## 6. Set reconciliation protocol
 
@@ -221,7 +223,7 @@ All messages and values mentioned in this chapter are scoped to a single connect
 
 The protocol generally operates as follows:
 
-1. Alice sends at a set interval (§6.2.1):
+1. Alice sends a state message in response to a gossip message when conditions require so (§6.2.1):
     * XOR of all known transaction references.
     * Highest Lamport Clock value over all transactions (LC).
     
@@ -249,11 +251,9 @@ A node MUST make sure to only add transactions of which all previous transaction
 
 The `State` message is sent as response to various conditions of the gossip protocol (see §5).
 The `State` message MUST contain a new `conversationID`.
-The `State` message contains a `XOR` value and an `LC`.
+The `State` message contains the `XOR` value and an `LC` of the local DAG.
 The `LC` value MUST equal the highest Lamport Clock value of all transaction references included in the `XOR` calculation.
 If no transactions are present, an all-zero `XOR` and `LC` of 0 is sent.
-
-This might look exactly like the `Gossip` message, but the type of response is different so it is a different type of message.
 
 #### 6.2.2 IBLT response
 
@@ -266,7 +266,7 @@ This is a response type message so it MUST contain the `conversationID`.
 
 #### 6.2.3 Transaction List Query
 
-For every `TransactionSet` message a node receives, it MUST check if the `LC_req` value matches the `LC` value from the original request.
+For every `TransactionSet` message a node receives, it MUST check if the `LC_req` value matches the `LC` value from the original request. The `TransactionSet` message MUST also contain the `conversationID` from the original `State` message.
 
 The IBLT in the `TransactionSet` message contains every transaction of the peer in the LC range of `0-min(LC, LC_req)`. The node MUST lookup/compute the IBLT for this range and subtract it from the IBLT of the peer. Decoding the resulting IBLT will list the transaction refs the peer has and the local node misses. 
 These transactions MUST be queried by using the `TransactionListQuery` message (see §5.2.2). 
@@ -320,6 +320,25 @@ In an empty `TransactionPayload` response message the transaction reference MUST
 
 See Appendix A.3 for the reasoning behind the empty `TransactionPayload` response.
 
+## 8. Diagnostics
+
+To provide insight into the state of the network, and the DAG for informational purposes and to aid analysis of anomalies,
+nodes SHOULD broadcast diagnostic information to its peers using the `Diagnostics` message.
+If broadcasting, the node MUST do this at least every minute, but it MUST NOT broadcast more often than every 5 seconds \(to avoid producing too much chatter\).
+A node MAY choose not to include any of the specified fields.
+
+See the [protobuf definition](https://raw.githubusercontent.com/nuts-foundation/nuts-node/master/network/transport/v2/protocol.proto) for the fields included in the `Diagnostics` message.
+
+## 9. Errors
+
+Internal errors that occur in the node during message handling MUST NOT be returned to the peers. 
+Only the following custom errors may be returned by the local node:
+
+* `internal error`: the node encountered an internal error during message handling.
+* `message not supported`: the node does not support the message type contained in the envelope. Indicates a protocol implementation incompatibility between the node and the peer.
+
+See Appendix A.4 for the reasoning behind not disclosing internal errors.
+
 ## Appendix A: Design decisions
 
 ### A.1 IBLT parameters
@@ -364,3 +383,9 @@ the response must be the same regardless the reason. This can be either an empty
 However, the node must take care to use the same type of response at all times (so either empty responses, or no response).
 This way, attackers can't derive information about the kind of response they receive.
 E.g., they can't determine whether the node does not have the transaction payload, or that the attacker isn't allowed to request the transaction payload.
+
+### A.4 Preventing internal errors disclosing internal state
+
+Internal errors (e.g. disk is full, file does not exist, private key not found, out of memory) can provide attackers with information about the internal state of the node,
+which can then be used to execute an attack. As such, the node must take care to not disclose internal errors to the attacker.
+If such an error occurs, the node must log the error for analysis by an operator and send a generic error message back to the client.
