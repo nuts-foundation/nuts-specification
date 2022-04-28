@@ -24,8 +24,10 @@ This document is currently a draft.
 
 This document is released under the [Attribution-ShareAlike 4.0 International \(CC BY-SA 4.0\) license](https://creativecommons.org/licenses/by-sa/4.0/).
 
-## 1.  Introduction
+## 1. Introduction
 
+Please see the [protobuf definition](https://raw.githubusercontent.com/nuts-foundation/nuts-node/master/network/transport/v2/protocol.proto)
+for the messages that are referred to in this RFC.
 
 ## 2. Terminology
  
@@ -316,6 +318,8 @@ To provide insight into the state of the network, and the DAG for informational 
 nodes SHOULD broadcast diagnostic information to its peers using the `Diagnostics` message.
 If broadcasting, the node MUST do this at least every minute, but it MUST NOT broadcast more often than every 5 seconds \(to avoid producing too much chatter\).
 A node MAY choose not to include any of the specified fields.
+
+See the protobuf definition for the fields included in the `Diagnostics` message.
 
 ## 9. Errors
 
