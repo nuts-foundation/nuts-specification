@@ -319,7 +319,7 @@ nodes SHOULD broadcast diagnostic information to its peers using the `Diagnostic
 If broadcasting, the node MUST do this at least every minute, but it MUST NOT broadcast more often than every 5 seconds \(to avoid producing too much chatter\).
 A node MAY choose not to include any of the specified fields.
 
-See the protobuf definition for the fields included in the `Diagnostics` message.
+See the [protobuf definition](https://raw.githubusercontent.com/nuts-foundation/nuts-node/master/network/transport/v2/protocol.proto) for the fields included in the `Diagnostics` message.
 
 ## 9. Errors
 
