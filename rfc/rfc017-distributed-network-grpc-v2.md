@@ -66,7 +66,7 @@ If a `conversationID` is unknown or if the response doesn't match the requiremen
 The individual messages describe the requirements.
 
 A node SHOULD limit the number of conversations to a single node when these conversations contain overlapping data.
-It's up to the implementation on how to mark a conversation as done and remove it from its administration.
+It's up to the implementation on how to mark a conversation as finished and remove it from its administration.
 
 ## 5. Gossip protocol
 
