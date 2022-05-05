@@ -112,7 +112,7 @@ A node MUST make sure to only add transactions of which all previous transaction
 
 #### 5.2.1 Broadcasting new transactions
 
-A node's new transaction references MUST be broadcast at an interval using the `Gossip` message, by default every 2 seconds. The interval MAY be adjusted by the node operator but MUST conform to the limits (min/max interval) defined by the network. It is advised to keep it relatively short because it directly influences the speed by which new transactions are retrieved.
+A node's new transaction references SHOULD be broadcast at an interval using the `Gossip` message, by default every 2 seconds. The interval MAY be adjusted by the node operator but MUST conform to the limits (min/max interval) defined by the network. It is advised to keep it relatively short because it directly influences the speed by which new transactions are retrieved.
 
 The `Gossip` message MUST contain an `XOR` value, an `LC` value and a list of transaction references (`transactions`).
 The list MUST contain transaction references added to the DAG since the last `Gossip` message. 
@@ -136,10 +136,10 @@ If the values are equal, no further action is required.
 
 If they are not equal, the transaction list MUST be filtered. All known transaction references MUST be removed.
 The resulting list contains all transaction the node is missing.
-The node MUST send a `TransactionListQuery` message containing the list of missing transaction references.
+The node SHOULD send a `TransactionListQuery` message containing the list of missing transaction references.
 This message MUST also add a new `conversationID`.
 
-The node then calculates a temporary XOR value by applying TX hashes from the filtered list to its own XOR value. If the temprorary XOR value doesn't match the XOR value of the peer and the `LC` value in the message is equal to or higher than the highest Lamport Clock value of the node, then the node MUST send a `State` message. See §6.2.1.
+The node then calculates a temporary XOR value by applying TX hashes from the filtered list to its own XOR value. If the temprorary XOR value doesn't match the XOR value of the peer and the `LC` value in the message is equal to or higher than the highest Lamport Clock value of the node, then the node SHOULD send a `State` message. See §6.2.1.
 
 #### 5.2.3 Transaction List
 
@@ -150,7 +150,7 @@ Unknown transactions references SHOULD be ignored.
 Transactions that resulted from a `TransactionRangeQuery` MUST have an LC value that is within the requested range.
 If any of these requirements are not met, the entire message MUST be ignored.
 If the resulting list of transactions is empty, a node MAY ignore the message and not send a `TransactionList` message.
-If the list is not empty, it MUST send a response.
+If the list is not empty, it SHOULD send a response.
 All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
 All transactions without a `pal` header MUST be added with their payload. Transactions with a `pal` header are discussed in [§7](rfc017-distributed-network-grpc-v2.md#7-private-transactions).
 If a transaction is received without a payload and it does not contain a `pal` header, it MUST stop processing the message.
@@ -158,7 +158,7 @@ Any transaction till that point MAY still be added.
 
 A `TransactionList` message MAY be broken up into smaller messages, each message should conform to these rules. Each part MUST also use the same `conversationID`.
 
-If a transaction can not be processed due to missing previous transaction, the node MUST send a `State` message. It SHOULD also stop processing any firther transactions from the list.
+If a transaction can not be processed due to missing previous transaction, the node SHOULD send a `State` message. It SHOULD also stop processing any firther transactions from the list.
 
 ## 6. Set reconciliation protocol
 
@@ -269,7 +269,7 @@ This is a response type message so it MUST contain the `conversationID`.
 For every `TransactionSet` message a node receives, it MUST check if the `LC_req` value matches the `LC` value from the original request. The `TransactionSet` message MUST also contain the `conversationID` from the original `State` message.
 
 The IBLT in the `TransactionSet` message contains every transaction of the peer in the LC range of `0-min(LC, LC_req)`. The node MUST lookup/compute the IBLT for this range and subtract it from the IBLT of the peer. Decoding the resulting IBLT will list the transaction refs the peer has and the local node misses. 
-These transactions MUST be queried by using the `TransactionListQuery` message (see §5.2.2). 
+These transactions SHOULD be queried by using the `TransactionListQuery` message (see §5.2.2). 
 
 If the decoding fails, the local node sends a new `State` message. 
 The IBLT subtraction used the range `0-min(LC, LC_req)`.
@@ -290,7 +290,7 @@ This last requirement prevents a node from querying the entire DAG while only so
 The `TransactionRangeQuery` message contains a `start` (inclusive) and `end` (exclusive) parameter corresponding to the requested page(s).
 The message MUST contain a (new) `conversationID`.
 
-If decoding fails and the IBLT covered the first page, the local node MUST use a `TransactionRangeQuery` message to query the first page.
+If decoding fails and the IBLT covered the first page, the local node SHOULD use a `TransactionRangeQuery` message to query the first page.
 
 
 ## 7. Private Transactions
@@ -389,3 +389,9 @@ E.g., they can't determine whether the node does not have the transaction payloa
 Internal errors (e.g. disk is full, file does not exist, private key not found, out of memory) can provide attackers with information about the internal state of the node,
 which can then be used to execute an attack. As such, the node must take care to not disclose internal errors to the attacker.
 If such an error occurs, the node must log the error for analysis by an operator and send a generic error message back to the client.
+
+### A.5 Best effort message sending
+
+A lot of the response type messages only state a node SHOULD send a response or a followup and not a MUST. This is because a node might have a reason to stop/pause processing.
+A node might be to busy doing something else, or it might be doing a migration or backup. Because nodes communicate with multiple nodes, a single busy node should not matter that much.
+If all nodes send at best-effort, that will be enough due to the number of nodes available.
