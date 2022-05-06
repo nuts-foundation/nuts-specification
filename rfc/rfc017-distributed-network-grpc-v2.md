@@ -185,17 +185,24 @@ When comparing two IBLTs, these parameters MUST be the same.
 An overview of the parameters:
 
 * **buckets**: defines the size of the IBLT, much like the size of a bloom filter. The larger the size, the bigger the set difference can be. 
-* **Hk**: each key is hashed to select the buckets the key is inserted to. The hash function is applied recursively to create extra hash values. This continues until k different values are found. The hash function, its seed and the value for `k` MUST all be the same for the entire network.
+* **Hk**: each key is hashed to select the buckets the key is inserted to. The hash function is applied recursively to create extra hash values. This continues until *k* different values are found. The hash function, its seed and the value for *k* MUST all be the same for the entire network.
 * **Hc**: each key is hashed to a checksum which is used to validate the inserted key during the decode phase. The hash function and its seed MUST all be the same for the entire network.
 * **data types**: the data types for *count*, *val_sum* and *hash_sum* MUST match ((un)signed, byte-size).
 
-The following parameters are used:
+The following parameters are used for the IBLT:
 
 * **buckets**: 1024
-* **Hc**: [murmur3](https://en.wikipedia.org/wiki/MurmurHash), 8 bytes, seed: 0x00
-* **Hk**: murmur3, 4 bytes, seed: 0x01, k = 6 
-* **val_sum field size**: 32 bytes
-* **count field size**: 4 bytes
+* **Hc**: [murmur3](https://en.wikipedia.org/wiki/MurmurHash) 64 bit hash, seed: 0x00
+* **Hk**: murmur3 32 bit hash, seed: 0x01
+* **k** = 6
+
+Computing the murmur3 hash requires conversion of integers to bytes, this MUST be done in little-endian fashion.
+
+Per bucket the following field sizes are used:
+
+* **val_sum**: 32 bytes
+* **hash_sum**: 8 bytes
+* **count**: 4 bytes
 
 See Appendix A.1 for an explanation.
 
@@ -213,8 +220,15 @@ When a *next* or *previous* page is mentioned, this means 512 has to be added/re
 
 #### 6.1.3 IBLT decoding
 
-When decoding an IBLT as described in [the original paper](https://arxiv.org/pdf/1101.2245 or https://www.ics.uci.edu/~eppstein/pubs/EppGooUye-SIGCOMM-11.pdf), the result is two sets of values: those that are missing in set A and those that are missing in set B. For this protocol only one of those sets is of interest, the other can be ignored.
-This also makes it more likely the IBLT can be decoded.
+Subtracting the IBLTs generated from sets A and B and decoding the resulting IBLT, as described in the original papers [1](https://arxiv.org/pdf/1101.2245), [2](https://www.ics.uci.edu/~eppstein/pubs/EppGooUye-SIGCOMM-11.pdf), produces two sets of values: those that are missing in set A and those that are missing in set B.
+When sets A and B contain all the transactions on the DAG of two different nodes, IBLTs can easily identify their set difference. 
+
+#### 6.1.4 IBLT serialization
+
+IBLTs from different nodes can only be compared when they are generated in the same way. 
+The IBLT parameters specified in §6.1.1 are constant and do not need to be communicated.
+The serialized IBLT consists of all buckets appended in order, and a bucket is serialized by concatenating the bytes of *count*, *hash_sum*, and *val_sum* and MUST be in this order.
+Conversion of integers to bytes MUST be in little-endian format.
 
 ### 6.2 Operation
 
