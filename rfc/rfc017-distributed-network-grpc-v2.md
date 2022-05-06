@@ -303,7 +303,7 @@ The `XOR` value MUST still be calculated over all transaction references on the 
 
 #### 6.2.4 Transaction Range Query
 
-If the IBLT from a `TransactionSet` message can be decoded but contains no missing transactions, the local node SHOULD also send a `TransactionRangeQuery` message.
+If the IBLT from a `TransactionSet` message can be decoded but contains no missing transactions, the local node SHOULD send a `TransactionRangeQuery` message.
 The peer SHOULD respond with `TransactionList` message, containing the requested transactions.
 
 What range should be requested depends on the local node's LC, and `LC_req` and `LC` from the `TransactionSet` message.
@@ -312,7 +312,7 @@ If the `LC_req` value is in the latest page of the local node, it SHOULD query a
 If the `LC_req` value is NOT in the latest page of the local node, then the query MUST only cover the next page.
 This last requirement prevents a node from querying the entire DAG while only some historic transactions are missing or when a page contains collisions.
 
-The `TransactionRangeQuery` message contains a `start` (inclusive) and `end` (exclusive) parameter corresponding to the requested page(s).
+The `TransactionRangeQuery` message contains a `start` (inclusive) and `end` (exclusive) parameter corresponding to the Lamport Clock values of the requested page(s).
 The message MUST contain a (new) `conversationID`.
 
 If decoding fails and the IBLT covered the first page, the local node SHOULD use a `TransactionRangeQuery` message to query the first page.
