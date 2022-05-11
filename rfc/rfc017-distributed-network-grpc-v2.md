@@ -103,8 +103,10 @@ The protocol generally operates as follows:
    * When different:
       * Remove all known transaction references from the list.
       * Bob calculates a new XOR value combining its own XOR value and the remaining new/unknown transactions hashes. 
-      * If this new XOR value matches that of Alice, or if Alice's LC is lower, Bob requests the list of unknown transactions.
-      * If this new XOR value differs and if Alice's LC is equal or higher than Bob's highest LC value, Bob sends a `State` message as defined in Chapter 6.
+      * If this new XOR value matches that of Alice, Bob requests the list of unknown transactions.
+      * If this new XOR value does not match that of Alice, Bob has two options to try and resolve their differences:
+        * If Alice's LC is lower and the list of new transactions is *not* empty, Bob still requests the list of unknown transactions.
+        * In any other case Bob sends a `State` message as defined in Chapter 6.
 
 3. Alice responds with the requested transactions (§5.2.3).
 
@@ -140,10 +142,9 @@ If they are not equal, the transaction list MUST be filtered. All known transact
 The resulting list contains all Gossiped transactions the node is missing.
 The node then calculates a temporary XOR value by applying TX hashes from the filtered list to its own XOR value.
 
-If the temporary XOR value doesn't match the XOR value of the peer and the `LC` value in the message is equal to or higher than the highest Lamport Clock value of the node, their differences cannot be resolved based on this message alone.
-In this case the node SHOULD send a `State` message. See §6.2.1. 
-In any other case the node SHOULD send a `TransactionListQuery` message containing the list of missing transaction references.
+If the temporary XOR value matches the XOR value of the peer, or the peer's `LC` is lower and there are new transactions references, the node SHOULD send a `TransactionListQuery` message containing the list of missing transaction references.
 This message MUST also add a new `conversationID`.
+In any other case the node SHOULD send a `State` message, see §6.2.1. 
 
 #### 5.2.3 Transaction List
 
