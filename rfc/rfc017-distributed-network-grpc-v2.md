@@ -28,6 +28,7 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 Please see the [protobuf definition](https://raw.githubusercontent.com/nuts-foundation/nuts-node/master/network/transport/v2/protocol.proto)
 for the messages that are referred to in this RFC.
+Connections are subject to the requirements specified by [RFC008 Certificate Structure](rfc/rfc008-certificate-structure.md).
 
 ## 2. Terminology
  
