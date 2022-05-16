@@ -68,7 +68,8 @@ If a node receives a response with a `conversationID`, it MUST match its content
 If a `conversationID` is unknown or if the response doesn't match the requirements, the message MUST be ignored.
 The individual messages describe the requirements.
 
-A node SHOULD limit the number of conversations to a single node when these conversations contain overlapping data.
+A node SHOULD limit the number of conversations to a single peer when these conversations contain overlapping data.
+The protocol requires only 1 active conversation per peer at a time.
 It's up to the implementation on how to mark a conversation as finished and remove it from its administration.
 
 ## 5. Gossip protocol
@@ -102,8 +103,11 @@ The protocol generally operates as follows:
    * When the XOR is the same: no action required.
    * When different:
       * Remove all known transaction references from the list.
-      * Request the remaining transactions.
-      * Bob calculates a new XOR value combining its own XOR value and the newly requested transactions hashes. If this new XOR value differs and if Alice's LC is equal or higher thatBob's highest LC value, Bob sends a `State` message as defined in Chapter 6. 
+      * Bob calculates a new XOR value combining its own XOR value and the remaining new/unknown transactions hashes. 
+      * If this new XOR value matches that of Alice, Bob requests the list of unknown transactions.
+      * If this new XOR value does not match that of Alice, Bob has two options to try and resolve their differences:
+        * If Alice's LC is lower and the list of new transactions is *not* empty, Bob still requests the list of unknown transactions.
+        * In any other case Bob sends a `State` message as defined in Chapter 6.
 
 3. Alice responds with the requested transactions (§5.2.3).
 
@@ -136,30 +140,36 @@ Upon receiving a `Gossip` message from a peer, a node MUST first compare the `XO
 If the values are equal, no further action is required.
 
 If they are not equal, the transaction list MUST be filtered. All known transaction references MUST be removed.
-The resulting list contains all transaction the node is missing.
-The node SHOULD send a `TransactionListQuery` message containing the list of missing transaction references.
-This message MUST also add a new `conversationID`.
+The resulting list contains all Gossiped transactions the node is missing.
+The node then calculates a temporary XOR value by applying TX hashes from the filtered list to its own XOR value.
 
-The node then calculates a temporary XOR value by applying TX hashes from the filtered list to its own XOR value. If the temprorary XOR value doesn't match the XOR value of the peer and the `LC` value in the message is equal to or higher than the highest Lamport Clock value of the node, then the node SHOULD send a `State` message. See §6.2.1.
+If the temporary XOR value matches the XOR value of the peer, or the peer's `LC` is lower and there are new transactions references, the node SHOULD send a `TransactionListQuery` message containing the list of missing transaction references.
+This message MUST also add a new `conversationID`.
+In any other case the node SHOULD send a `State` message, see §6.2.1. 
 
 #### 5.2.3 Transaction List
 
-When a node receives a `TransactionListQuery` message, it SHOULD respond with a `TransactionList` message.
-This is a response type message, so it MUST include the sent `conversationID`.
-Transactions that resulted from a `TransactionListQuery` MUST have been present in that message.
-Unknown transactions references SHOULD be ignored.
-Transactions that resulted from a `TransactionRangeQuery` MUST have an LC value that is within the requested range.
-If any of these requirements are not met, the entire message MUST be ignored.
-If the resulting list of transactions is empty, a node MAY ignore the message and not send a `TransactionList` message.
-If the list is not empty, it SHOULD send a response.
+When a node receives a `TransactionListQuery` or `TransactionRangeQuery` message, it SHOULD respond with a `TransactionList` message.
+This is a response type message, so it MUST include the request's `conversationID`.
 All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
 All transactions without a `pal` header MUST be added with their payload. Transactions with a `pal` header are discussed in [§7](rfc017-distributed-network-grpc-v2.md#7-private-transactions).
-If a transaction is received without a payload and it does not contain a `pal` header, it MUST stop processing the message.
-Any transaction till that point MAY still be added.
 
-A `TransactionList` message MAY be broken up into smaller messages, each message should conform to these rules. Each part MUST also use the same `conversationID`.
+A `TransactionList` message MAY be broken up into smaller messages to not exceed the maximum message size, each message should still conform to these rules. 
+Before sending the first message, the node MUST calculate the `totalMessages` it will send and MUST include this in all messages. 
+Each part MUST also include a `messageNumber` starting from 1, incrementing by 1 for every new message until all messages are sent. 
 
-If a transaction can not be processed due to missing previous transaction, the node SHOULD send a `State` message. It SHOULD also stop processing any firther transactions from the list.
+#### 5.2.4 Receiving new transactions
+
+For every part of a `TransactionList` a node receives, it MUST confirm that the `conversationID` matches that of the request.
+Transactions received in response to a `TransactionListQuery` MUST have been present in the request.
+Transactions received in response to a `TransactionRangeQuery` MUST have an LC value that is within the requested range.
+If any of these requirements are not met, the entire message MUST be ignored.
+
+If a transaction can not be processed due to missing previous transaction, the node SHOULD send a `State` message. It SHOULD also stop processing any further transactions from the list.
+If a transaction is received without a payload, and it does not contain a `pal` header, it MUST stop processing the message.
+Any transaction until that point MAY still be added.
+
+When `messageNumber` and`totalMessages` are the same, all parts of the `TransactionList` are received and the conversation MAY be closed.
 
 ## 6. Set reconciliation protocol
 
@@ -238,7 +248,7 @@ All messages and values mentioned in this chapter are scoped to a single connect
 
 The protocol generally operates as follows:
 
-1. Alice sends a state message in response to a gossip message when conditions require so (§6.2.1):
+1. Alice sends a State message in response to a gossip message when conditions require so (§6.2.1):
     * XOR of all known transaction references.
     * Highest Lamport Clock value over all transactions (LC).
     
@@ -249,12 +259,10 @@ The protocol generally operates as follows:
       * the IBLT that includes the Lamport Clock range of 0-LC(Alice)
       * Bob's highest Lamport Clock value
 
-3. When receiving the message, Alice subtracts Bob's IBLT from her own IBLT for the given range (§6.2.3):
-   * If not decodable, go to 1 and send values based on the previous page.
-   * If decodable, send a request for missing transactions
-   * If Bob's highest Lamport Clock value is higher than the LC value sent in 1, then request transactions by Lamport Clock value (§6.2.4):
-     * Lamport Clock start value.
-     * Lamport Clock end value.
+3. When receiving the message, Alice subtracts Bob's IBLT from her own IBLT for the given range (§6.2.3) and does one of the following:
+   * If not decodable, go to 1 and send values based on the previous page, or request all transactions on lowest page if already comparing the lowest page.
+   * If decodable, send a request for missing transactions if there are any.
+   * If Bob's highest Lamport Clock value is higher than the LC value sent in 1, then request transactions over a range of Lamport Clock values (§6.2.4)
 
 4. When receiving a request for transactions, Bob responds with a message including the requested transactions.
 
@@ -262,7 +270,7 @@ The protocol generally operates as follows:
 
 A node MUST make sure to only add transactions of which all previous transactions are present.
 
-#### 6.2.1 Broadcasting the state
+#### 6.2.1 Requesting a peer's State
 
 The `State` message is sent as response to various conditions of the gossip protocol (see §5).
 The `State` message MUST contain a new `conversationID`.
@@ -273,17 +281,20 @@ If no transactions are present, an all-zero `XOR` and `LC` of 0 is sent.
 #### 6.2.2 IBLT response
 
 When a peer receives a `State` message and the `XOR` differs, it SHOULD respond with a `TransactionSet` message.
-The sent `LC` value falls within the bounds of a page.
+The requested `LC` value falls within the bounds of a page.
 The response IBLT MUST be calculated over the transactions leading up to and including that page.
 If the peer's highest Lamport Clock value is lower, it MUST use the IBLT covering the entire DAG.
 Next to the IBLT data, the `TransactionSet` message MUST contain the original `LC` value as `LC_req`, a new `LC` value indicating the highest LC value from the peer.
-This is a response type message so it MUST contain the `conversationID`.
+This is a response type message, so it MUST contain the `conversationID`.
 
 #### 6.2.3 Transaction List Query
 
-For every `TransactionSet` message a node receives, it MUST check if the `LC_req` value matches the `LC` value from the original request. The `TransactionSet` message MUST also contain the `conversationID` from the original `State` message.
+For every `TransactionSet` message a node receives, it MUST check if the `LC_req` value matches the `LC` value from the original request. 
+The `TransactionSet` message MUST also contain the `conversationID` from the original `State` message.
 
-The IBLT in the `TransactionSet` message contains every transaction of the peer in the LC range of `0-min(LC, LC_req)`. The node MUST lookup/compute the IBLT for this range and subtract it from the IBLT of the peer. Decoding the resulting IBLT will list the transaction refs the peer has and the local node misses. 
+The IBLT in the `TransactionSet` message contains every transaction of the peer in the LC range of `0-min(LC, LC_req)`. 
+The node MUST lookup/compute the IBLT for this range and subtract it from the IBLT of the peer. 
+Decoding the resulting IBLT will list the transaction refs the peer has and the local node misses. 
 These transactions SHOULD be queried by using the `TransactionListQuery` message (see §5.2.2). 
 
 If the decoding fails, the local node sends a new `State` message. 
@@ -294,15 +305,16 @@ The `XOR` value MUST still be calculated over all transaction references on the 
 
 #### 6.2.4 Transaction Range Query
 
-If the IBLT from a `TransactionSet` message can be decoded, the local node MAY also send a `TransactionRangeQuery` message.
+If the IBLT from a `TransactionSet` message can be decoded but contains no missing transactions, the local node SHOULD send a `TransactionRangeQuery` message.
 The peer SHOULD respond with `TransactionList` message, containing the requested transactions.
-This is only needed if the page containing the `LC` value of the `TransactionSet` message comes after the page containing `LC_req`. 
-This means the peer has additional transactions outside the IBLT range.
-If the `LC_req` value is in the latest page of the local node, it SHOULD query all pages leading up to the `LC` value.
-If the `LC_req` value is NOT in the latest page of the local node, then it MUST only query the next page.
+
+What range should be requested depends on the local node's LC, and `LC_req` and `LC` from the `TransactionSet` message.
+If the page containing `LC` comes after the page containing `LC_req`, the peer has additional transactions outside the LC range covered by the IBLT.
+If the `LC_req` value is in the latest page of the local node, it SHOULD query all pages after `LC_req` leading up to and including the page containing the `LC` value.
+If the `LC_req` value is NOT in the latest page of the local node, then the query MUST only cover the next page.
 This last requirement prevents a node from querying the entire DAG while only some historic transactions are missing or when a page contains collisions.
 
-The `TransactionRangeQuery` message contains a `start` (inclusive) and `end` (exclusive) parameter corresponding to the requested page(s).
+The `TransactionRangeQuery` message contains a `start` (inclusive) and `end` (exclusive) parameter corresponding to the Lamport Clock values of the requested page(s).
 The message MUST contain a (new) `conversationID`.
 
 If decoding fails and the IBLT covered the first page, the local node SHOULD use a `TransactionRangeQuery` message to query the first page.
