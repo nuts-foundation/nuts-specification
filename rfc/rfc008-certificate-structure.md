@@ -74,3 +74,8 @@ In case of theft or loss of a private key and/or certificate, please consult the
 
 All connections mentioned in §3 MUST be accepted. A node operator MAY NOT deny a connection request other than those using a banned or revoked certificate. A governance framework SHOULD be in place to determine how a certificate can be banned. Banning a certificate does not replace the revoking mechanism of a CA.
 
+## 7. TLS Protocols
+
+Connections must be secured according to the guidelines provided by the Dutch National Cyber Security Center (NCSC).
+The current version of this guideline is [2.1](https://www.ncsc.nl/documenten/publicaties/2021/januari/19/ict-beveiligingsrichtlijnen-voor-transport-layer-security-2.1).
+According to the guideline, we require at least TLS v1.2 and advice strongly to support TLS v1.3 as well.
