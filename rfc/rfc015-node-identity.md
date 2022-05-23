@@ -91,7 +91,7 @@ See [RFC005](rfc005-distributed-network-using-grpc.md) for more information abou
 The validating node will resolve the DID document of the sent DID and will compare the `serviceEndpoint` of the `NutsComm` service with the SAN of the certificate that is related to the connection.
 A single match is sufficient when multiple DNS entries are available in the SAN extension. If no match is found the connected peer remains anonymous.
 
-The hostname of the node and certificate SAN are validated according to [RFC 6125, Appendix B](https://tools.ietf.org/html/rfc6125).
+The hostname of the node and certificate SAN are validated according to [RFC 6125, Appendix B](https://tools.ietf.org/html/rfc6125) (`Common Name` is not supported).
 
 This description applies to both client and server.
 
