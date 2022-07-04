@@ -1,10 +1,10 @@
 # RFC005 Distributed Network using gRPC
 
-|  |  |
-| :--- | :--- |
-| Nuts foundation | R.G. Krul |
+|                           |  |
+|:--------------------------| :--- |
+| Nuts foundation           | R.G. Krul |
 | Request for Comments: 005 | Nedap |
-|  | February 2021 |
+| Obsoleted by: RFC017      | February 2021 |
 
 ## Distributed Network using gRPC
 
