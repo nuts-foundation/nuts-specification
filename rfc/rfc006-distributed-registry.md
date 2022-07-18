@@ -263,7 +263,7 @@ If a DID Document doesn't have any other controllers, and the control over the p
 
 The Nuts network is a mesh network without central authority. Each node in the network will have a copy of every DID Document published on the network.
 DID Document resolution happens on the local node of the relying party. 
-If the relying party has contracted a third party for hosting the Nuts node, it should reconsider the privacy concerns together with the third party.
+If the relying party has contracted a third party for hosting the Nuts node, it should evaluate the privacy concerns together with the third party.
 
 Nuts DID Documents may contain contact information. Parties SHOULD make sure this information does not contain personal information.
 Corporate names, telephone numbers and email addresses should not be linkable to a single person.
