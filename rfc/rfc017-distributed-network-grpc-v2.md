@@ -49,7 +49,7 @@ Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-arc
 
 Particular exchanges (private transactions) might require authentication of the peer's identity. This identity (a.k.a. node identity) is specified by [RFC015 Node identity](rfc015-node-identity.md).
 If a node has a node DID and wishes to create an authenticated connection, it MUST send the DID as `nodeDID` gRPC header when establishing inbound or outbound connections.
-If authentication fails, the authenticating side MUST close the connection with the following error: `nodeDID authentication failed`.
+If authentication fails, the authenticating side MUST close the connection and SHOULD return the following error: `nodeDID authentication failed` (status code: `16 (Unauthenticated)`).
 The received node DID MUST be authenticated upon receiving, to directly inform the peer should its configuration be incorrect. 
 
 As specified by RFC015, the node MUST authenticate the peer's node DID as follows:
