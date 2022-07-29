@@ -45,11 +45,13 @@ Changes for the version 2 transactions:
   * if the transaction has no entries in **prevs**, it's' lc value is **0**.
   * otherwise, the value MUST be equal to `max(prev1, ... prevN)+1`.
 
-These additions interact with the requirement that each transaction point to one of the latest *HEADS* by means of their **prevs**. 
+These additions interact with the requirement that each transaction points to the latest transaction by means of their **prevs**. 
 Because there can only be a single root transaction, that transaction will automatically have a **lc** value of `0`.
 The requirement that a transaction points to previous transaction(s) also makes it possible to apply the latest point.
 [RFC004 ref](rfc004-verifiable-transactional-graph.md#3-transaction-format) also defines the notion of branches. 
 **LC** values will overlap between branches.
+When adding a new transaction, that transaction MUST point to the transaction with the highest **lc** value.
+If multiple transactions have the highest **lc** value, any single one of them may be used.
 
 ## 4. Changes to version 1
 

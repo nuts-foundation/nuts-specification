@@ -89,11 +89,11 @@ All transactions referred to by `prevs` MUST be present, since failing to do so 
 
 As the name implies the DAG MUST be acyclic, transactions that introduce a cycle are invalid MUST be ignored. ANY following transaction that refers to the invalid transaction \(direct or indirect\) MUST be ignored as well.
 
-Since it takes some time for the transactions to be synced to all network peers \(eventual consistency\) there COULD be multiple transactions referring to the previous transactions in the **prevs** field, a phenomenon called _branching_. Branching is common and harmless. Branches are merged by specifying their heads in the **prevs** field:
+Since it takes some time for the transactions to be synced to all network peers \(eventual consistency\) there COULD be multiple transactions referring to the previous transactions in the **prevs** field, a phenomenon called _branching_. Branching is common and relatively harmless. Branches are merged by specifying their heads in the **prevs** field:
 
 ![DAG structure](../.gitbook/assets/rfc004-branching.svg)
 
-Branches may remain unmerged.
+Branches may remain unmerged. As mentioned at the beginning of this paragraph, a transaction MUST refer to a previous transaction. It doesn't matter on which branch the latest transaction is published. 
 
 The first transaction in the DAG is the _root transaction_ and SHALL NOT have any **prevs** entries. There MUST only be one root transaction for a network and subsequent root transactions MUST be ignored.
 
