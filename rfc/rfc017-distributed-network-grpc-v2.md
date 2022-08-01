@@ -62,7 +62,10 @@ As specified by RFC015, the node MUST authenticate the peer's node DID as follow
 Certain messages in the protocol are a response to a certain request. To make sure a response corresponds to a certain request, a `conversationID` is added to the request. Response type messages MUST add the same `conversationID` in the response.
 The `conversationID` is scoped to a connection.
 A node is free to choose the form of a `conversationID`, it MUST be unique during the lifetime of the connection.
-It MUST be valid for at least 10 seconds and no longer than 30 seconds.
+It MUST be valid for at least 10 seconds.
+It MUST be invalidated after 30 seconds of the last processed message.
+If a lot of messages have to be processed, it could take a while for a conversation to finish.
+To prevent a timeout during a long conversation, the timeout should be reset after handling of each valid message.
 
 If a node receives a response with a `conversationID`, it MUST match its contents with the original request.
 If a `conversationID` is unknown or if the response doesn't match the requirements, the message MUST be ignored.
@@ -306,7 +309,7 @@ The `XOR` value MUST still be calculated over all transaction references on the 
 #### 6.2.4 Transaction Range Query
 
 If the IBLT from a `TransactionSet` message can be decoded but contains no missing transactions, the local node SHOULD send a `TransactionRangeQuery` message.
-The peer SHOULD respond with `TransactionList` message, containing the requested transactions.
+The peer SHOULD respond with `TransactionList` message, containing the requested transactions. The peer SHOULD make sure to send all transactions that were requested.
 
 What range should be requested depends on the local node's LC, and `LC_req` and `LC` from the `TransactionSet` message.
 If the page containing `LC` comes after the page containing `LC_req`, the peer has additional transactions outside the LC range covered by the IBLT.
