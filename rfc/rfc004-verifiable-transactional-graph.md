@@ -83,19 +83,21 @@ When serializing a reference to string form it MUST be hexadecimal encoded and S
 
 ### 3.3 Ordering, branching and merging
 
-Transactions MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to the previous transaction. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor. A new transaction MUST be appended to the end of the DAG by referring to the last transaction of the DAG \(_head_\) by including its reference in the **prevs** field.
+Transactions MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to previous transactions. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor. A new transaction MUST be appended to the end of the DAG by referring to one of the last transactions of the DAG \(_head_\) by including its reference in the **prevs** field.
 
 All transactions referred to by `prevs` MUST be present, since failing to do so would corrupt the DAG.
 
 As the name implies the DAG MUST be acyclic, transactions that introduce a cycle are invalid MUST be ignored. ANY following transaction that refers to the invalid transaction \(direct or indirect\) MUST be ignored as well.
 
-Since it takes some time for the transactions to be synced to all network peers \(eventual consistency\) there COULD be multiple transactions referring to the previous transactions in the **prevs** field, a phenomenon called _branching_. Since branches \(especially old and/or long ones\) may cause transactions to be reordered which hurts performance they MUST be merged as soon as possible. Branches are merged by specifying their heads in the **prevs** field:
+Since it takes some time for the transactions to be synced to all network peers \(eventual consistency\) there COULD be multiple transactions referring to the previous transactions in the **prevs** field, a phenomenon called _branching_. Branching is common and relatively harmless. Branches are merged by specifying their heads in the **prevs** field:
 
 ![DAG structure](../.gitbook/assets/rfc004-branching.svg)
 
+Branches may remain unmerged. As mentioned at the beginning of this paragraph, a transaction MUST refer to a previous transaction. It doesn't matter on which branch the latest transaction is published. 
+
 The first transaction in the DAG is the _root transaction_ and SHALL NOT have any **prevs** entries. There MUST only be one root transaction for a network and subsequent root transactions MUST be ignored.
 
-When processing a DAG the system MUST start at the root transaction and work its way to the head\(s\) processing subsequent transactions. When encountering a branch the transactions on all branches from that point up until the merge MUST be processed before processing the merge itself. Since ordering is casual processing order over parallel branches isn't important. When looking at the diagram above, the following processing orders are valid:
+When processing a DAG the system MUST start at the root transaction and work its way to the head\(s\) processing subsequent transactions. When encountering a branch the transactions on all branches from that point up until a merge MUST be processed before processing the merge itself. Since ordering is casual processing order over parallel branches isn't important. When looking at the diagram above, the following processing orders are valid:
 
 * `A -> B -> C -> D -> E -> F` \(mixed parallel order\)
 * `A -> B -> D -> C -> E -> F` \(branch D first, then branch C\)
@@ -210,3 +212,13 @@ Still, this does not make correlation attacks impossible, just harder.
 E.g.: in small networks, the number of care organizations might be so small, that one could guess the receiving organization with relatively large accuracy.
 Especially when they are issued (and re-issued after they expire) by an automated process.
 This problem gets smaller when the network grows.
+
+### A.2 Heads, `prevs` and branches
+
+In previous versions of the specification, the `prevs` was specified to contain all current heads of the DAG.
+This requirement has changed due to:
+
+- when creating a lot of transactions, lots of branches are created. Adding these heads to the next transaction greatly increases the size of the transaction.
+- the state of the DAG is no longer indicated by its heads but rather by an XOR value and its IBLT structure. See [RFC017](./rfc017-distributed-network-grpc-v2.md)
+
+Referring to a previous transaction is still required to make sure the Lamport Clock still increases with each transaction. 
