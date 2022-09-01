@@ -61,9 +61,10 @@ In addition to the registered header parameters, the following headers MUST be p
 
 * **sigt**: \(signing time\) MUST contain the signing time of the transaction as Unix time since epoch encoded as NumericValue.
 * **ver**: MUST contain the format version of the transaction as number. For this version of the format the version MUST be 1.
-* **prevs**: \(previous transactions\) MUST contain the references \(see section 3.2\) of the preceding transactions \(see section 3.4\).
+* **prevs**: \(previous transactions\) MUST contain references \(see section 3.2\) of preceding transactions \(see section 3.4\).
   * When it's a root transaction the field SHALL NOT have any entries.
   * When creating a transaction it MUST only contain transactions that the local node has successfully processed, to avoid publishing unprocessable transactions.
+  * The field SHOULD contain only one of the latest heads in addition to other requirements (for example requirements introduced by [RFC006 §5.1](rfc006-distributed-registry#51-conflict-detection)).
 
 The following protected headers MAY be present:
 
