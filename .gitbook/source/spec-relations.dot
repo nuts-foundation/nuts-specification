@@ -18,6 +18,9 @@ digraph D {
         RFC012 [label = "RFC012\nNuts Organization Credential",href = "rfc012-nuts-organization-credential"];
         RFC013 [label = "RFC013\nVerifiable Credential IRMA Proof",href = "rfc013-vc-irma-proof"];
         RFC014 [label = "RFC014\nNuts Authorization Credential",href = "rfc014-authorization-credential"];
+        RFC015 [label = "RFC015\nNode Identity",href = "rfc015-node-identity"];
+        RFC016 [label = "RFC016\nLamport Clock",href = "rfc016-lamport-clock"];
+        RFC017 [label = "RFC017\nV2 Network Protocol",href = "rfc017-distributed-network-grpc-v2"];
     }
 
     // External RFCs
@@ -26,6 +29,8 @@ digraph D {
         RFC7662_EXT [label = "RFC7662\nOAuth 2.0 Token Introspection", href = "https://tools.ietf.org/html/rfc7662", fillcolor = azure2, style = filled]
         RFC7523_EXT [label = "RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants", href = "https://tools.ietf.org/html/rfc7523", fillcolor = azure2, style = filled,]
         RFC7515_EXT [label = "RFC7515\nJSON Web Signature (JWS)", href = "https://tools.ietf.org/html/rfc7515", fillcolor = azure2, style = filled]
+        DID_EXT [label = "W3C DID\nDecentralized Identifiers (DIDs) v1.0", href = "https://www.w3.org/TR/did-core/", fillcolor = azure2, style = filled]
+        VC_EXT  [label = "W3C VC\nVerifiable Credentials Data Model v1.1", href = "https://www.w3.org/TR/vc-data-model/", fillcolor = azure2, style = filled]
     }
 
     RFC002 -> RFC001
@@ -44,18 +49,37 @@ digraph D {
 
     RFC006 -> RFC004
     RFC006 -> RFC008
+    RFC006 -> DID_EXT
 
     RFC011 -> RFC003
     RFC011 -> RFC004
     RFC011 -> RFC7779_EXT
+    RFC011 -> VC_EXT
 
     RFC012 -> RFC003
     RFC012 -> RFC006
     RFC012 -> RFC011
+    RFC012 -> VC_EXT
 
     RFC013 -> RFC011
+    RFC013 -> VC_EXT
 
     RFC014 -> RFC001
     RFC014 -> RFC003
     RFC014 -> RFC011
+    RFC014 -> VC_EXT
+
+    RFC015 -> RFC005
+    RFC015 -> RFC006
+    RFC015 -> RFC017
+    RFC015 -> DID_EXT
+    RFC015 -> VC_EXT
+
+    RFC016 -> RFC004
+
+    RFC017 -> RFC004
+    RFC017 -> RFC005
+    RFC017 -> RFC008
+    RFC017 -> RFC015
+    RFC017 -> RFC016
 }
