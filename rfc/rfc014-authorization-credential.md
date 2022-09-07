@@ -139,7 +139,7 @@ These are in addition to the ones listed in [§5.2.1.7 of RFC003](rfc003-oauth2-
 * The credential `issuer` equals the **sub** field of the JWT in the access token request.
 * The credential `credentialSubject.id` equals the **iss** field of the JWT in the access token request.
 
-An NutsAuthorizationCredential is not needed when requester and authorizer are the same.
+A `NutsAuthorizationCredential` is not needed when `requester` and `authorizer` are the same.
 
 ### 4.3 Runtime enforcement
 
