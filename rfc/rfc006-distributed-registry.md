@@ -413,7 +413,7 @@ Since the information is self-proclaimed and not authenticated or verified in an
 
 ## 5.1 Conflict detection
 
-It's a conflict for a create transaction when:
+A transaction that creates a DID document causes a conflict when all the following conditions apply:
 
 * Two or more transactions exist that introduce the same DID (both have the same `jwk` header).
 * The contents of the DID Document differs.
