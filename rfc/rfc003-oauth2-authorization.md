@@ -220,6 +220,7 @@ To validate the identity of the issuer, the value of the `kid` MUST be present i
 **5.2.1.4 JWT validity**
 
 The JWT **iat** and **exp** fields MUST be validated. The timestamp of validation MUST lie between these values. The exp field MAY not be more than 5 seconds after the **iat** field.
+Clock skew MUST be taken into account for both ahead of time and behind in time. The duration of the clock skew defaults to 5 seconds unless stated otherwise by a network agreement.
 
 **5.2.1.5 Login contract validation**
 
