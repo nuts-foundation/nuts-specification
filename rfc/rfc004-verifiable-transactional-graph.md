@@ -36,6 +36,7 @@ This document does not define how to transport data to other participants in a d
 * **JWS payload**: The payload as defined by [RFC7515](https://tools.ietf.org/html/rfc7515#section-3).
 * **Transaction contents**: The actual data in the transaction.
 * **Head**: Transaction that is not referenced by another \(newer\) transaction.
+* **Lamport clock**: Logical clock creating a casual ordering between transactions (https://en.wikipedia.org/wiki/Lamport_timestamp).
 
 Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
@@ -54,21 +55,27 @@ In addition to required header parameters as specified in RFC7515 the following 
 
 * **cty**: MUST contain the type of the transaction content indicating how to interpret it.
 * **crit** MUST contain the **sigt**, **ver**, **prevs** and **pal** headers.
+* **crit** MUST also contain the **lc** header if **ver** == 2.
 
 The **jku**, **x5c** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the transaction.
 
 In addition to the registered header parameters, the following headers MUST be present as protected headers:
 
 * **sigt**: \(signing time\) MUST contain the signing time of the transaction as Unix time since epoch encoded as NumericValue.
-* **ver**: MUST contain the format version of the transaction as number. For this version of the format the version MUST be 1.
+* **ver**: MUST contain the format version of the transaction as number. For this version of the format the version MUST be 1 or 2.
 * **prevs**: \(previous transactions\) MUST contain references \(see section 3.2\) of preceding transactions \(see section 3.4\).
   * When it's a root transaction the field SHALL NOT have any entries.
   * When creating a transaction it MUST only contain transactions that the local node has successfully processed, to avoid publishing unprocessable transactions.
-  * The field SHOULD contain only one of the latest heads in addition to other requirements (for example requirements introduced by [RFC006 §5.1](rfc006-distributed-registry#51-conflict-detection)).
+* The **lc** MUST be a positive number constructed as follows:
+  * if the transaction has no entries in **prevs**, it's' lc value is **0**.
+  * otherwise, the value MUST be equal to `max(prev1, ... prevN)+1`.
 
 The following protected headers MAY be present:
 
 * **pal**: MUST contain the encrypted addresses of the participants \(used for private transactions, see section 3.8\).
+
+When adding a new transaction, that transaction MUST point (through the **prevs** field) to the transaction with the highest **lc** value.
+If multiple transactions have the highest **lc** value, a single one of them MUST be used.
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
@@ -94,7 +101,8 @@ Since it takes some time for the transactions to be synced to all network peers 
 
 ![DAG structure](../.gitbook/assets/rfc004-branching.svg)
 
-Branches may remain unmerged. As mentioned at the beginning of this paragraph, a transaction MUST refer to a previous transaction. It doesn't matter on which branch the latest transaction is published. 
+Branches may remain unmerged. As mentioned at the beginning of this paragraph, a transaction MUST refer to a previous transaction. It doesn't matter on which branch the latest transaction is published.
+**LC** values will overlap between branches.
 
 The first transaction in the DAG is the _root transaction_ and SHALL NOT have any **prevs** entries. There MUST only be one root transaction for a network and subsequent root transactions MUST be ignored.
 
@@ -125,23 +133,9 @@ When updates are required for a type of transaction content, it MUST be composed
 
 Processing the DAG can be seen as planning tasks required for construction: some tasks can happen in parallel \(laying floors and installing electricity\), some tasks must happen sequentially \(foundation must be poured before building the walls\). This is the same for transactions on the DAG: transactions on a branch MUST be processed sequentially but processing order of parallel branches is unspecified, and before processing a merging transaction all **prevs** \(branches\) must have been processed.
 
-An algorithm that COULD be used is _Breadth-First-Search_. However, with branches with more than 1 transaction this algorithm processes the merging transaction before all preceding transactions were processed. This CAN be solved by adding an extra check that doesn't process a transaction which's previous transactions haven't all been processed. When all the merge transaction's previous transactions have been processed, it will be re-added to the queue for processing. The pseudo code for this algorithm looks as follows:
-
-```text
-given FIFO queue
-add root transaction to queue
-until queue empty; take transaction from queue
-    if current transaction already visited
-        continue loop
-
-    if any of the previous (prevs) transactions is not yet processed
-        continue loop
-
-    for all next transactions of the current transaction
-        add next transaction to queue
-
-    process transaction
-```
+Processing MUST be performed in order of the **lc** values.
+If multiple transactions have the same **lc** value, they MUST be processed in sorted order.
+The transactions MUST be sorted by their hexadecimal hash value.
 
 ### 3.6 Signature verification
 
