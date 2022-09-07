@@ -41,19 +41,13 @@ To support a variety of claims, the [W3C Verifiable Credential specification](ht
 
 ### 3.1 Supported proofs
 
-The following proof types must be supported:
+To ensure the authenticity and integrity of the VC, a VC document MUST contain a signature in a `proof` section as described in section 2.2.1 of [Verifiable Credential Data Integrity Specification](https://w3c.github.i.o/vc-data-integrity/#signatures). The following proof types must be supported by a Nuts node implementation:
 
 #### 3.1.1 JsonWebSignature2020
 
-This standard is described by [https://w3c-ccg.github.io/lds-jws2020](https://w3c-ccg.github.io/lds-jws2020). It uses a detached JWS for presenting the signature in the proof. [RFC7797](https://tools.ietf.org/html/rfc7797) describes how a detached JWS works. The proof is formatted according to [https://w3c-ccg.github.io/ld-proofs/](https://w3c-ccg.github.io/ld-proofs/).
+This signature suite is specified in [https://w3c-ccg.github.io/lds-jws2020](https://w3c-ccg.github.io/lds-jws2020). It uses a detached JWS for presenting the signature in the `jws` part of the proof. [RFC7797](https://tools.ietf.org/html/rfc7797) describes how a detached JWS works. The hashing algorithm should be of type `ES256`.
 
-The signature for a JsonWebSignature2020 is basically a normal JWS but with its payload removed. The most important part to take into account is that the signature is computed over the payload without the `proof` part.
-
-The complete algorithm used to create the signature is as follows:
-
-* take the input Verifiable Credential and remove the `proof` field. Store as `raw_vc`.
-* compute the sha256 of the `raw_vc`, store as `hash_vc`:`hash_vc = sha256(raw_vc)`.  
-* compose a `raw_proof` JSON object without the `jws` field:
+The proof MUST have a `verificationMethod` which contains an assertMethod ID from a resolvable Nuts DID Document of a public key of the `JSONWebKey2020` type. 
 
 ```javascript
 {
@@ -61,25 +55,6 @@ The complete algorithm used to create the signature is as follows:
   "proofPurpose": "assertionMethod",
   "verificationMethod": "did:nuts:EgFjg8zqN6eN3oiKtSvmUucao4VF18m2Q9fftAeANTBd#twlH6rB8ArZrknmBRWLXhao3FutZtvOm0hnNhcruenI",
   "created": "2021-03-09T11:44:56.382202+01:00"
-}
-```
-
-where the `verificationMethod` must be a valid assertionMethod ID from the DID Document. `created` MUST be a RFC3339 compliant time string. `type` and `proofPurpose` MUST be entered as above.
-
-* compute the sha256 of the `raw_proof`, store as `hash_proof`:`hash_proof = sha256(raw_proof)`.
-* concatenate  `hash_proof` with `hash_vc` and store as `payload`.
-* construct the JWS `header` as `{"alg":"ES256","b64":false,"crit":["b64"]}` where `alg` MUST contain the right algorithm.
-* construct a challenge by base64 encoding the header and payload and join with a `.`: `challenge = base64_rawurlencode(header) + '.' + base64_rawurlencode(payload)`  
-* sign the bytes from the previous step with the private key corresponding to the `kid`: `sig = sign(challenge, privateKey(kid))`
-* create `jws` as `header + ".." + base64_rawurlencode(sig)`
-* place the result in the `jws` field of the `proof`:
-
-```javascript
-{
-  "type": "JsonWebSignature2020",
-  "proofPurpose": "assertionMethod",
-  "verificationMethod": "did:nuts:EgFjg8zqN6eN3oiKtSvmUucao4VF18m2Q9fftAeANTBd#twlH6rB8ArZrknmBRWLXhao3FutZtvOm0hnNhcruenI",
-  "created": "2021-03-09T11:44:56.382202+01:00",
   "jws": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..ZXlKaGJHY2lPaUpGVXpJMU5pSjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2hoZEktUkZPSzdlbnZJTTdLN1E5SzBSeHhRSzNIVWJPTUJyLVlZX1g0eW1YR0pXOHF4UkEuN0F4a3lZekNXTElPZ2Q5TlpnR3p2aHd2UzZZQ3FpRTRPX3FwWGVOSEN6X091S1c0TmJsWkJueTBkZVhXT0lXZ3JNczF4OTZlNmtnaGZGYTRNd0J3TlE="
 }
 ```
