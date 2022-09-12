@@ -232,19 +232,16 @@ The **aud** field MUST match the URL of the registered OAuth endpoint. This prev
 
 **5.2.1.7 Validate verifiable credentials**
 
-The **vcs** field contains the list of verifiable credentials of any type.
+The **vcs** field contains a list of verifiable credentials of any type.
 
-If a credential has the `NutsAuthorizationCredential` type it determines whether the accessible resource and is valid according to the following rules \(based on [RFC014](rfc014-authorization-credential.md)\):
+A credential is valid when it complies to the following rules:
 
-* The credential `issuer` equals the **sub** field of the JWT.
-* The credential `credentialSubject.id` equals the **iss** field of the JWT.
 * The credential proof is valid.
 * The credential has not been revoked.
 * The credential has not expired.
 
-It MUST be verified that the requester's request conforms to the specified policy and only requests allowed resources.
-
-The **vcs** field is not needed when requester and authorizer are the same.
+It MUST be verified that the request conforms to the specified policy.
+Specific verifiable credentials could add additional validation requirements.
 
 **5.2.1.8 Subject validation**
 

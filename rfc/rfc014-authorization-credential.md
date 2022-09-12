@@ -119,9 +119,35 @@ Example:
 
 ## 4. Access Control
 
-A resource server uses the Nuts Authorization Credential to check the access rights of an actor. The rules for determining access are a combination of a Bolt specific policy and any additional information from the credential. Identification and authentication are covered by [RFC003](rfc003-oauth2-authorization.md). The Bolt policy will list the operations and resource types that can be accessed. See also [RFC003 §7](rfc003-oauth2-authorization.md#7-bolt-requirements) A policy MAY also require certain parameters. For example, when a `search` operation is done on a FHIR `observation` resource, the policy may have a rule that requires a query parameter using the `subject` field of the credential. All restrictions and policy rules MUST use paths relative to the endpoint for the given service. [§4 of RFC006](rfc006-distributed-registry.md#4-services) covers the registration of services. If `resources` are present in the credential, the resource server can compare the operation and relative path of the request to the `resources` present in the credential.
+### 4.1 Policy
 
-Although Nuts Authorization Credentials are part of the OAuth flow of [RFC003](rfc003-oauth2-authorization.md), the actual checking is done at request time. This means that the resource server will have to check the policy and make a request for the restrictions from the Nuts registry. This model can be compared with an [Attribute Based Access Control \(ABAC\) model](https://en.wikipedia.org/wiki/Attribute-based_access_control). The Bolt policies are added to the Policy Administration Point, the Nuts node acts as Policy Information Point. The resource server is the Policy Enforcement Point. It's up to the vendor to implement the Policy Decision Point.
+A resource server uses the Nuts Authorization Credential to check the access rights of an actor. 
+The rules for determining access are a combination of a Bolt specific policy and any additional information from the credential. 
+Identification and authentication are covered by [RFC003](rfc003-oauth2-authorization.md). 
+The Bolt policy will list the operations and resource types that can be accessed. 
+See also [RFC003 §7](rfc003-oauth2-authorization.md#7-bolt-requirements) A policy MAY also require certain parameters. 
+For example, when a `search` operation is done on a FHIR `observation` resource, the policy may have a rule that requires a query parameter using the `subject` field of the credential.
+All restrictions and policy rules MUST use paths relative to the endpoint for the given service. 
+[§4 of RFC006](rfc006-distributed-registry.md#4-services) covers the registration of services. 
+If `resources` are present in the credential, the resource server can compare the operation and relative path of the request to the `resources` present in the credential.
+
+### 4.2 Access token request 
+
+The following validations are to be performed by the authorization server during an access token request.
+These are in addition to the ones listed in [§5.2.1.7 of RFC003](rfc003-oauth2-authorization.md#521-validation-steps).
+
+* The credential `issuer` equals the **sub** field of the JWT in the access token request.
+* The credential `credentialSubject.id` equals the **iss** field of the JWT in the access token request.
+
+A `NutsAuthorizationCredential` is not needed when `requester` and `authorizer` are the same.
+
+### 4.3 Runtime enforcement
+
+Although Nuts Authorization Credentials are part of the OAuth flow of [RFC003](rfc003-oauth2-authorization.md), the actual checking is done at request time. 
+This means that the resource server will have to check the policy and make a request for the restrictions from the Nuts registry. 
+This model can be compared with an [Attribute Based Access Control \(ABAC\) model](https://en.wikipedia.org/wiki/Attribute-based_access_control). 
+The Bolt policies are added to the Policy Administration Point, the Nuts node acts as Policy Information Point. The resource server is the Policy Enforcement Point. 
+It's up to the vendor to implement the Policy Decision Point.
 
 ## 5. Issuance & distribution
 
