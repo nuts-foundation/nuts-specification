@@ -41,7 +41,7 @@ To support a variety of claims, Nuts uses the Verificable Credential (VC) format
 
 ### 3.1 Supported proofs
 
-To ensure the authenticity and integrity of the VC, a VC document MUST contain a signature in a `proof` section as described in section 2.2.1 of [Verifiable Credential Data Integrity Specification](https://w3c.github.i.o/vc-data-integrity/#signatures). The following proof types must be supported by a Nuts node implementation:
+To ensure the authenticity and integrity of the VC, a VC document MUST contain an embedded proof in a `proof` section as described in section 2.2.1 of [Verifiable Credential Data Integrity Specification](https://w3c.github.io/vc-data-integrity/#signatures). The following proof types must be supported by a Nuts node implementation:
 
 #### 3.1.1 JsonWebSignature2020
 
