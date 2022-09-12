@@ -413,7 +413,12 @@ Since the information is self-proclaimed and not authenticated or verified in an
 
 ## 5.1 Conflict detection
 
-The algorithm for conflict detection can be summarized as follows:
+A transaction that creates a DID document causes a conflict when all of the following conditions apply:
+
+* Two or more transactions exist that introduce the same DID (both have the same `jwk` header).
+* The contents of the DID Document differs.
+
+The algorithm for conflict detection for a DID document update can be summarized as follows:
 
 * A DID Document update transaction is received.
 * The current version is resolved together with the resolution metadata \(the metadata refers to the transaction\(s\) that created the current version\).
