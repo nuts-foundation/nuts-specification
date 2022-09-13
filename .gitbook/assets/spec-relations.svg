@@ -247,7 +247,7 @@
 <!-- VC_EXT -->
 <g id="node19" class="node">
 <title>VC_EXT</title>
-<g id="a_node19"><a xlink:href="https://www.w3.org/TR/vc-data-model/" xlink:title="W3C VC\nVerifiable Credentials Data Model v1.1">
+<g id="a_node19"><a xlink:href="https://www.w3.org/TR/2022/REC-vc-data-model-20220303/" xlink:title="W3C VC\nVerifiable Credentials Data Model v1.1">
 <polygon fill="#e0eeee" stroke="black" points="2566,-135.5 2318,-135.5 2318,-97.5 2566,-97.5 2566,-135.5"/>
 <text text-anchor="middle" x="2442" y="-120.3" font-family="Helvetica,sans-Serif" font-size="14.00">W3C VC</text>
 <text text-anchor="middle" x="2442" y="-105.3" font-family="Helvetica,sans-Serif" font-size="14.00">Verifiable Credentials Data Model v1.1</text>

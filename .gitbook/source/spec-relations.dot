@@ -29,7 +29,7 @@ digraph D {
         RFC7523_EXT [label = "RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants", href = "https://tools.ietf.org/html/rfc7523", fillcolor = azure2, style = filled,]
         RFC7515_EXT [label = "RFC7515\nJSON Web Signature (JWS)", href = "https://tools.ietf.org/html/rfc7515", fillcolor = azure2, style = filled]
         DID_EXT [label = "W3C DID\nDecentralized Identifiers (DIDs) v1.0", href = "https://www.w3.org/TR/did-core/", fillcolor = azure2, style = filled]
-        VC_EXT  [label = "W3C VC\nVerifiable Credentials Data Model v1.1", href = "https://www.w3.org/TR/vc-data-model/", fillcolor = azure2, style = filled]
+        VC_EXT  [label = "W3C VC\nVerifiable Credentials Data Model v1.1", href = "https://www.w3.org/TR/2022/REC-vc-data-model-20220303/", fillcolor = azure2, style = filled]
     }
 
     RFC002 -> RFC001
