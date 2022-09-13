@@ -19,7 +19,6 @@ digraph D {
         RFC013 [label = "RFC013\nVerifiable Credential IRMA Proof",href = "rfc013-vc-irma-proof"];
         RFC014 [label = "RFC014\nNuts Authorization Credential",href = "rfc014-authorization-credential"];
         RFC015 [label = "RFC015\nNode Identity",href = "rfc015-node-identity"];
-        RFC016 [label = "RFC016\nLamport Clock",href = "rfc016-lamport-clock"];
         RFC017 [label = "RFC017\nV2 Network Protocol",href = "rfc017-distributed-network-grpc-v2"];
     }
 
@@ -75,11 +74,8 @@ digraph D {
     RFC015 -> DID_EXT
     RFC015 -> VC_EXT
 
-    RFC016 -> RFC004
-
     RFC017 -> RFC004
     RFC017 -> RFC005
     RFC017 -> RFC008
     RFC017 -> RFC015
-    RFC017 -> RFC016
 }
