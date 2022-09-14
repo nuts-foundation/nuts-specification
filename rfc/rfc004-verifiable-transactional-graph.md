@@ -54,7 +54,7 @@ In addition to required header parameters as specified in RFC7515 the following 
   other algorithms SHALL NOT be used.
 
 * **cty**: MUST contain the type of the transaction content indicating how to interpret it.
-* **crit** MUST contain the **sigt**, **ver**, **prevs** and **pal** headers.
+* **crit** MUST contain the **sigt**, **ver** and **prevs** headers.
 * **crit** MUST also contain the **lc** header if **ver** == 2.
 
 The **jku**, **x5c** and **x5u** header parameters SHOULD NOT be used and MUST be ignored by when processing the transaction.
@@ -75,7 +75,7 @@ The following protected headers MAY be present:
 * **pal**: MUST contain the encrypted addresses of the participants \(used for private transactions, see section 3.8\).
 
 When adding a new transaction, that transaction MUST point (through the **prevs** field) to the transaction with the highest **lc** value.
-If multiple transactions have the highest **lc** value, a single one of them MUST be used.
+If multiple transactions have the highest **lc** value, a single one of them SHOULD be used.
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
