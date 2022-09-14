@@ -66,7 +66,7 @@ In addition to the registered header parameters, the following headers MUST be p
 * **prevs**: \(previous transactions\) MUST contain references \(see section 3.2\) of preceding transactions \(see section 3.4\).
   * When it's a root transaction the field SHALL NOT have any entries.
   * When creating a transaction it MUST only contain transactions that the local node has successfully processed, to avoid publishing unprocessable transactions.
-* The **lc** MUST be a positive number constructed as follows:
+* **lc**: MUST be a positive number constructed as follows:
   * if the transaction has no entries in **prevs**, it's' lc value is **0**.
   * otherwise, the value MUST be equal to `max(prev1, ... prevN)+1`.
 
