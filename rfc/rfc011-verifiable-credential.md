@@ -37,7 +37,7 @@ It's to be expected that multiple sources must be supported that can claim certa
 
 ## 3. W3C Verifiable Credential
 
-To support a variety of claims, the [W3C Verifiable Credential specification](https://www.w3.org/TR/vc-data-model/) is used. Every Nuts specific VC and proof type must follow the W3C specification. If the W3C specification offers options, then the specific VP must specify which option is to be used. All VCs MUST use DIDs as specified in [RFC004](https://github.com/nuts-foundation/nuts-specification/tree/cf30c150a86ad3c717840873af1c9c1a547a4076/rfc/rfc004-distributed-document-format.md) for the issuer.
+To support a variety of claims, the [W3C Verifiable Credential specification](https://www.w3.org/TR/vc-data-model/) is used. Every Nuts specific VC and proof type must follow the W3C specification. If the W3C specification offers options, then the specific VC must specify which option is to be used. All VCs MUST use DIDs as specified in [RFC004](https://github.com/nuts-foundation/nuts-specification/tree/cf30c150a86ad3c717840873af1c9c1a547a4076/rfc/rfc004-distributed-document-format.md) for the issuer.
 
 ### 3.1 Supported proofs
 
@@ -86,7 +86,7 @@ where the `verificationMethod` must be a valid assertionMethod ID from the DID D
 
 ### 3.2 Content-type
 
-All VCs MUST have a content-type equal to `application/vc+json` when published on the network. All issued VCs MUST contain the `https://nuts.nl/credentials/v1` context. VCs MAY NOT specify more than one additional type next to `VerifiableCredential`.
+All VCs MUST have a content-type equal to `application/vc+json` when published on the network. VCs MAY NOT specify more than one additional type next to `VerifiableCredential`.
 
 ### 3.3 Updates
 
