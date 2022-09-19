@@ -45,7 +45,7 @@ To ensure the authenticity and integrity of the VC, a VC document MUST contain a
 
 #### 3.1.1 JsonWebSignature2020
 
-This signature suite is specified by [https://w3c-ccg.github.io/lds-jws2020](https://w3c-ccg.github.io/lds-jws2020). It uses a detached JWS for presenting the signature in the `jws` part of the proof. [RFC7797](https://tools.ietf.org/html/rfc7797) describes how a detached JWS works. The hashing algorithm should be of type `ES256`.
+This signature suite is specified by [https://w3c-ccg.github.io/lds-jws2020](https://w3c-ccg.github.io/lds-jws2020). It uses a detached JWS for presenting the signature in the `jws` part of the proof. [RFC7797](https://tools.ietf.org/html/rfc7797) describes how a detached JWS works. The hashing algorithm MUST be of type `ES256`.
 
 The proof MUST have a `verificationMethod` which contains an assertMethod ID from a resolvable Nuts DID Document of a public key of the `JSONWebKey2020` type. 
 
