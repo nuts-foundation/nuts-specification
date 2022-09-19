@@ -61,7 +61,7 @@ The proof MUST have a `verificationMethod` which contains an assertMethod ID fro
 
 ### 3.2 Content-type
 
-All VCs MUST have a content-type equal to `application/vc+json` when published on the network. All issued VCs MUST contain the `https://nuts.nl/credentials/v1` context. VCs MAY NOT specify more than one additional type next to `VerifiableCredential`.
+All VCs MUST have a content-type equal to `application/vc+json` when published on the network. VCs MAY NOT specify more than one additional type next to `VerifiableCredential`.
 
 ### 3.3 Updates
 
