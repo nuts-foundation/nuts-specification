@@ -39,11 +39,18 @@ It's to be expected that multiple parties can assert certain claims with informa
 
 To support a variety of claims, Nuts uses the Verificable Credential (VC) format as described by [W3C Verifiable Credential specification](https://www.w3.org/TR/vc-data-model/). Every Nuts specific VC and proof type must follow the W3C specification. If the W3C specification offers optional fields then the specification of that credential must specify if and how they should be used. All VCs MUST use DIDs as specified in [RFC004](https://github.com/nuts-foundation/nuts-specification/tree/cf30c150a86ad3c717840873af1c9c1a547a4076/rfc/rfc004-distributed-document-format.md) to reference the issuer.
 
-### 3.1 Supported proofs
+### 3.1 JSON-LD context
+
+Verifiable Credentials are usually represented in [JSON-LD](https://json-ld.org/) format. Every JSON-LD document requires one or more context definitions.
+Every Nuts VC type and proof type SHOULD be specified in the [Nuts JSON-LD context](https://raw.githubusercontent.com/nuts-foundation/nuts-node/master/vcr/assets/assets/contexts/nuts-v2.ldjson).
+Nodes MUST support this context and the [W3C Verifiable Credential context](https://www.w3.org/2018/credentials/v1).
+A node MAY support additional contexts.
+
+### 3.2 Supported proofs
 
 To ensure the authenticity and integrity of the VC, a VC document MUST contain an embedded proof in a `proof` section as described in section 2.2.1 of [Verifiable Credential Data Integrity Specification](https://w3c.github.io/vc-data-integrity/#signatures). The following proof types must be supported by a Nuts node implementation:
 
-#### 3.1.1 JsonWebSignature2020
+#### 3.2.1 JsonWebSignature2020
 
 This signature suite is specified by [https://w3c-ccg.github.io/lds-jws2020](https://w3c-ccg.github.io/lds-jws2020). It uses a detached JWS for presenting the signature in the `jws` part of the proof. [RFC7797](https://tools.ietf.org/html/rfc7797) describes how a detached JWS works. The hashing algorithm MUST be of type `ES256`.
 
@@ -59,28 +66,28 @@ The proof MUST have a `verificationMethod` which contains an assertMethod ID fro
 }
 ```
 
-### 3.2 Content-type
+### 3.3 Content-type
 
 All VCs MUST have a content-type equal to `application/vc+json` when published on the network. VCs MAY NOT specify more than one additional type next to `VerifiableCredential`.
 
-### 3.3 Updates
+### 3.4 Updates
 
 VCs are not updatable, an update can be performed by revoking the current and issuing a new VC.
 
-### 3.4 Identifiers
+### 3.5 Identifiers
 
 VC identifiers MUST be constructed as `DID#id` where `id` is unique for the given issuer.
 
-### 3.5 Active issuer
+### 3.6 Active issuer
 
 A VC MUST have an active issuer at the time of usage. Usage includes using the VC to generate a VP or sending it along in an OAuth flow. If the issuer is deactivated at the time of usage, the VC MUST be regarded as invalid.
 
-### 3.6 Transaction requirements
+### 3.7 Transaction requirements
 
 If a VC issuer is a Nuts DID Subject and the VC is published via a transaction according to [RFC004](rfc004-verifiable-transactional-graph.md) and [RFC005](rfc005-distributed-network-using-grpc.md) then the transaction MUST refer to the correct transaction as specified by [RFC004](rfc004-verifiable-transactional-graph.md#36-signature-verification).
 This ensures the correct ordering of transactions.
 
-### 3.7 VC Example
+### 3.8 VC Example
 
 Below is an example of a credential. **Issuer** and **Subject** are the same in the example. This specification neither requires nor prevents this.
 
