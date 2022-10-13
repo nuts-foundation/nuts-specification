@@ -14,7 +14,7 @@ A Nuts Authorization Credential describes which data an actor may access. It is 
 
 ### Status
 
-This document is currently a draft.
+This document describes a Nuts standards protocol.
 
 ### Copyright Notice
 

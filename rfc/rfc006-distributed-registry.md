@@ -18,7 +18,7 @@ This RFC describes a protocol to build a registry containing information require
 
 ### Status
 
-This document is currently a draft.
+This document describes a Nuts standards protocol.
 
 ### Copyright Notice
 
