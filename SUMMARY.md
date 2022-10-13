@@ -16,7 +16,6 @@
 * [RFC013 Verifiable Credential IRMA Proof Type](rfc/rfc013-vc-irma-proof.md)
 * [RFC014 Nuts Authorization Credential](rfc/rfc014-authorization-credential.md)
 * [RFC015 Node identity](rfc/rfc015-node-identity.md)
-* [RFC016 Transaction Lamport clock](rfc/rfc016-lamport-clock.md)
 * [RFC017 Distributed Network Protocol (v2) using gRPC](rfc/rfc017-distributed-network-grpc-v2.md)
 
 ## templates
