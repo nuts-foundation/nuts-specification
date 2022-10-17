@@ -4,7 +4,7 @@
 | :--- | :--- |
 | Nuts foundation | R.G. Krul |
 | Request for Comments: 004 | Nedap |
-| Updated by: RFC016 | September 2020 |
+|  | September 2020 |
 
 ## Verifiable Transactional Graph
 
@@ -14,7 +14,7 @@ This RFC describes an interoperable, content agnostic data format for distribute
 
 ### Status of document
 
-###### This document is currently a draft.
+This document describes a Nuts standards protocol.
 
 ### Copyright Notice
 
