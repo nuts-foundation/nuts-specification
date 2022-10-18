@@ -351,7 +351,7 @@ In order to validate an UZI signed JWS, the validator MUST perform the following
 * The `alg` value MUST be equal to `RS256`
 * The `signature` MUST be correct and created with the certificate from the `x5c` header field
 * The certificate MUST descend from the known CA tree
-* The certificate MUST have the `repudiation` bit set
+* The certificate MUST have the `nonRepudiation`, a.k.a. `contentCommitment`, bit set to 1.
 * The certificate MUST NOT be revoked
 * If the `typ` is a JWT and the JSON payload contains an `iat`, the certificate chain MUST be valid at the given date
 
