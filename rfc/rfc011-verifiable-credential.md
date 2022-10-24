@@ -42,7 +42,7 @@ To support a variety of claims, Nuts uses the Verificable Credential (VC) format
 ### 3.1 JSON-LD context
 
 Verifiable Credentials are usually represented in [JSON-LD](https://json-ld.org/) format. Every JSON-LD document requires one or more context definitions.
-Every Nuts VC type and proof type SHOULD be specified in the [Nuts JSON-LD context](https://raw.githubusercontent.com/nuts-foundation/nuts-node/master/vcr/assets/assets/contexts/nuts-v2.ldjson).
+Every Nuts VC type and proof type SHOULD be specified in the [Nuts JSON-LD context](https://raw.githubusercontent.com/nuts-foundation/nuts-node/master/vcr/assets/assets/contexts/nuts.ldjson).
 Nodes MUST support this context and the [W3C Verifiable Credential context](https://www.w3.org/2018/credentials/v1).
 A node MAY support additional contexts.
 
