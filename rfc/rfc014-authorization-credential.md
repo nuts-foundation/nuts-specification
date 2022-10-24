@@ -10,7 +10,7 @@
 
 ### Abstract
 
-A Nuts Authorization Credential describes which data an actor may access. It is scoped to a specific combination of custodian, actor and service \(Bolt\). The credential also contains the legal base on which data access may occur. This allows this credential to be used for explicit consent from a patient but also in cases where consent is implied. A patient can consent to a referral to a specialist. This implies that relevant data is accessible to that specialist. This RFC adds the requirement for Bolts to define an access policy. A resource server, hosted by a custodian, will use the policy and the credential to grant access to a specific resource. The credential is currently only usable for FHIR based services.
+A Nuts Authorization Credential describes which data an actor may access. It is scoped to a specific combination of custodian, actor and service \(Bolt\). This allows this credential to be used for explicit consent from a patient but also in cases where consent is implied. A patient can consent to a referral to a specialist. This implies that relevant data is accessible to that specialist. This RFC adds the requirement for Bolts to define an access policy. A resource server, hosted by a custodian, will use the policy and the credential to grant access to a specific resource. The credential is currently only usable for FHIR based services.
 
 ### Status
 
@@ -180,7 +180,7 @@ A Nuts Authorization Credential is always scoped to a specific Bolt.
 
 ## 12. Examples
 
-Example of a Nuts Authorization Credential with explicit consent:
+Example of a Nuts Authorization Credential with a broad set of rights for a single subject:
 
 ```javascript
 {
@@ -195,13 +195,6 @@ Example of a Nuts Authorization Credential with explicit consent:
   "expirationDate": "2010-02-01T19:73:24Z",
   "credentialSubject": {
     "id": "did:nuts:SjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2",
-    "legalBase": {
-      "consentType": "explicit",
-      "evidence": {
-        "path": "pdf/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
-        "type": "application/pdf"
-      } 
-    },
     "purposeOfUse": "zorginzage",
     "subject": "urn:oid:2.16.840.1.113883.2.4.6.3:123456780"
   },
@@ -209,7 +202,7 @@ Example of a Nuts Authorization Credential with explicit consent:
 }
 ```
 
-Example of a Nuts Authorization Credential with implied consent:
+Example of a Nuts Authorization Credential for a specific set of resources:
 
 ```javascript
 {
@@ -224,9 +217,6 @@ Example of a Nuts Authorization Credential with implied consent:
   "expirationDate": "2010-02-01T19:73:24Z",
   "credentialSubject": {
     "id": "did:nuts:SjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2",
-    "legalBase": {
-      "consentType": "implied"
-    },
     "localParameters": {
         "internalID": "skljcnydtlikjdrvy34bn8ts675druytk"    
     },
