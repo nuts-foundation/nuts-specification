@@ -97,7 +97,7 @@ Header `prevs` entries SHOULD only include successfully-processed transactions, 
 
 Transactions MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to previous transactions. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor.
 
-All transactions referred to by `prevs` MUST already be present in respective graph, since failing to do so would corrupt the DAG.
+All transactions referred to by `prevs` MUST already be present in the respective graph, since failing to do so would corrupt the DAG.
 
 As the name implies the DAG MUST be acyclic, transactions that introduce a cycle are invalid MUST be ignored. ANY following transaction that refers to the invalid transaction \(direct or indirect\) MUST be ignored as well.
 
