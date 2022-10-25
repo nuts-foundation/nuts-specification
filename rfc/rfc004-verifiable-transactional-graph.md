@@ -67,9 +67,9 @@ In addition to the registered header parameters, the following headers MUST be p
   * The root transaction SHALL NOT have any **prevs** entries.
   * Non-root transactions MUST include one reference as described in subsection 3.2.1.
   * If a **kid** parameter is present, then **prevs** MUST also contain a reference to a transaction which its content includes the key entry with the respective **kid**.
-* **lc**: MUST be a positive number constructed as follows:
-  * if the transaction has no entries in **prevs**, it's' lc value is **0**.
-  * otherwise, the value MUST be equal to `max(prev1, ... prevN)+1`.
+* **lc**: (Lamport's Logical Clock) MUST be a natural number.
+  * If the transaction has **prevs** entries, then **lc** is 0.
+  * Otherwise, **lc** MUST be the highest **prevs** entry plus 1.
 
 The following protected headers MAY be present:
 
