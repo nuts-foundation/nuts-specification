@@ -16,7 +16,7 @@ todo
 
 ### Status of document
 
-This document is currently a draft.
+This document describes a Nuts standards protocol.
 
 ### Copyright Notice
 

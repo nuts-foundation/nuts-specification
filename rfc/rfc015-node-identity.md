@@ -21,7 +21,7 @@ This RFC links individual DIDs to the service provider DID.
 
 ### Status
 
-This document is currently a draft.
+This document describes a Nuts standards protocol.
 
 ### Copyright Notice
 

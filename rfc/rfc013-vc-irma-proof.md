@@ -14,7 +14,7 @@ This RFC describes requirements for a [Verifiable Credential Proof](https://www.
 
 ### Status
 
-This document is currently a draft.
+This document describes a Nuts standards protocol.
 
 ### Copyright Notice
 

@@ -14,7 +14,7 @@ Creating a network with trusted Verified Credentials is victim of the chicken-an
 
 ### Status
 
-This document is currently a draft.
+This document describes a Nuts standards protocol.
 
 ### Copyright Notice
 

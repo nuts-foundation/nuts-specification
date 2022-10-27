@@ -16,7 +16,7 @@ This RFC specifies a new gRPC-based distributed network protocol. It replaces ve
 
 ### Status of document
 
-This document is currently a draft.
+This document describes a Nuts standards protocol.
 
 ### Copyright Notice
 
