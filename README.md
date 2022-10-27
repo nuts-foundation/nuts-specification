@@ -1,5 +1,7 @@
 # Nuts specifications
 
+gitbook integration test: is this visible?
+
 ## Welcome
 Dear reader. This page contains the Nuts specification documents in the form of a Request For Comments (RFC). These specifications address several subjects which together can be used to build a piece of software which is capable of interacting with the Nuts network.
 
