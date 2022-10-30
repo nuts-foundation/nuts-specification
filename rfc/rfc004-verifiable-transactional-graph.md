@@ -63,9 +63,10 @@ In addition to the registered header parameters, the following headers MUST be p
 
 * **sigt**: \(signing time\) MUST contain the signing time of the transaction as Unix time since epoch encoded as NumericValue.
 * **ver**: MUST contain the format version of the transaction as number. For this version of the format the version MUST be 1 or 2.
-* **prevs**: \(previous transactions\) MUST contain references \(see section 3.2\) of preceding transactions \(see section 3.4\).
-  * When it's a root transaction the field SHALL NOT have any entries.
-  * When creating a transaction it MUST only contain transactions that the local node has successfully processed, to avoid publishing unprocessable transactions.
+* **prevs**: \(previous transactions\) MUST be a string array with *transaction references* as described in subsection 3.2.
+  * The root transaction SHALL NOT have any **prevs** entries.
+  * Non-root transactions MUST include one reference as described in subsection 3.2.1.
+  * If a **kid** parameter is present, then **prevs** MUST also contain a reference to a transaction which its content includes the key entry with the respective **kid**.
 * **lc**: MUST be a positive number constructed as follows:
   * if the transaction has no entries in **prevs**, it's' lc value is **0**.
   * otherwise, the value MUST be equal to `max(prev1, ... prevN)+1`.
@@ -73,9 +74,6 @@ In addition to the registered header parameters, the following headers MUST be p
 The following protected headers MAY be present:
 
 * **pal**: MUST contain the encrypted addresses of the participants \(used for private transactions, see section 3.8\).
-
-When adding a new transaction, that transaction MUST point (through the **prevs** field) to the transaction with the highest **lc** value.
-If multiple transactions have the highest **lc** value, a single one of them SHOULD be used.
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
@@ -85,15 +83,21 @@ There SHOULD be only 1 signature on the JWS. If there are multiple signatures al
 
 ### 3.2 Transaction Reference
 
-The transaction reference uniquely identifies a transaction and is used to refer to it. It MUST be calculated by taking the bytes of the JWS EXACTLY as received and hashing it using SHA-256.
+Transactions are defined by one, and only one JWS (source). Transactions are refered to by the SHA-256 digests of their respective JWS (source).
 
-When serializing a reference to string form it MUST be hexadecimal encoded and SHOULD be lowercase, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
+#### 3.2.1 Previous Transactions
+
+Entries in `prevs` MUST each be a hexadecimal encoding of one transaction refererce (hash digest). Entries SHOULD use lower-case, e.g. `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`. Note that due to the mixed-casing possibility, string matching can **not** be used for equality comparison.
+
+New transaction additions MUST refer [`prevs`] to a transaction with the highest `lc` value present within the applicable graph. When multiple transactions match the highest `lc` value present, then only a single one of them [arbitrary] SHOULD be refered to.
+
+Header `prevs` entries SHOULD only include successfully-processed transactions, this to avoid publishing of unprocessable transactions. Note that “successfully-processed” is relative. Other nodes may have a different outcome.
 
 ### 3.3 Ordering, branching and merging
 
-Transactions MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to previous transactions. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor. A new transaction MUST be appended to the end of the DAG by referring to one of the last transactions of the DAG \(_head_\) by including its reference in the **prevs** field.
+Transactions MUST form a rooted DAG \(Directed Acyclic Graph\) by referring to previous transactions. This MAY be used to establish _casual ordering_, e.g. registration of a care organization as child object of a vendor.
 
-All transactions referred to by `prevs` MUST be present, since failing to do so would corrupt the DAG.
+All transactions referred to by `prevs` MUST already be present in the respective graph, since failing to do so would corrupt the DAG.
 
 As the name implies the DAG MUST be acyclic, transactions that introduce a cycle are invalid MUST be ignored. ANY following transaction that refers to the invalid transaction \(direct or indirect\) MUST be ignored as well.
 
@@ -104,7 +108,7 @@ Since it takes some time for the transactions to be synced to all network peers 
 Branches may remain unmerged. As mentioned at the beginning of this paragraph, a transaction MUST refer to a previous transaction. It doesn't matter on which branch the latest transaction is published.
 **LC** values will overlap between branches.
 
-The first transaction in the DAG is the _root transaction_ and SHALL NOT have any **prevs** entries. There MUST only be one root transaction for a network and subsequent root transactions MUST be ignored.
+The first transaction in the DAG is the _root transaction_. There MUST only be one root transaction for a network. Subsequent root transactions MUST be ignored.
 
 When processing a DAG the system MUST start at the root transaction and work its way to the head\(s\) processing subsequent transactions. When encountering a branch the transactions on all branches from that point up until a merge MUST be processed before processing the merge itself. Since ordering is casual processing order over parallel branches isn't important. When looking at the diagram above, the following processing orders are valid:
 
