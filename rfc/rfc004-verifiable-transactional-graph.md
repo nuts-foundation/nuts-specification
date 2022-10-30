@@ -75,6 +75,9 @@ The following protected headers MAY be present:
 
 * **pal**: MUST contain the encrypted addresses of the participants \(used for private transactions, see section 3.8\).
 
+When adding a new transaction, that transaction MUST point (through the **prevs** field) to the transaction with the highest **lc** value.
+If multiple transactions have the highest **lc** value, a single one of them SHOULD be used.
+
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
 The contents then MAY be stored next to or apart from the transaction itself \(but that's out of scope for this RFC\).
