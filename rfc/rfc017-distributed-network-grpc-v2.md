@@ -265,7 +265,7 @@ The protocol operates by comparing transaction pages, starting at the last page 
 3. When receiving the message, Bob subtracts Alice's IBLT from his own IBLT for the given range (§6.2.3) and does one of the following:
    * If not decodable, go to step 1 and send State message for the previous page.
      * If already comparing the first page, request all transactions of the first page.
-   * If decodable, send a request for missing transactions if there are any.
+   * If decodable and missing transactions, send a request for missing transactions
    * If Alice's highest Lamport Clock value is higher than the LC value sent in 1, then request transactions over a range of Lamport Clock values (§6.2.4)
 
 4. When receiving a request for transactions, Alice responds with a message including the requested transactions.
