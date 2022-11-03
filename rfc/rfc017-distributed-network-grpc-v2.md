@@ -256,7 +256,7 @@ The protocol generally operates as follows:
     * Highest Lamport Clock value over all transactions (LC).
     
 2. When receiving Bob's message, Alice compares the XOR value from Bob with its own (§6.2.2):
-    * When the XOR is the same and the LC value equals Alice's highest Lamport Clock value: no action required.
+    * When the XOR is the same: no action required.
     * When different, send a message containing:
       * LC value sent by Bob
       * the IBLT that includes the Lamport Clock range of 0-LC(Bob)
