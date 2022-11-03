@@ -251,25 +251,25 @@ All messages and values mentioned in this chapter are scoped to a single connect
 
 The protocol generally operates as follows:
 
-1. Alice sends a State message in response to a gossip message when conditions require so (§6.2.1):
+1. Bob sends a State message in response to a gossip message when conditions require so (§6.2.1):
     * XOR of all known transaction references.
     * Highest Lamport Clock value over all transactions (LC).
     
-2. When receiving Alice's message, Bob compares the XOR value from Alice with its own (§6.2.2):
-    * When the XOR is the same and the LC value equals BOB's highest Lamport Clock value: no action required.
+2. When receiving Bob's message, Alice compares the XOR value from Bob with its own (§6.2.2):
+    * When the XOR is the same and the LC value equals Alice's highest Lamport Clock value: no action required.
     * When different, send a message containing:
-      * LC value sent by Alice
-      * the IBLT that includes the Lamport Clock range of 0-LC(Alice)
-      * Bob's highest Lamport Clock value
+      * LC value sent by Bob
+      * the IBLT that includes the Lamport Clock range of 0-LC(Bob)
+      * Alice's highest Lamport Clock value
 
-3. When receiving the message, Alice subtracts Bob's IBLT from her own IBLT for the given range (§6.2.3) and does one of the following:
+3. When receiving the message, Bob subtracts Alice's IBLT from his own IBLT for the given range (§6.2.3) and does one of the following:
    * If not decodable, go to 1 and send values based on the previous page, or request all transactions on lowest page if already comparing the lowest page.
    * If decodable, send a request for missing transactions if there are any.
-   * If Bob's highest Lamport Clock value is higher than the LC value sent in 1, then request transactions over a range of Lamport Clock values (§6.2.4)
+   * If Alice's highest Lamport Clock value is higher than the LC value sent in 1, then request transactions over a range of Lamport Clock values (§6.2.4)
 
-4. When receiving a request for transactions, Bob responds with a message including the requested transactions.
+4. When receiving a request for transactions, Alice responds with a message including the requested transactions.
 
-5. After adding Bob's transactions to the DAG (making sure its cryptographic signature is valid), query the payload if it's missing.
+5. After adding Alice's transactions to the DAG (making sure its cryptographic signature is valid), query the payload if it's missing.
 
 A node MUST make sure to only add transactions of which all previous transactions are present.
 
