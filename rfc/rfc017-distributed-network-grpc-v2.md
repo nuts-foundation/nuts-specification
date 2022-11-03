@@ -249,7 +249,7 @@ Conversion of integers to bytes MUST be in little-endian format.
 All messages and values mentioned in this chapter are scoped to a single connection between two nodes.
 *Alice* and *Bob* are used to represent two nodes connected to each other.
 
-The protocol generally operates as follows:
+The protocol operates by comparing transaction pages, starting at the last page and working back when pages differ.
 
 1. Bob sends a State message in response to a gossip message when conditions require so (§6.2.1):
     * XOR of all known transaction references.
@@ -263,7 +263,8 @@ The protocol generally operates as follows:
       * Alice's highest Lamport Clock value
 
 3. When receiving the message, Bob subtracts Alice's IBLT from his own IBLT for the given range (§6.2.3) and does one of the following:
-   * If not decodable, go to 1 and send values based on the previous page, or request all transactions on lowest page if already comparing the lowest page.
+   * If not decodable, go to step 1 and send State message for the previous page.
+     * If already comparing the first page, request all transactions of the first page.
    * If decodable, send a request for missing transactions if there are any.
    * If Alice's highest Lamport Clock value is higher than the LC value sent in 1, then request transactions over a range of Lamport Clock values (§6.2.4)
 
