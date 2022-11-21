@@ -163,8 +163,8 @@ Although the IRMA protocol is open, the best way to support IRMA as service prov
 Since the goal is to identify the user, the selection of attributes used to sign the login contract is crucial. The combination of attributes must be globally unique and must have been obtained at a high level. The list below shows the selection of attributes required together with their issuer. A complete list of supported attributes can be found on the [IRMA website](https://privacybydesign.foundation/attribute-index/en/).
 
 * `pbdf.gemeente.personalData.initials`
+* `pbdf.gemeente.personalData.prefix`
 * `pbdf.gemeente.personalData.familyname`
-* `pbdf.gemeente.personalData.dateofbirth`
 * `pbdf.gemeente.personalData.digidlevel`
 * `pbdf.sidn-pbdf.email.email`
 
@@ -181,9 +181,9 @@ When the service provider is using the open-source IRMA Go server the following 
 "disclose": [
   [
     [ 
-      "pbdf.gemeente.personalData.initials", 
+      "pbdf.gemeente.personalData.initials",
+      "pbdf.gemeente.personalData.prefix", 
       "pbdf.gemeente.personalData.familyname", 
-      "pbdf.gemeente.personalData.dateofbirth", 
       "pbdf.gemeente.personalData.digidlevel"
     ]
   ],
