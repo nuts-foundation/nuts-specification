@@ -315,8 +315,8 @@ The care organization refers to it:
       "id": "did:nuts:abc#F1Dsgwngfdg3SH6TpDv0Ta1aOE",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauth": "did:nuts:123?type=oauth",
-        "fhir": "did:nuts:123?type=fhir"
+        "oauth": "did:nuts:123/serviceEndpoint?type=oauth",
+        "fhir": "did:nuts:123/serviceEndpoint?type=fhir"
       }
     }
   ]
@@ -396,7 +396,7 @@ The service MAY also refer to another DID's contact information service \(in cas
 
 ```javascript
 {
-  "serviceEndpoint": "did:nuts:some-other-did?type=node-contact-info"
+  "serviceEndpoint": "did:nuts:some-other-did/serviceEndpoint?type=node-contact-info"
 }
 ```
 
@@ -565,8 +565,8 @@ The SaaS provider registers a care organization as:
       "id": "did:nuts:abc#Dsgwngfdg3SH6TpDv0Ta1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauth": "did:nuts:1?type=oauth",
-        "fhir": "did:nuts:1?type=fhir"
+        "oauth": "did:nuts:1/serviceEndpoint?type=oauth",
+        "fhir": "did:nuts:1/serviceEndpoint?type=fhir"
       }
     }
   ]
@@ -629,8 +629,8 @@ The hospital would be able to register a single DID document:
       "id": "did:nuts:abc#Dsgwngfdg3SH6TpDv0Ta1",
       "type": "NutsCompoundService",
       "serviceEndpoint": {
-        "oauth": "did:nuts:1?type=oauth",
-        "fhir": "did:nuts:1?type=fhir"
+        "oauth": "did:nuts:1/serviceEndpoint?type=oauth",
+        "fhir": "did:nuts:1/serviceEndpoint?type=fhir"
       }
     }
   ]
