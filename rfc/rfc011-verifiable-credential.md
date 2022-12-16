@@ -87,7 +87,16 @@ A VC MUST have an active issuer at the time of usage. Usage includes using the V
 If a VC issuer is a Nuts DID Subject and the VC is published via a transaction according to [RFC004](rfc004-verifiable-transactional-graph.md) and [RFC005](rfc005-distributed-network-using-grpc.md) then the transaction MUST refer to the correct transaction as specified by [RFC004](rfc004-verifiable-transactional-graph.md#36-signature-verification).
 This ensures the correct ordering of transactions.
 
-### 3.8 VC Example
+### 3.8 Validation
+
+A VC can only be used when it's valid. The validity of a VC is ultimately up to the verifier to check, but the holder can perform some basic checks before adding a VC to the internal storage.
+Before adding a VC to the node, the node MUST validate that:
+  - all JSON-LD contexts are resolvable.
+  - the embedded proof is correct.
+
+Any additional requirements for a VC MUST be validated by the verifier when the VC is presented.
+
+### 3.9 VC Example
 
 Below is an example of a credential. **Issuer** and **Subject** are the same in the example. This specification neither requires nor prevents this.
 
