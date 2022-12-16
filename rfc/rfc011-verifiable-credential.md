@@ -91,7 +91,7 @@ This ensures the correct ordering of transactions.
 
 A VC can only be used when it's valid. The validity of a VC is ultimately up to the verifier to check, but the holder can perform some basic checks before adding a VC to the internal storage.
 Before adding a VC to the node, the node MUST validate that:
-  - the JSON-LD context is resolvable.
+  - all JSON-LD contexts are resolvable.
   - the embedded proof is correct.
 
 Any additional requirements for a VC MUST be validated by the verifier when the VC is presented.
