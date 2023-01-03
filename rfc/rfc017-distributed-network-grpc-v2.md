@@ -155,7 +155,8 @@ In any other case the node SHOULD send a `State` message, see §6.2.1.
 When a node receives a `TransactionListQuery` or `TransactionRangeQuery` message, it SHOULD respond with a `TransactionList` message.
 This is a response type message, so it MUST include the request's `conversationID`.
 All transactions in the `TransactionList` message MUST be sorted by LC value (lowest first).
-All transactions without a `pal` header MUST be added with their payload. Transactions with a `pal` header are discussed in [§7](rfc017-distributed-network-grpc-v2.md#7-private-transactions).
+All transactions without a `pal` header MUST be added with their payload.
+All transactions with a `pal` header MUST be added without their payload. Transactions with a `pal` header are discussed in [§7](rfc017-distributed-network-grpc-v2.md#7-private-transactions).
 
 A `TransactionList` message MAY be broken up into smaller messages to not exceed the maximum message size, each message should still conform to these rules. 
 Before sending the first message, the node MUST calculate the `totalMessages` it will send and MUST include this in all messages. 
