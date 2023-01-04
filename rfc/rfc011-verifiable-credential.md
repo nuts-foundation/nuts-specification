@@ -183,7 +183,7 @@ Such a revocation transaction has the following requirements:
 
 The transaction MUST be published on the Nuts network. The content-type is `application/vc+json;type=revocation`
 
-The signature is calculated as stated in §3.1.1.
+The signature is calculated as stated in §3.2.1.
 
 ### 4.6 Use cases
 
