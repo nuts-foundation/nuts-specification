@@ -31,7 +31,7 @@ This document describes the general principles of all related Nuts architecture.
 * **Actor / Requester**: The care organization that, in the context of a specific subject, wants to access medical data of a subject available at a custodian.
 * **Custodian / Authorizer**: The care organization that, in the context of a specific subject, is responsible for storing the medical data.
 * **Digital signature**: A cryptographic signature e.g. specified in [RFC5280](https://tools.ietf.org/html/rfc5280) or [RFC7515](https://tools.ietf.org/html/rfc7515). Specifically not the digital version of the wet signature.
-* **Legal Base**: Grounds for medical data exchange given by the subject conforming to national and international legislation. By default, no medical data may be exchanged.
+* **Legal Basis**: Grounds for medical data exchange conforming to national and international legislation.
 * **Node**: A piece of software implementing the Nuts specification.
 * **Service provider**: An organization providing software services which support care organizations in their daily work.
 * **Subject**: The subject of the medical data, usually the patient, client or civilian.
@@ -100,17 +100,17 @@ Therefore: keep data at the source and retrieve on demand. Do not copy without r
 
 #### 4.4.2. Data exchange parties
 
-The GDPR speaks of data processors which play a role in digital information exchange. In the case of Nuts these are the service providers. Service providers have a direct relation with the care organization it’s providing services for. Medical \(and other personal\) data must be exchanged directly between the service providers of care organizations. No third party may play a role in this data exchange since it would be able to deduce information even when all data is encrypted. This also means that there’s no room for a central party that would be involved in data exchange or the exchange/management of any document establishing the legal base for a data exchange \[M6\].
+The GDPR speaks of data processors which play a role in digital information exchange. In the case of Nuts these are the service providers. Service providers have a direct relation with the care organization it’s providing services for. Medical \(and other personal\) data must be exchanged directly between the service providers of care organizations. No third party may play a role in this data exchange since it would be able to deduce information even when all data is encrypted. This also means that there’s no room for a central party that would be involved in data exchange or the exchange/management of any document establishing the legal basis for a data exchange \[M6\].
 
 The result of reducing the involved parties is that the network must be a distributed network \[M4\]. Required information for care organizations, their service providers and available service descriptions must be distributed amongst all network participants. Since this registry data is security related, it must be signed with a digital signature.
 
-#### 4.2.3. Legal base for data exchange
+#### 4.2.3. Legal basis for data exchange
 
-When an actor wants to retrieve data from a custodian regarding a specific subject, it must act on a known legal base \[M2\]. This legal base must be stored at the custodian side since that is also the responsible party for the subject’s data \[M3\]. This legal base will be the base for most of the authorizations of an identity for a particular resource.
+When an actor wants to retrieve data from a custodian regarding a specific subject, it must act on a known legal basis \[M2\]. This legal basis must be stored at the custodian side since that is also the responsible party for the subject’s data \[M3\]. This legal basis will be the base for most of the authorizations of an identity for a particular resource.
 
-The actor must be informed about the existence of the legal base. This notification is a confidential action between the custodian and the actor. An actor must not query custodians for data without having been notified about the legal base. Otherwise the actor might reveal it has a relationship with a certain subject to other parties. That would be a breach of privacy \[M4, M6\].
+The actor must be informed about the existence of the legal basis. This notification is a confidential action between the custodian and the actor. An actor must not query custodians for data without having been notified about the legal basis. Otherwise the actor might reveal it has a relationship with a certain subject to other parties. That would be a breach of privacy \[M4, M6\].
 
-In a perfect world, the legal base should also have a digital signature that can be traced back to the subject. This, with the current available technology, digital skills and level of adoption, might prove a bridge too far. Therefore any such signature will probably be labeled as optional in any architectural sub-document.
+In a perfect world, the legal basis should also have a digital signature that can be traced back to the subject. This, with the current available technology, digital skills and level of adoption, might prove a bridge too far. Therefore any such signature will probably be labeled as optional in any architectural sub-document.
 
 ### 4.3. Trust & Security
 
