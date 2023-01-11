@@ -390,19 +390,9 @@ Countermeasures:
 
 Multiple peers might share the same IP address and certificate in clustering or cloud environments. However, it can also be used by attackers to trying to flood the node with a very large number of connections exhausting resources like file descriptors, connection pools or thread pools.
 
-Countermeasures:
-
-* Nodes SHOULD limit the number of active connections from/to a single IP address \(e.g. 5 connections\).
-* Nodes SHOULD limit the number of active connections from/to a single certificate subject \(e.g. 5 connections\).
-
 #### Threat: Resource Exhaustion through Message Flooding
 
 A peer that floods the node with many messages threatens the stability of a node, and the network in general: resources for processing incoming messages often have hard limits in the form connection pools, thread pools or backlogs.
-
-Countermeasures:
-
-* Nodes SHOULD limit the number of network messages received from a peer to 5 per second.
-* Nodes SHOULD limit the number of network messages send to a peer to 5 per second.
 
 #### Threat: Uncontrolled DAG Growth
 
