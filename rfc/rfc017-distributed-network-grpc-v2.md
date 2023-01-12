@@ -370,6 +370,45 @@ Only the following custom errors may be returned by the local node:
 
 See Appendix A.4 for the reasoning behind not disclosing internal errors.
 
+## 10. Security Considerations
+
+This section describes anticipated attacks vectors and \(non-malicious\) situations that may threaten a node, and how they're mitigated.
+
+When a peer performs an action which is identified as a threat, nodes SHOULD immediately close the connection and inform the peer of the rule that was violated. That way the operator of the peer can identify what should be fixed on their node. However, when offences are repeated the node SHOULD apply "Three Strikes Out"; after 3 violations the node SHOULD deny further connections using the peer's certificate \(identified by certificate issuer DN and serial number\), until the ban is lifted by an operator.
+
+### 10.1 Denial of Service
+
+#### Threat: Memory Exhaustion due to Large Messages
+
+A \(malicious\) peer could exhaust the node's memory with \(many\) large network messages.
+
+Countermeasures:
+
+* Nodes MUST NOT accept incoming network messages larger than 512 kilobytes.
+* Nodes MUST NOT send network messages larger than 512 kilobytes.
+
+#### Threat: Resource Exhaustion through Connection Flooding
+
+Multiple peers might share the same IP address and certificate in clustering or cloud environments. However, it can also be used by attackers to trying to flood the node with a very large number of connections exhausting resources like file descriptors, connection pools or thread pools.
+
+#### Threat: Resource Exhaustion through Message Flooding
+
+A peer that floods the node with many messages threatens the stability of a node, and the network in general: resources for processing incoming messages often have hard limits in the form connection pools, thread pools or backlogs.
+
+#### Threat: Uncontrolled DAG Growth
+
+A single peer or orchestrated group of peers can quickly produce many transactions, quickly growing the DAG. Since history must be retained to verify the DAG integrity in the future, it's desirable to limit the number of faulty transactions or transactions without a meaningful content.
+
+### 10.2 Data Manipulation
+
+#### Threat: Manipulating Transaction Content
+
+By altering a transaction's content when responding to a payload query an attacker can hamper nodes or even steal identities \(e.g. DIDs\).
+
+Countermeasures:
+
+* Nodes MUST verify the payload hash when receiving transaction content as specified by [RFC004 section 3.6 \(Signature and transaction content verification\)](rfc004-verifiable-transactional-graph.md)
+
 ## Appendix A: Design decisions
 
 ### A.1 IBLT parameters
