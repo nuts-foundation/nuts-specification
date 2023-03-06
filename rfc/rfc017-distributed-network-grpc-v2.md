@@ -45,7 +45,15 @@ Connections are subject to the requirements specified by [RFC008 Certificate Str
 
 Other terminology comes from the [Nuts Start Architecture](rfc001-nuts-start-architecture.md#nuts-start-architecture).
 
-## 3. Authenticating node identity
+## 3. Connections
+
+The protocol uses [gRPC](https://grpc.io/) over [HTTP/2](https://tools.ietf.org/html/rfc7540). Since the protocol uses a bi-directional stream over which peers can send and receive messages, there needs to be only a single connection between two peers. For instance, if node _A_ connects to node _B_, _B_ can send messages back to _A_ without having to connect back to node _A_. Nodes SHOULD avoid maintaining duplicate connections to their peers to minimize traffic and system load.
+
+### 3.1. Peer Identification
+
+Since nodes might be operating behind reverse proxies, NAT routers and/or load balancers there needs to be a way to identify a peer that's not dependent on the remote host/port of the connection. Instead, a node MUST generate a globally unique identifier \(the node's _peer ID_\) and provide it as `peerID` in gRPC connection metadata on incoming or outgoing connections. A peer ID MAY be changed every time a node \(re\)starts but MUST be the same for all connections of that node.
+
+### 3.2. Authenticating node identity
 
 Particular exchanges (private transactions) might require authentication of the peer's identity. This identity (a.k.a. node identity) is specified by [RFC015 Node identity](rfc015-node-identity.md).
 If a node has a node DID and wishes to create an authenticated connection, it MUST send the DID as `nodeDID` gRPC header when establishing inbound or outbound connections.
@@ -56,6 +64,21 @@ As specified by RFC015, the node MUST authenticate the peer's node DID as follow
 
 1. Resolve peer's node DID to its corresponding DID document.
 2. Assert that one of the `NutsComm` endpoint's host matches (one of) the `dNSName` SANs in the peer's TLS client certificate.
+
+To prevent bootstrapping issues, a node MAY have an authenticated and an anonymous connection (both sides are unauthenticated) with a peer at the same time. 
+To create an anonymous connection, a peer MUST NOT send its `nodeDID` and MUST ignore any `nodeDID` returned by the peer.  
+
+### 3.3. Service Discovery
+
+TODO, see PR #162
+
+### 3.4. Connection Failure
+When (re)connecting to a peer that sends an error message or is otherwise unresponsive, the node MUST take measures to avoid flooding it since that only adds more load to a system possibly under stress. 
+A back-off strategy SHOULD be used to reconnect at increasing intervals.
+
+### 3.5. Security
+
+Connections MUST be secured using TLS v1.2 \(or higher\) with both client- and server X.509 certificates. Refer to [RFC008 Certificate Structure](rfc008-certificate-structure.md) for requirements regarding these certificates and which Certificate Authorities should be accepted.
 
 ## 4. Conversations
 
