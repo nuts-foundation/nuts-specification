@@ -469,6 +469,6 @@ If all nodes send at best-effort, that will be enough due to the number of nodes
 ## X. Service Discovery
 
 Although a (or multiple) trusted bootstrap node is required for initially connecting to the network, nodes SHOULD discover new peers by searching for `NutsComm` endpoints in the received DID documents.
-This SHOULD be done after the initial DAG sync is completed, to avoid connecting to non-existing endpoints resolved from older versions of DID documents.
-
-TODO: What if a node were to publish a competitor's NutsComm endpoint in its DID document, causing implementations to ignore the competitor's endpoint (because the malicious node's DID document is processed first)
+Only absolute `NutsComm` endpoints SHOULD be discovered. References to other DID documents, IP addresses, and domains as listed in [RFC2606](https://www.ietf.org/archive/id/draft-chapin-rfc2606bis-00.html) SHOULD be ignored.
+Connecting to discovered endpoints SHOULD be delayed until after the initial DAG sync is completed.
+This prevents trying to connect using outdated information, but more importantly, connecting to every endpoint as it is discovered would result in requesting the remainder of the DAG from all newly connected peers.
