@@ -70,7 +70,10 @@ To create an anonymous connection, a peer MUST NOT send its `nodeDID` and MUST i
 
 ### 3.3. Service Discovery
 
-TODO, see PR #162
+Although a (or multiple) trusted bootstrap node is required for initially connecting to the network, nodes SHOULD discover new peers by searching for `NutsComm` endpoints in the received DID documents.
+Only absolute `NutsComm` endpoints SHOULD be discovered. References to other DID documents, IP addresses, and domains as listed in [RFC2606](https://www.ietf.org/archive/id/draft-chapin-rfc2606bis-00.html) SHOULD be ignored.
+Connecting to discovered endpoints SHOULD be delayed until after the initial DAG sync is completed.
+This prevents trying to connect using outdated information, but more importantly, connecting to every endpoint as it is discovered would result in requesting the remainder of the DAG from all newly connected peers.
 
 ### 3.4. Connection Failure
 When (re)connecting to a peer that sends an error message or is otherwise unresponsive, the node MUST take measures to avoid flooding it since that only adds more load to a system possibly under stress. 
