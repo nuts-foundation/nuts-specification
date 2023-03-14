@@ -67,13 +67,16 @@ In addition to the registered header parameters, the following headers MUST be p
   * The root transaction SHALL NOT have any **prevs** entries.
   * Non-root transactions MUST include one reference as described in subsection 3.2.1.
   * If a **kid** parameter is present, then **prevs** MUST also contain a reference to a transaction which its content includes the key entry with the respective **kid**.
-* **lc**: MUST be a positive number constructed as follows:
-  * if the transaction has no entries in **prevs**, it's' lc value is **0**.
-  * otherwise, the value MUST be equal to `max(prev1, ... prevN)+1`.
+* **lc**: (Lamport's Logical Clock) MUST be a natural number.
+  * If the transaction has no **prevs** entries, then **lc** is 0.
+  * Otherwise, **lc** MUST be the highest **prevs** entry plus 1.
 
 The following protected headers MAY be present:
 
 * **pal**: MUST contain the encrypted addresses of the participants \(used for private transactions, see section 3.8\).
+
+When adding a new transaction, that transaction MUST point (through the **prevs** field) to the transaction with the highest **lc** value.
+If multiple transactions have the highest **lc** value, a single one of them SHOULD be used.
 
 To aid performance of validating the DAG the JWS SHALL NOT contain the actual application data of the transaction. Instead, the JWS payload MUST contain the SHA-256 hash of the contents encoded as hexadecimal, lower case string, e.g.: `386b20eeae8120f1cd68c354f7114f43149f5a7448103372995302e3b379632a`
 
