@@ -401,3 +401,81 @@ Beside the mandatory VP fields, the following applies:
 * The `proof.type` field MUST equal `NutsUziSignedContract`.
 * The `proof.proofValue` field MUST contain the JWT in its compact serialization form as described in \[[RFC7515 section 3.1](https://tools.ietf.org/html/rfc7515#section-3.1)\].
 
+### 7.3 NutsEmployeeIdentity
+
+The NutsEmployeeIdentity method is an authentication _means_ which allows a care organisation to assert the identity of the current user. The care organisation uses the information of the current user session to present the user with a statement about its identity and asks the user to confirm this. After confirmation this bundle of information is singed with the care organisation's public key.
+
+This method makes it possible to assert a user identity without the need for a personal authentication means. This puts the care organisation in the role of identity issuer instead of a trusted third party. A use-case (Bolt) can choose to allow this authentication under certain (low risk) circumstances which still require a person to be authenticated in order to comply with the requirements of the [NEN7513](https://www.nen.nl/nen-7513-2018-nl-245399)(Dutch standard for logging in context of medical ICT).
+
+Note: The _means_ is designed in a way that it is interchangeable with (other) means with a higher trust level, (using a personal authentication device). Even it is technically possible, this means MUST NOT be used to perform machine to machine interactions which are not initiated by the current user, e.g. background jobs, fetching data automatically etc. By doing so, a use-case (Bolt) can not update the trust level of a means without braking functionality. This means MUST only be used to claim the identity of actual and identifying natural persons working under the responsibility of the care organisation, and MUST NOT identify e.g. shared accounts, teams, administrators, dummy or test users.
+
+#### 7.3.1 Attributes
+
+In order for the Nuts node to sign the contract 4 things are needed: 
+
+1. The challenge in the form of a login contract 
+2. The issuing care organisation
+3. Personal information about the person (user)
+4. The employee role which contains information about the relationship between the care organisation and the user 
+
+#### 7.3.2 Challenge
+The following object is an example of the parameters which can be used to initialize a signing session:
+
+```json
+{
+  "challenge": "LOGIN CONTRACT",
+  "credential": {
+    "@context":[
+      "http://schema.org/",
+      "https://www.w3.org/2018/credentials/v1"
+    ],
+    "type": ["VerifiableCredential"],
+    "issuer":"did:nuts:123456789",
+    "credentialSubject": {
+      "@type": "EmployeeRole",
+      "identifier": "481",
+      "roleName": "Verpleegkundige niveau 2",
+      "member": {
+        "@type": "Person",
+        "initials": "J",
+        "familyName": "van Dijk",
+        "email": "j.vandijk@example.com"
+      }
+    }
+  }
+}
+```
+
+#### 7.3.3 Response
+
+```json
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "http://schema.org/"
+  ],
+  "type": "VerifiablePresentation",
+  "verifiableCredential": {
+    "issuer": "did:nuts:123456789",
+    "type": "VerifiableCredential",
+    "credentialSubject": {
+      "@type": "EmployeeRole",
+      "identifier": "481",
+      "roleName": "Verpleegkundige niveau 2",
+      "member": {
+        "@type": "Person",
+        "initials": "J",
+        "familyName": "van Dijk",
+        "email": "j.vandijk@example.com"
+      }
+    }
+  },
+  "proof": {
+    "type": "JsonWebSignature2020",
+    "verificationMethod": "did:nuts:123456789#key-1",
+    "challenge": "LOGIN CONTRACT",
+    "created": "2023-04-03T16:34:17.687862+01:00",
+    "jws": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..hKcboC8m6YnZPi6ReJAYs0J0Ztn5nxcx2EavoXdtrkWxmE1JZmImW89_8IIgjvfI8XtGeDlEnGywAuY2u7y9Bw"
+  }
+}
+```
