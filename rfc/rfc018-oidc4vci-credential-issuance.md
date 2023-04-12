@@ -50,6 +50,12 @@ which contains a URL pointing to the client metadata. This indicates the wallet 
 
 The issuer can resolve this URL and retrieve the client metadata to find the credential offer endpoint.
 
+## 5. Credential Issuer Trust
+
+In server-to-server issuance of credentials, there's no user approving the credential offer before requesting it and loading it into the holder's wallet.
+Therefore, the holder must make a decision whether to trust credential issuer.
+Trust SHOULD be derived from the TLS trust anchors referred to by Appendix B.1.
+
 ## Appendix A: Design decisions
 
 ### A.1 No PIN requirement
@@ -60,6 +66,14 @@ quickly scanning the QR code and stealing the resulting credential.
 Since this specification describes server-to-server flows, there is no user involved from who the QR code can be stolen
 or coerced into giving the QR code.
 To prevent eavesdropping, HTTPS MUST be used to protect communication (see Appendix B.1).
+
+### A.2 Trust issuer based on TLS certificates
+
+Since the TLS trust anchors are curated, trusting credential issuers can be derived from trust TLS server certificates:
+Credential issuer identifiers are URLs and thus link to a trusted TLS certificate.
+
+Future, more involved trust models could involve the issuer presenting a credential from which trust is derived.
+For instance, proving that the issuer is a registered legal entity, which can be held accountable.
 
 ## Appendix B: Security Considerations
 
