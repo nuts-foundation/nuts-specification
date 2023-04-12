@@ -21,7 +21,8 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 1. Introduction
 
-This specification describes how to apply OpenID for Verifiable Credential Issuance (OIDC4VCI) to issue Verifiable Credentials (VCs) 
+This specification describes how to apply OpenID for Verifiable Credential Issuance (OIDC4VCI) to issue Verifiable Credentials (VCs)
+to resolvable DIDs in server-to-server flows, without user (human) interaction from the holder.
 
 ## 2. Terminology
 
