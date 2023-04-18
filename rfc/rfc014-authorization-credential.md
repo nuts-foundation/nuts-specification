@@ -57,13 +57,6 @@ The `credentialSubject` field contains the following:
 ```javascript
 {
   "id": "did:nuts:SjkuVHVqZndMVVJwcnUzbjhuZklhODB1M1M0LW9LcWY0WUs5S2",
-  "legalBase": {
-    "consentType": "explicit",
-    "evidence": {
-      "path": "pdf/f2aeec97-fc0d-42bf-8ca7-0548192d4231",
-      "type": "application/pdf"
-    }
-  },
   "localParameters": {...},
   "resources": [
     {
@@ -79,7 +72,7 @@ The `credentialSubject` field contains the following:
 
 ### 3.2.1 Required fields
 
-The `id`, `legalBase` and `purposeOfUse` fields MUST be filled. Within the `legalBase` object, `consentType` MUST either be `implied` or `explicit`. When `explicit`, the `subject` field MUST be filled.
+The `id` and `purposeOfUse` fields MUST be filled.
 
 ### 3.2.2 Scoping
 
@@ -87,9 +80,7 @@ The `id` field MUST contain the DID of the actor. The `subject` field MAY contai
 
 ### 3.2.3 Legal base
 
-The patient consent can be either implied or explicit. When it's implied, this should be reflected by the `purposeOfUse`. A Bolt MUST therefore also describe if it is covered by explicit or implied consent. 
-When `legalBase.evidence` is filled, it MUST contain a value for the `path` and `type` fields. The `path` is a relative path to the service data endpoint and the `type` contains the media type as specified by [RFC6838](https://datatracker.ietf.org/doc/html/rfc6838). 
-The evidence resource MUST be accessible with an access token that was created with the corresponding credential.
+This property has been removed.
 
 ### 3.2.4 Resources
 
