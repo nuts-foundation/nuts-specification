@@ -20,6 +20,8 @@ digraph D {
         RFC014 [label = "RFC014\nNuts Authorization Credential",href = "rfc014-authorization-credential"];
         RFC015 [label = "RFC015\nNode Identity",href = "rfc015-node-identity"];
         RFC017 [label = "RFC017\nV2 Network Protocol",href = "rfc017-distributed-network-grpc-v2"];
+        RFC019 [label = "RFC019\nEmployee Identity Means",href = "rfc019-employee-identity-means"];
+        RFC020 [label = "RFC020\nAuthorization Credential Extension",href = "rfc020-authorization-credential-extension"];
     }
 
     // External RFCs
@@ -78,4 +80,11 @@ digraph D {
     RFC017 -> RFC005
     RFC017 -> RFC008
     RFC017 -> RFC015
+
+	RFC019 -> VC_EXT
+    RFC019 -> RFC002
+    RFC019 -> RFC003
+
+    RFC020 -> RFC014
+    RFC020 -> RFC019
 }
