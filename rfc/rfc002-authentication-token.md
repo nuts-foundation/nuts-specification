@@ -140,8 +140,6 @@ This specification uses the JSON-LD format for VPs since the JWT format isn't us
 
 ## 7. Supported means
 
-Future means will be added when available.
-
 ### 7.1. IRMA
 
 [IRMA](https://irma.app), which stands for “I reveal my attributes” is the name of an app that implements the idemix cryptographic protocol suite. It provides strong authentication as well as privacy-preserving features such as anonymity, the ability to transact without revealing the identity of the transactor, and unlinkability, the ability of a single identity to send multiple transactions without revealing that the transactions were sent by the same identity. More information can be found on the website of the [Privacy by Design foundation](https://privacybydesign.foundation/irma-explanation/).
@@ -400,4 +398,3 @@ Beside the mandatory VP fields, the following applies:
 * The `proof` field MUST be a singular object.
 * The `proof.type` field MUST equal `NutsUziSignedContract`.
 * The `proof.proofValue` field MUST contain the JWT in its compact serialization form as described in \[[RFC7515 section 3.1](https://tools.ietf.org/html/rfc7515#section-3.1)\].
-
