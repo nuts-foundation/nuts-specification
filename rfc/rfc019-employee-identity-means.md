@@ -72,7 +72,7 @@ The user data MAY also contain a `RoleName` that contains the user role within t
 
 ### 3.2 HTML based challenge
 
-After a session has been started by the node, the client application MUST direct the user to a web page that is hosted by the node.
+After a session has been started by the node, the client application MUST present the user a web page that is hosted by the node.
 The node MUST make sure that the web page is linked to the session and that the give user data can not be altered.
 The web page MUST present the user with a contract as stated in [RFC002](./rfc002-authentication-token.md#5-login-contract) and show which user data will be exposed to the resource server. 
 The web page MUST also provide a checkbox that requires the user to acknowledge the challenge and confirm the data to be shared.
