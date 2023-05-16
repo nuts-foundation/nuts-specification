@@ -77,7 +77,7 @@ The node MUST make sure that the web page is linked to the session and that the 
 The web page MUST present the user with a contract as stated in [RFC002](./rfc002-authentication-token.md#5-login-contract) and show which user data will be exposed to the resource server. 
 The web page MUST also provide a checkbox that requires the user to acknowledge the challenge and confirm the data to be shared.
 The web page MUST present a button that allows the user to submit the response to the node via an HTTP POST call.
-The session identifier used to link the user response to the session MUST be a random generated token with a minimum length of 16 bytes.
+The session identifier used to link the user response to the session MUST be a random secure token with a minimum length of 16 bytes.
 The token lifetime MUST NOT be longer than 15 minutes.
 
 ### 3.3 VerifiableCredential
