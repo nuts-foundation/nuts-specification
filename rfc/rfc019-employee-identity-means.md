@@ -183,5 +183,5 @@ The presentation has the following requirements:
 
 The _means_ is designed in a way that it is interchangeable with (other) means with a higher trust level, (using a personal authentication device).
 Even it is technically possible, this means MUST NOT be used to perform machine to machine interactions which are not initiated by the current user, e.g. background jobs, fetching data automatically etc.
-By doing so, a use-case can not update the trust level of a means without braking functionality.
+By doing so, a use-case can not update the trust level of a means without breaking functionality.
 This means MUST only be used to claim the identity of actual and identifying natural persons working under the responsibility of the organisation, and MUST NOT identify e.g. shared accounts, teams, administrators, dummy or test users.
