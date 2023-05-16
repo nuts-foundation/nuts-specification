@@ -10,7 +10,7 @@
 
 ### Abstract
 
-A `assuranceLevel` field is added to the `NutsAuthorizationCredential`. It can be used within the context of a `resource` to indicate the required assurance level of the authentication.
+A `assuranceLevel` field is added to the `NutsAuthorizationCredential`. It can be used inside a `resource` to indicate the required assurance level of the authentication.
 
 This RFC is an addition to the means listed in [RFC014](./rfc014-authorization-credential.md)
 
