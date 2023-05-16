@@ -65,7 +65,7 @@ The authentication flow is as follows:
 In order for the resource server to comply to local legislation the following data MUST be added to the credential:
 
 - **Initials**: The initials of the user.
-- **Familyname**: The family name of the user.
+- **Family name**: The family name of the user.
 - **Identifier**: A unique identifier for the user within the context of the organization. This may be an email address or an employee number. 
 
 The user data MAY also contain a `RoleName` that contains the user role within the organization.
