@@ -4,7 +4,7 @@
 |:--------------------------|:----------------|
 | Nuts foundation           | W.M. Slakhorst  |
 | Request for Comments: 020 | Nedap           |
-| Ammends: RFC014           | April 2023      |
+| Amends: RFC014            | April 2023      |
 
 ## Authorization credential extension
 
