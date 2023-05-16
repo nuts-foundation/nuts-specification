@@ -34,7 +34,7 @@ An additional field in the NutsAuthorizationCredential allows a resource server 
 ## 2. Terminology
 
 * **Authorization server**: The application that evaluates access token requests and creates access tokens.
-* **Resource server**: The application that requires authorized access to its API’s.
+* **Resource server**: The application that requires authorized access to its APIs.
 
 ## 3. AssurenceLevel field
 
