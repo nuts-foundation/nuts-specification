@@ -10,7 +10,7 @@
 
 ### Abstract
 
-A `assuranceLevel` field is added to the `NutsAuthorizationCredential`. It can be used inside a `resource` to indicate the required assurance level of the authentication.
+An `assuranceLevel` field is added to the `NutsAuthorizationCredential`. It can be used inside a `resource` to indicate the required assurance level of the authentication.
 
 This RFC is an addition to the means listed in [RFC014](./rfc014-authorization-credential.md)
 
@@ -41,6 +41,7 @@ An additional field in the NutsAuthorizationCredential allows a resource server 
 The additional field is called `assuranceLevel`. It MUST contain one of the following values: `low`, `substantial` or `high`.
 The field is optional. When present it COULD be used by the authorization server to verify the access token request. 
 The field is located within a resource. A resource is located in the `resources` list.
+If set, `userContext` SHOULD be `true`. If `userContext` is set to `true` and `assuranceLevel` is not set, it defaults to `low`.
 
 The following example shows the location of the new field, other fields have been omitted for brevity:
 

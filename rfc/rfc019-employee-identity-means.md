@@ -13,7 +13,7 @@
 ### Abstract
 
 The NutsEmployeeIdentity method is an authentication _means_ which allows an organisation to assert the identity of the current user.
-The organisation uses the information of the current user session to present the user with a statement about its identity and asks the user to confirm this.
+The organisation uses the information of the active user session to present the user with a statement about its identity and asks the user to confirm this.
 After confirmation this bundle of information is signed with the organisation's private key.
 
 This method makes it possible to assert a user identity without the need for a personal authentication means.
@@ -34,7 +34,7 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 1.  Introduction
 
-Introducing new authentication means in an organizational setting can have quite an impact, even more when mainstream identity providers have not yet adjusted to new standards.
+Introducing new authentication means in an organizational setting can have quite an impact, even more when mainstream identity providers have not yet adjusted to self-sovereign identity.
 New feature or applications require a higher assurance level for authentication than the current situation.
 This introduces an additional authentication step in the process of users. This often happens at a place in the workflow where they don't expect it.
 This is a situation that remain until the main login is adapted to the newer/higher security standard.
@@ -53,11 +53,11 @@ This RFC bridges the gap so the software can already be changed to accept newer 
 The authentication flow is as follows:
 
 - a user requests access to a resource that is hosted at a *resource server* and requires additional authentication.
-- the *client application* starts a session on the *node* with the current user data.
-- the user is directed to a web page where it accepts the given conditions by pressing a button.
+- the *client application* starts a session on the *node* with the user data from the active session.
+- the user is directed to a web page where it accepts/rejects the given conditions by pressing a button.
 - this button sends the confirmation to the *node* for the given session.
 - upon receiving the request, the node will issue a `NutsEmployeeCredential` from and to the organization DID associated with the existing user session.
-- the credential is used to create a VerifiablePresentation.
+- the credential is used to create a NutsSelfSignedPresentation.
 - the VerifiablePresentation is used in the access token request as defined in [RFC003](./rfc003-oauth2-authorization.md#422-payload).
 
 ### 3.1 User data
@@ -74,9 +74,8 @@ The user data MAY also contain a `roleName` that contains the user role within t
 
 After a session has been started by the node, the client application MUST present the user a web page that is hosted by the node.
 The node MUST make sure that the web page is linked to the session and that the give user data can not be altered.
-The web page MUST present the user with a contract as stated in [RFC002](./rfc002-authentication-token.md#5-login-contract) and show which user data will be exposed to the resource server. 
-The web page MUST also provide a checkbox that requires the user to acknowledge the challenge and confirm the data to be shared.
-The web page MUST present a button that allows the user to submit the response to the node via an HTTP POST call.
+The web page MUST present the user with a dialog that explains user data will be exposed to the resource server.
+The web page must clearly indicate how the user can confirm and give consent, and how the user can reject the challenge.
 The session identifier used to link the user response to the session MUST be a random secure token with a minimum length of 16 bytes.
 The token lifetime MUST NOT be longer than 15 minutes.
 
