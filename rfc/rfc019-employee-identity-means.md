@@ -55,7 +55,7 @@ The authentication flow is as follows:
 - a user requests access to a resource that is hosted at a *resource server* and requires additional authentication.
 - the *client application* starts a session on the *node* with the current user data.
 - the user is directed to a web page where it accepts the given conditions by pressing a button.
-- this button initiates a POST request to the *node for the given session.
+- this button sends the confirmation to the *node* for the given session.
 - upon receiving the request, the node will issue a `NutsEmployeeCredential` from and to the organization DID of the current user context.
 - the credential is used to create a VerifiablePresentation.
 - the VerifiablePresentation is used in the access token request as defined in [RFC003](./rfc003-oauth2-authorization.md#422-payload).
