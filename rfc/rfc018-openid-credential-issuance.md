@@ -10,8 +10,8 @@
 ### Abstract
 
 This RFC describes how to use [OpenID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html)
-to issue credentials from a Nuts node, to another Nuts node. It adds security requirements and wallet discovery
-to make it applicable to Nuts.
+to issue credentials from a Nuts node, to another Nuts node. It adds security requirements, wallet discovery and
+server-to-server responses to make it applicable to Nuts.
 
 ### Status of document
 
