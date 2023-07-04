@@ -47,6 +47,17 @@ Issuers MUST support the pre-authorized code flow to issue credentials.
 While OpenID4VCI specifies a PIN to mitigate credential stealing,
 implementations MUST NOT require a PIN in server-to-server flows (see Appendix A.1).
 
+The following from the OpenID4VCI specification does not need to be supported:
+
+- Authorization code flow
+- Credential offers:
+  - with `string` values, referring to a credential's `id` in `credentials_supported`
+  - specified as `credential_offer_uri` parameter
+- Batching
+- Deferred credential requests
+- Credential types other than JSON-LD
+- Requesting an updated credential
+
 ## 3.2 Credential Offer Response
 
 The OpenID4VCI specification does not specify responses for the credential offer.
