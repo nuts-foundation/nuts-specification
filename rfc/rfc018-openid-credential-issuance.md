@@ -66,8 +66,10 @@ a response is useful for the issuer to know whether the credential offer was acc
 
 ### 3.2.1 Credential Offer Success Response
 
-In case the wallet accepted the offer and will try to retrieve the credential, it MUST respond with HTTP status `200 OK`.
-If the wallet has retrieved the credential, it can respond with `status` set to `credential_received`.
+In case the wallet considers the offer valid, it MUST respond with HTTP status `200 OK`.
+This is regardless of whether the wallet will actually revrieve the wallet.
+
+If the wallet decides to retrieve the credential synchronously, it SHOULD respond with `status` set to `credential_received`.
 Below is a non-normative example of such a response:
 
 ```http
