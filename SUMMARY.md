@@ -18,6 +18,8 @@
 * [RFC015 Node identity](rfc/rfc015-node-identity.md)
 * [RFC017 Distributed Network Protocol (v2) using gRPC](rfc/rfc017-distributed-network-grpc-v2.md)
 * [RFC018 Verifiable Credential Issuance using OpenID](rfc/rfc018-openid-credential-issuance.md)
+* [RFC019 Employee Identity Authentication Means](rfc/rfc019-employee-identity-means.md)
+* [RFC020 Authorization credential extension](rfc/rfc020-authorization-credential-extension.md)
 
 ## templates
 
