@@ -49,7 +49,7 @@ Conforming implementations MUST support the following features:
 - Credential offer:
   - with `credential_offer` parameter
   - with `string` values, referring to a credential's `id` in `credentials_supported`
-- Credentials in JSON-LD format
+- Credentials in JSON-LD (`ldp_vc`) format
 - Issuer- and wallet metadata
 
 ## 3.2 Credential Offer Response
@@ -61,9 +61,9 @@ a response is useful for the issuer to know whether the credential offer was acc
 ### 3.2.1 Credential Offer Success Response
 
 In case the wallet considers the offer valid, it MUST respond with HTTP status `200 OK`.
-This is regardless of whether the wallet will actually revrieve the wallet.
+This is regardless of whether the wallet will actually retrieve the wallet.
 
-If the wallet decides to retrieve the credential synchronously, it SHOULD respond with `status` set to `credential_received`.
+If the wallet immediately retrieved the credential, it SHOULD respond with `status` set to `credential_received`.
 Below is a non-normative example of such a response:
 
 ```http
@@ -137,4 +137,4 @@ Since the TLS trust anchors are curated, trusting credential issuers can be deri
 Credential issuer identifiers are URLs and thus link to a trusted TLS certificate.
 
 Future, more involved trust models could involve the issuer presenting a credential from which trust is derived.
-For instance, proving that the issuer is a registered legal entity, which can be held accountable.
+For instance, proving that the issuer is a registered legal entity.
