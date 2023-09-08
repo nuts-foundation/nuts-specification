@@ -36,7 +36,7 @@ An additional field in the NutsAuthorizationCredential allows a resource server 
 * **Authorization server**: The application that evaluates access token requests and creates access tokens.
 * **Resource server**: The application that requires authorized access to its APIs.
 
-## 3. AssurenceLevel field
+## 3. AssuranceLevel field
 
 The additional field is called `assuranceLevel`. It MUST contain one of the following values: `low`, `substantial` or `high`.
 The field is optional. When present it COULD be used by the authorization server to verify the access token request. 
