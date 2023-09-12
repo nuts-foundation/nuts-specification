@@ -82,7 +82,7 @@ The authorization server determines the encoding by adding the correct parameter
 The following parameter MUST be added:
 
 * `vp_formats`: An object defining the formats and proof types of Verifiable Presentations and Verifiable Credentials that a Verifier supports as stated by §9 of the OpenID for Verifiable Presentations specification [OIDC4VP].
-  (ldp_vp or jwt_vp_json)
+  (ldp_vp or jwt_vp)
 
 When processing the assertion the authorization server can detect the used format by checking the initial character.
 A JSON encoded assertion starts with a '{' character or '%7B' when urlencoded.
