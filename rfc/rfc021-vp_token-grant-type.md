@@ -50,7 +50,7 @@ This section defines specific parameters and treatments of those parameters for 
 
 To use a VP as an authorization grant, the client uses an access token request as defined in Section 4 of the OAuth Assertion Framework [RFC7521] with the following specific parameter values and encodings.
 
-The value of the "grant_type" is "urn:ietf:params:oauth:grant-type:vp_token-bearer".
+The value of the "grant_type" is "vp_token-bearer".
 
 The value of the "assertion" parameter MUST contain a Verifiable Presentation. The Verifiable Presentation MUST be encoded as either:
 
@@ -82,7 +82,6 @@ The authorization server determines the encoding by adding the correct parameter
 The following parameter MUST be added:
 
 * `vp_formats`: An object defining the formats and proof types of Verifiable Presentations and Verifiable Credentials that a Verifier supports as stated by §9 of the OpenID for Verifiable Presentations specification [OIDC4VP].
-  (ldp_vp or jwt_vp)
 
 When processing the assertion the authorization server can detect the used format by checking the initial character.
 A JSON encoded assertion starts with a '{' character or '%7B' when urlencoded.
@@ -108,9 +107,9 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 1. The assertion MUST be a valid JWT according to §6.3.1 of the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 2. The `vp` field of the JWT MUST be valid according to §4.10 the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 3. The `nonce` of the JWT MUST be a string that is unique for each request.
-4. The `kid` field MUST be a DID URL.
-5. The `iss` field MUST be a Decentralized Identifier [DID] and MUST correspond to the `kid`.
-6. The `sub` field MUST match the `credentialSubject.ID` field from all the Verifiable Credentials that are used to request the access token.
+4. The `iss` field MUST be a Decentralized Identifier [DID].
+5. The `kid` field MUST be a DID URL and MUST resolve to a verificationMethod in the DID Document. The DID part of the DID URL MUST match the `iss` field.
+6. The `sub` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
 7. The `aud` field MUST be a DID under control of the Authorization Server.
 
 ### 4.3 JSON requirements
@@ -119,10 +118,9 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 2. The proof of the VP MUST be a valid [JSONWebSignature2020] object.
 3. The `challenge` field of the JSON object MUST be a string that is unique for each request.
 4. The `domain` field of the JSON object MUST be a DID under control of the Authorization Server.
-5. The `issuer` field of the JSON object MUST be a Decentralized Identifier [DID].
-6. The `verificationMethod` field of the Proof MUST be a DID URL and correspond to the `issuer` field.
-7. The `holder` field if present MUST match the `credentialSubject.ID` field from all the Verifiable Credentials that are used to request the access token.
-8. If the `holder` field is not present then the `issuer` field MUST match the `credentialSubject.ID` field from all the Verifiable Credentials that are used to request the access token.
+5. The `verificationMethod` field of the Proof MUST be a DID URL.
+6. The `holder` field if present MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
+7. The `verificationMethod` field of the proof MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
 
 ## 5. Presentation Definition endpoint
 
