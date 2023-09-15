@@ -153,7 +153,7 @@ The authorization server MAY reduce storage requirements by only storing the non
 * [RFC7521] D. Campbell, Ed., B. Zaninovich, Ed., "Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521, May 2015, <https://www.rfc-editor.org/info/rfc7521>.
 * [JWT] M. Jones, J. Bradley, N. Sakimura, "JSON Web Token (JWT)", RFC 7519, May 2015, <https://www.rfc-editor.org/info/rfc7519>.
 * [VC-DATA-MODEL] M. Sporny, D. Longley, D. Chadwick, "Verifiable Credentials Data Model 1.1", W3C Recommendation, 3 March 2022, <https://www.w3.org/TR/vc-data-model/>.
-* [PE] D. Buchner, B. Zundel, M. Riedel, K.H. Duffy, "Presentation Exchange 2.X.X", 12 September 2023, <https://identity.foundation/presentation-exchange>.
+* [PE] D. Buchner, B. Zundel, M. Riedel, K.H. Duffy, "Presentation Exchange 2.0.0", 12 September 2023, <https://identity.foundation/presentation-exchange/spec/v2.0.0/>.
 * [JSONWebSignature2020] O. Steel, M. Prorock, C.E. Lehner, "JSON Web Signature 2020", W3C Community Group Report, 21 July 2022, <https://w3c-ccg.github.io/lds-jws2020/>.
 * [OIDC4VP] O. Terbu, T. Lodderstedt, K. Yasuda, T. Looker, "OpenID for Verifiable Presentations Draft 18", OpenID connect working group, 21 April 2023, <https://openid.net/specs/openid-4-verifiable-presentations-1_0.html>.
 * [RFC8414] M. Jones, N. Sakimura, J. Bradley, "OAuth 2.0 Authorization Server Metadata", RFC 8414, June 2018, <https://www.rfc-editor.org/info/rfc8414>.
