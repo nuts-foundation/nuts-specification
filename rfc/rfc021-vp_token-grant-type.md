@@ -100,7 +100,7 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 3. The Presentation Submission MUST be an answer to the Presentation Definition that corresponds with the requested scope. 
    How an authorization server determines the Presentation Definition based on scope is out of scope of this specification.
    However, a request to the Presentation Definition endpoint MUST result to the same Presentation Definition as the Presentation Definition that is used to validate the VP.
-4. The Verifiable Presentation MUST be not be valid for more than 15 minutes.
+4. The Verifiable Presentation validity determines the upper bound of access token validity.
 5. A clock skew of no more than 5 seconds MAY be applied when validating the Verifiable Presentation.
 
 ### 4.2 JWT requirements
