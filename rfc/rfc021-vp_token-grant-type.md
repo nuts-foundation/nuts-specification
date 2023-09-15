@@ -25,19 +25,20 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 1.  Introduction
 
-A Verifiable Presentation [VP] is an encoding that enables identity and security  information base  on Verifiable Credentials to be shared  across security domains. 
-A security token is generally issued by an Identity Provider and consumed by a Relying Party that relies on its content to identify  the token's subject for security-related purposes. 
-In the case of  Verifiable Credentials, the identity provider role is fulfilled by  the holder using a wallet. The relying party role equals the verifier  role as defined by the Verifiable Credentials specification.
+A Verifiable Presentation [VP] is an encoding that enables identity and security information base on Verifiable Credentials to be shared across security domains. 
+A security token is generally issued by an Identity Provider and consumed by a Relying Party that relies on its content to identify the token's subject for security-related purposes. 
+In the case of Verifiable Credentials, the assertion is self-issued by the holder using a wallet. 
+The relying party role equals the verifier role as defined by the Verifiable Credentials specification.
 
 The OAuth 2.0 Authorization Framework [RFC6749] provides a method for making authenticated HTTP requests to a resource using an access token. 
 Access tokens are issued to third-party clients by an authorization server (AS) with the (sometimes implicit) approval of the resource owner. 
 In OAuth, an authorization grant is an abstract term used to describe intermediate credentials that represent the resource owner authorization. 
-An authorization grant is used by the client to obtain an access token.  Several authorization grant types are defined to support a wide range of client types and user experiences. 
+An authorization grant is used by the client to obtain an access token. Several authorization grant types are defined to support a wide range of client types and user experiences. 
 OAuth also allows for the definition of new extension grant types to support additional clients or to provide a bridge between OAuth and other trust frameworks. 
 Finally, OAuth allows the definition of additional authentication mechanisms to be used by clients when interacting with the authorization server.
 
 "Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants" [RFC7521] is an abstract extension to OAuth 2.0 that provides a general framework for the use of assertions (a.k.a. security tokens) as client credentials and/or authorization grants with OAuth 2.0. 
-This specification profiles the OAuth Assertion Framework [RFC7521] to define an extension grant type that uses a Verifiable Presentation Bearer Token to request an OAuth 2.0 access token.
+This specification profiles [RFC7521] to define an extension grant type that uses a self-issued Verifiable Presentation Bearer Token to request an OAuth 2.0 access token.
 
 ## 2. Terminology
 
@@ -69,7 +70,7 @@ The following example demonstrates an access token request with a VP as an autho
      Host: as.example.com
      Content-Type: application/x-www-form-urlencoded
 
-     grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Avp_token-bearer
+     grant_type=vp_token-bearer
      &assertion=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
      eyJpc3Mi[...omitted for brevity...].
      J9l-ZhwP[...omitted for brevity...]
