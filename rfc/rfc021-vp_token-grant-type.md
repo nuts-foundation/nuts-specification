@@ -10,8 +10,7 @@
 
 ### Abstract
 
-This specification defines the use of a Verifiable Presentation Bearer
-Token as a means for requesting an OAuth 2.0 access token.
+This specification defines the use of a Verifiable Presentation Bearer Token as a means for requesting an OAuth 2.0 access token.
 
 ### Status of document
 
@@ -25,20 +24,32 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 1.  Introduction
 
-A Verifiable Presentation [VP] is an encoding that enables identity and security information base on Verifiable Credentials to be shared across security domains. 
-A security token is generally issued by an Identity Provider and consumed by a Relying Party that relies on its content to identify the token's subject for security-related purposes. 
+A Verifiable Presentation [VP] is an encoding that enables identity and security information based on Verifiable Credentials to be shared across security domains. 
+A security token is generally issued by an Authorization Server and consumed by a Relying Party that relies on its content to make authorization decisions. 
 In the case of Verifiable Credentials, the assertion is self-issued by the holder using a wallet. 
-The relying party role equals the verifier role as defined by the Verifiable Credentials specification.
+The Relying Party role equals the verifier role as defined by the Verifiable Credentials specification.
 
 The OAuth 2.0 Authorization Framework [RFC6749] provides a method for making authenticated HTTP requests to a resource using an access token. 
-Access tokens are issued to third-party clients by an authorization server (AS) with the (sometimes implicit) approval of the resource owner. 
+Access tokens are issued to third-party clients by an Authorization Server (AS) with the (sometimes implicit) approval of the resource owner. 
 In OAuth, an authorization grant is an abstract term used to describe intermediate credentials that represent the resource owner authorization. 
 An authorization grant is used by the client to obtain an access token. Several authorization grant types are defined to support a wide range of client types and user experiences. 
 OAuth also allows for the definition of new extension grant types to support additional clients or to provide a bridge between OAuth and other trust frameworks. 
-Finally, OAuth allows the definition of additional authentication mechanisms to be used by clients when interacting with the authorization server.
+Finally, OAuth allows the definition of additional authentication mechanisms to be used by clients when interacting with the Authorization Server.
 
 "Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants" [RFC7521] is an abstract extension to OAuth 2.0 that provides a general framework for the use of assertions (a.k.a. security tokens) as client credentials and/or authorization grants with OAuth 2.0. 
 This specification profiles [RFC7521] to define an extension grant type that uses a self-issued Verifiable Presentation Bearer Token to request an OAuth 2.0 access token.
+
+A Verifiable Presentation is created by a holder and can be used to prove possession of a Verifiable Credential.
+The holder will need to know which Verifiable Credentials are required to access a resource.
+The Authorization Server provides this information in the form of a Presentation Definition [PE].
+The complete flow consists of the following steps:
+
+1. The client requests a Presentation Definition from the Authorization Server.
+2. The client creates a Verifiable Presentation that matches the Presentation Definition.
+3. The client requests an access token from the Authorization Server using the Verifiable Presentation as an authorization grant.
+4. The Authorization Server validates the Verifiable Presentation and Presentation Definition.
+5. The Authorization Server issues an access token.
+6. The client uses the access token to access a resource.
 
 ## 2. Terminology
 
@@ -59,7 +70,7 @@ The value of the "assertion" parameter MUST contain a Verifiable Presentation. T
 * The Verifiable Presentation is encoded as JWT according to section §6.3.1 of the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 
 The "scope" parameter MUST be used, as defined in the OAuth Assertion Framework [RFC7521], to indicate the requested scope. 
-The scope parameter determines the set of credentials the authorization server expects.
+The scope parameter determines the set of credentials the Authorization Server expects.
 
 The "presentation_submission" parameter MUST be used, as defined in Presentation Exchange [PE], to indicate how the VP matches the requested Verifiable Credentials.
 The Presentation Submission MUST be encoded using the application/x-www-form-urlencoded content type.
@@ -79,46 +90,45 @@ The following example demonstrates an access token request with a VP as an autho
 
 ## 3.1 Assertion Encoding
 
-As stated in the previous section, the assertion parameter can either be encoded in JSON or JWT.
-The authorization server determines the encoding by adding the correct parameters to the authorization server metadata [RFC8414]].
+The assertion parameter can either be encoded in JSON or JWT.
+The Authorization Server determines the encoding by adding the correct parameters to the Authorization Server metadata [RFC8414]].
 The following parameter MUST be added:
 
 * `vp_formats`: An object defining the formats and proof types of Verifiable Presentations and Verifiable Credentials that a Verifier supports as stated by §9 of the OpenID for Verifiable Presentations specification [OIDC4VP].
 
-When processing the assertion the authorization server can detect the used format by checking the initial character.
+When processing the assertion the Authorization Server can detect the used format by checking the initial character.
 A JSON encoded assertion starts with a '{' character or '%7B' when urlencoded.
 
-## 4. Processing requirements
+## 4. JWT Format and Processing Requirements
 
-In order to issue an access token response as described in OAuth 2.0 [RFC6749], the authorization server MUST validate the VP.
+In order to issue an access token response as described in OAuth 2.0 [RFC6749], the Authorization Server MUST validate the VP.
 The validation requirements are split into three paragraphs. The first paragraph describes the requirements that apply to all VP's.
 The second paragraph describes the requirements that apply to JWT encoded VP's. The third paragraph describes the requirements that apply to JSON encoded VP's.
 
-### 4.1 General requirements
+### 4.1 General processing requirements
 
-1. The authorization server MUST validate the Presentation Submission according to section 6 of the Presentation Exchange [PE] specification.
-2. The authorization server MUST validate the VP according to section 6.1 of the Presentation Exchange [PE] specification.
-3. The Presentation Submission MUST be an answer to the Presentation Definition that corresponds with the requested scope. 
-   How an authorization server determines the Presentation Definition based on scope is out of scope of this specification.
-   However, a request to the Presentation Definition endpoint MUST result to the same Presentation Definition as the Presentation Definition that is used to validate the VP.
+1. The Authorization Server MUST validate the Presentation Submission according to section 6 of the Presentation Exchange [PE] specification.
+2. The Authorization Server MUST validate the VP and Presentation Submission according to section 6.1 of the Presentation Exchange [PE] specification.
+3. The Presentation Submission MUST be an answer to the Presentation Definition that corresponds with the requested scope.
+   How an Authorization Server determines the Presentation Definition based on scope is out of scope of this specification.
 4. The Verifiable Presentation validity determines the upper bound of access token validity.
 5. A clock skew of no more than 5 seconds MAY be applied when validating the Verifiable Presentation.
 
-### 4.2 JWT requirements
+### 4.2 JWT format requirements
 
 1. The assertion MUST be a valid JWT according to §6.3.1 of the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 2. The `vp` field of the JWT MUST be valid according to §4.10 the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
-3. The `nonce` of the JWT MUST be a string that is unique for each request.
+3. The `nonce` of the JWT MUST be a string that is unique for each access token request.
 4. The `iss` field MUST be a Decentralized Identifier [DID].
 5. The `kid` field MUST be a DID URL and MUST resolve to a verificationMethod in the DID Document. The DID part of the DID URL MUST match the `iss` field.
 6. The `sub` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
-7. The `aud` field MUST be a DID under control of the Authorization Server.
+7. The `aud` field MUST match the DID of the Authorization Server.
 
-### 4.3 JSON requirements
+### 4.3 JSON format requirements
 
 1. The assertion MUST be a valid JSON object according to §4.10 the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 2. The proof of the VP MUST be a valid [JSONWebSignature2020] object.
-3. The `challenge` field of the JSON object MUST be a string that is unique for each request.
+3. The `challenge` field of the JSON object MUST be a string that is unique for each token request.
 4. The `domain` field of the JSON object MUST be a DID under control of the Authorization Server.
 5. The `verificationMethod` field of the Proof MUST be a DID URL.
 6. The `holder` field if present MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
@@ -126,29 +136,46 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 
 ## 5. Presentation Definition endpoint
 
-In order for a client to know which Presentation Definition [PE] to use, the authorization server MUST provide a Presentation Definition endpoint.
-The Presentation Definition endpoint MUST be registered as a `presentation_definition_endpoint` in the authorization server metadata [RFC8414].
+In order for a client to know which Presentation Definition [PE] to use, the Authorization Server MUST provide a Presentation Definition endpoint.
+The Presentation Definition endpoint MUST be registered as a `presentation_definition_endpoint` in the Authorization Server metadata [RFC8414].
 The Presentation Definition endpoint MUST return a Presentation Definition that corresponds with the requested scope.
+The endpoint has a single query parameter `scope` that contains the requested scope. The parameter may contain multiple values.
+
+The following example shows a request to the Presentation Definition endpoint:
+
+    GET /presentation_definition?scope=a&scope=b HTTP/1.1
+    Host: as.example.com
 
 ## 6. Access Token Introspection
 
-The authorization server MUST support the access token introspection endpoint as defined in OAuth 2.0 [RFC7662].
-The introspection endpoint MUST return the following fields:
+The Authorization Server MAY support an access token introspection endpoint as defined in OAuth 2.0 [RFC7662].
+The introspection endpoint SHOULD map the fields as follows:
 
-* `iss`: The issuer of the access token.
-* `sub`: The subject of the access token.
+* `iss`: The issuer of the access token (DID).
+* `sub`: The subject of the access token (DID).
 * `exp`: The expiration time of the access token.
 * `iat`: The time the access token was issued.
 * `scope`: The granted scope.
-* `vcs`: The Verifiable Credentials that were used to request the access token.
+* `vcs`: The Verifiable Credentials that were used to request the access token using the same encoding as used in the access token request.
 
 ## 7. Security Considerations
 
 The nonce/challenge (nonce) is used to prevent replay attacks. The nonce is a random string that is generated by the client.
-The nonce is included in the signed data. The authorization server MUST reject any request that uses a nonce that has been used before.
-The authorization server MAY reduce storage requirements by only storing the nonce for the lifetime of the Verifiable Presentation.
+The nonce is included in the signed data. The Authorization Server MUST reject any request that uses a nonce that has been used before.
+The Authorization Server MAY reduce storage requirements by only storing the nonce for the lifetime of the Verifiable Presentation.
 
-## 8. References
+All endpoints MUST be protected by TLS, version 1.2 as a minimum.
+
+## 8. Privacy considerations
+
+This RFC is meant to be used in a machine to machine context.
+If any personal data may be accessed with an `vp_token-bearer` access token, it's recommended to reevaluate and use the OpenID4VP specification and include user authorization.
+
+Extra care should be taken when designing the scope to Presentation Definition mapping.
+Scopes on the personal data level should not result in different Presentation Definitions. 
+This could be abused to determine if certain data is available at a Resource Server.
+
+## 9. References
 
 * [RFC6749] D. Hardt, "The OAuth 2.0 Authorization Framework", RFC 6749, October 2012, <https://www.rfc-editor.org/info/rfc6749>.
 * [RFC7521] D. Campbell, Ed., B. Zaninovich, Ed., "Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521, May 2015, <https://www.rfc-editor.org/info/rfc7521>.
