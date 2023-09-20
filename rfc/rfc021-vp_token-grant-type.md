@@ -75,6 +75,7 @@ The following example demonstrates an access token request with a VP as an autho
      eyJpc3Mi[...omitted for brevity...].
      J9l-ZhwP[...omitted for brevity...]
      &presentation_submission= {..}
+     &scope=a_scope
 
 ## 3.1 Assertion Encoding
 
