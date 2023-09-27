@@ -25,9 +25,8 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 ## 1.  Introduction
 
 A Verifiable Presentation [VP] is an encoding that enables identity and security information based on Verifiable Credentials to be shared across security domains. 
-A security token is generally issued by an Authorization Server and consumed by a Relying Party that relies on its content to make authorization decisions. 
-In the case of Verifiable Credentials, the assertion is self-issued by the holder using a wallet. 
-The Relying Party role equals the verifier role as defined by the Verifiable Credentials specification.
+A security token is generally issued by an Authorization Server and consumed by a client that relies on its content to make authorization decisions. 
+In the case of Verifiable Credentials, the presentation is self-signed by the holder using a wallet.
 
 The OAuth 2.0 Authorization Framework [RFC6749] provides a method for making authenticated HTTP requests to a resource using an access token. 
 Access tokens are issued to third-party clients by an Authorization Server (AS) with the (sometimes implicit) approval of the resource owner. 
@@ -44,10 +43,10 @@ The holder will need to know which Verifiable Credentials are required to access
 The Authorization Server provides this information in the form of a Presentation Definition [PE].
 The complete flow consists of the following steps:
 
-1. The client requests a Presentation Definition from the Authorization Server.
-2. The client creates a Verifiable Presentation that matches the Presentation Definition.
+1. The client requests a Presentation Definition from the Authorization Server based on a scope.
+2. The client creates a Verifiable Presentation and a Presentation Submission that describes how the VP fulfills the requirements of the Presentation Definition.
 3. The client requests an access token from the Authorization Server using the Verifiable Presentation as an authorization grant.
-4. The Authorization Server validates the Verifiable Presentation and Presentation Definition.
+4. The Authorization Server validates the Verifiable Presentation and Presentation Submission.
 5. The Authorization Server issues an access token.
 6. The client uses the access token to access a resource.
 
@@ -69,7 +68,7 @@ The value of the "assertion" parameter MUST contain a Verifiable Presentation. T
 * The Verifiable Presentation is encoded as JSON using the application/x-www-form-urlencoded content type.
 * The Verifiable Presentation is encoded as JWT according to section §6.3.1 of the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 
-The "scope" parameter MUST be used, as defined in the OAuth Assertion Framework [RFC7521], to indicate the requested scope. 
+The "scope" parameter MUST be used, as defined in the OAuth Assertion Framework [RFC6749], to indicate the requested scope. 
 The scope parameter determines the set of credentials the Authorization Server expects.
 
 The "presentation_submission" parameter MUST be used, as defined in Presentation Exchange [PE], to indicate how the VP matches the requested Verifiable Credentials.
@@ -120,7 +119,7 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 2. The `vp` field of the JWT MUST be valid according to §4.10 the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 3. The `nonce` of the JWT MUST be a string that is unique for each access token request.
 4. The `iss` field MUST be a Decentralized Identifier [DID].
-5. The `kid` field MUST be a DID URL and MUST resolve to a verificationMethod in the DID Document. The DID part of the DID URL MUST match the `iss` field.
+5. The `kid` header MUST be a DID URL and MUST resolve to a verificationMethod in the DID Document. The DID part of the DID URL MUST match the `iss` field.
 6. The `sub` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
 7. The `aud` field MUST match the DID of the Authorization Server.
 
