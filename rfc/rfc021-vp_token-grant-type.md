@@ -72,7 +72,7 @@ The "scope" parameter MUST be used, as defined in the OAuth Assertion Framework 
 The scope parameter determines the set of credentials the Authorization Server expects.
 
 The "presentation_submission" parameter MUST be used, as defined in Presentation Exchange [PE], to indicate how the VP matches the requested Verifiable Credentials.
-The Presentation Submission MUST be encoded using the application/x-www-form-urlencoded content type.
+The Presentation Submission MUST be in JSON format, URL encoded.
 
 The following example demonstrates an access token request with a VP as an authorization grant (with extra line breaks for display purposes only):
 
