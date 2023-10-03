@@ -122,6 +122,10 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 5. The `kid` header MUST be a DID URL and MUST resolve to a verificationMethod in the DID Document. The DID part of the DID URL MUST match the `iss` field.
 6. The `sub` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
 7. The `aud` field MUST match the DID of the Authorization Server.
+8. The `iat` field MUST be present and contain a valid timestamp. It MUST be before the current time.
+9. The `exp` field MUST be present and contain a valid timestamp. It MUST be after the current time.
+10. The difference between the `exp` and `iat` fields MUST be equal or less than 5 seconds.
+11. The `jti` field MUST be present and contain a string that is unique for each access token request.
 
 ### 4.3 JSON format requirements
 
@@ -132,20 +136,58 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 5. The `verificationMethod` field of the Proof MUST be a DID URL.
 6. The `holder` field if present MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
 7. The `verificationMethod` field of the proof MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
+8. The `created` field of the proof MUST be present and contain a valid timestamp. It MUST be before the current time.
+9. The `expires` field of the proof MUST be present and contain a valid timestamp. It MUST be after the current time.
+10. The difference between the `expires` and `created` fields MUST be equal or less than 5 seconds.
+
+### 4.4 Preventing Token Replay
+
+The Authorization Server MUST reject any request that uses the unique value (`jti` or `challenge`) that has been used before.
+This approach has been chosen over the `nonce` field because there's no initial request to get a nonce from the Authorization Server.
+The Authorization Server MUST store the unique value for 10 seconds and MUST reject any request that uses a unique value that has been used before.
+The 10 seconds is based on the 5-second clock skew and the 5-second maximum difference between the expires and issued fields.
 
 ## 5. Presentation Definition endpoint
 
 In order for a client to know which Presentation Definition [PE] to use, the Authorization Server MUST provide a Presentation Definition endpoint.
 The Presentation Definition endpoint MUST be registered as a `presentation_definition_endpoint` in the Authorization Server metadata [RFC8414].
-The Presentation Definition endpoint MUST return a Presentation Definition that corresponds with the requested scope.
+The Presentation Definition endpoint MUST return a Presentation Definition array that corresponds with the requested scope.
 The endpoint has a single query parameter `scope` that contains the requested scope. The parameter may contain multiple values.
+Values are separated by a space and MUST be URL encoded.
 
 The following example shows a request to the Presentation Definition endpoint:
 
-    GET /presentation_definition?scope=a&scope=b HTTP/1.1
+    GET /presentation_definition?scope=a+b HTTP/1.1
     Host: as.example.com
 
-## 6. Access Token Introspection
+## 6. Scopes
+
+The scope parameter is used to indicate which Verifiable Credentials are required to access a resource.
+The OAuth 2.0 Authorization Framework allows the use of multiple scopes. 
+To simplify processing, this specification only allows a single main scope and multiple sub-scopes.
+Allowing mixing of different main scopes in a single access token request is out of scope of this specification.
+The Authorization Server MUST reject any request that contains multiple main scopes.
+
+A main scope is defined as the first scope in the scope parameter.
+It MUST be present and MUST be a string and can't contain `:`.
+A sub-scope is defined as any scope after the main scope.
+It MUST be a string and can contain `:` to indicate specific resources that need to be accessed.
+It SHOULD follow the format `resource:id:operation` where `resource` is the resource type, `id` is the specific identifier of the resource and `operation` is the operation that is allowed on the resource.
+
+The following example shows a request to the token endpoint with a main scope and a sub-scope:
+
+    POST /token.oauth2 HTTP/1.1
+    Host: as.example.com
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=vp_token-bearer
+    &assertion=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
+    eyJpc3Mi[...omitted for brevity...].
+    J9l-ZhwP[...omitted for brevity...]
+    &presentation_submission= {..}
+    &scope=a_scope+a_resource:5:read
+
+## 7. Access Token Introspection
 
 The Authorization Server MAY support an access token introspection endpoint as defined in OAuth 2.0 [RFC7662].
 The introspection endpoint SHOULD map the fields as follows:
@@ -157,7 +199,7 @@ The introspection endpoint SHOULD map the fields as follows:
 * `scope`: The granted scope.
 * `vcs`: The Verifiable Credentials that were used to request the access token using the same encoding as used in the access token request.
 
-## 7. Security Considerations
+## 8. Security Considerations
 
 The nonce/challenge (nonce) is used to prevent replay attacks. The nonce is a random string that is generated by the client.
 The nonce is included in the signed data. The Authorization Server MUST reject any request that uses a nonce that has been used before.
@@ -165,7 +207,7 @@ The Authorization Server MAY reduce storage requirements by only storing the non
 
 All endpoints MUST be protected by TLS, version 1.2 as a minimum.
 
-## 8. Privacy considerations
+## 9. Privacy considerations
 
 This RFC is meant to be used in a machine to machine context.
 If any personal data may be accessed with an `vp_token-bearer` access token, it's recommended to reevaluate and use the OpenID4VP specification and include user authorization.
@@ -174,7 +216,7 @@ Extra care should be taken when designing the scope to Presentation Definition m
 Scopes on the personal data level should not result in different Presentation Definitions. 
 This could be abused to determine if certain data is available at a Resource Server.
 
-## 9. References
+## 10. References
 
 * [RFC6749] D. Hardt, "The OAuth 2.0 Authorization Framework", RFC 6749, October 2012, <https://www.rfc-editor.org/info/rfc6749>.
 * [RFC7521] D. Campbell, Ed., B. Zaninovich, Ed., "Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521, May 2015, <https://www.rfc-editor.org/info/rfc7521>.
