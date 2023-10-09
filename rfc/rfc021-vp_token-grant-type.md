@@ -147,6 +147,15 @@ This approach has been chosen over the `nonce` field because there's no initial 
 The Authorization Server MUST store the unique value for 10 seconds and MUST reject any request that uses a unique value that has been used before.
 The 10 seconds is based on the 5-second clock skew and the 5-second maximum difference between the expires and issued fields.
 
+### 4.5 Error Response
+
+If the Authorization Server determines that the VP is invalid, the Authorization Server MUST return an error response as defined in OAuth 2.0 [RFC6749].
+In addition to the error response defined in OAuth 2.0 [RFC6749], the Authorization Server MUST use the following error codes when the VP is invalid:
+
+* `invalid_verifiable_presentation`: The VP is invalid. This error code is used when the signature is incorrect or when a required field is missing.
+* `invalid_presentation_submission`: The Presentation Submission is invalid. This error code is used when the Presentation Submission is not an answer to the Presentation Definition that corresponds with the requested scope.
+* `invalid_verifiable_credentials`: The submitted Verifiable Credentials do not meet the requirements. This error code is used when the Verifiable Credentials aren't corresponding to the Presentation Definition or when the Verifiable Credentials are expired, not trusted or invalid.
+
 ## 5. Presentation Definition endpoint
 
 In order for a client to know which Presentation Definition [PE] to use, the Authorization Server MUST provide a Presentation Definition endpoint.
