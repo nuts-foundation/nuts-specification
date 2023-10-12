@@ -134,11 +134,10 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 3. The `challenge` field of the JSON object MUST be a string that is unique for each token request.
 4. The `domain` field of the JSON object MUST be a DID under control of the Authorization Server.
 5. The `verificationMethod` field of the Proof MUST be a DID URL.
-6. The `holder` field if present MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
-7. The `verificationMethod` field of the proof MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
-8. The `created` field of the proof MUST be present and contain a valid timestamp. It MUST be before the current time.
-9. The `expires` field of the proof MUST be present and contain a valid timestamp. It MUST be after the current time.
-10. The difference between the `expires` and `created` fields MUST be equal or less than 5 seconds.
+6. The `verificationMethod` field of the proof MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
+7. The `created` field of the proof MUST be present and contain a valid timestamp. It MUST be before the current time.
+8. The `expires` field of the proof MUST be present and contain a valid timestamp. It MUST be after the current time.
+9. The difference between the `expires` and `created` fields MUST be equal or less than 5 seconds.
 
 ### 4.4 Preventing Token Replay
 
@@ -150,17 +149,19 @@ The 10 seconds is based on the 5-second clock skew and the 5-second maximum diff
 ### 4.5 Error Response
 
 If the Authorization Server determines that the VP is invalid, the Authorization Server MUST return an error response as defined in OAuth 2.0 [RFC6749].
-In addition to the error response defined in OAuth 2.0 [RFC6749], the Authorization Server MUST use the following error codes when the VP is invalid:
+In addition to the error response defined in OAuth 2.0 [RFC6749], the Authorization Server MUST return a HTTP 400 (Bad Request) and use the following error codes when the VP is invalid:
 
 * `invalid_verifiable_presentation`: The VP is invalid. This error code is used when the signature is incorrect or when a required field is missing.
 * `invalid_presentation_submission`: The Presentation Submission is invalid. This error code is used when the Presentation Submission is not an answer to the Presentation Definition that corresponds with the requested scope.
-* `invalid_verifiable_credentials`: The submitted Verifiable Credentials do not meet the requirements. This error code is used when the Verifiable Credentials aren't corresponding to the Presentation Definition or when the Verifiable Credentials are expired, not trusted or invalid.
+* `invalid_verifiable_credentials`: The submitted Verifiable Credentials do not meet the requirements. This error code is used when the Verifiable Credentials aren't corresponding to the Presentation Definition or when the Verifiable Credentials are expired, not trusted or invalid. 
+It is also used when the Verifiable Credentials are not issued to the signer of the Verifiable Presentation.
 
 ## 5. Presentation Definition endpoint
 
 In order for a client to know which Presentation Definition [PE] to use, the Authorization Server MUST provide a Presentation Definition endpoint.
 The Presentation Definition endpoint MUST be registered as a `presentation_definition_endpoint` in the Authorization Server metadata [RFC8414].
-The Presentation Definition endpoint MUST return a Presentation Definition array that corresponds with the requested scope.
+The Presentation Definition endpoint MUST return a single Presentation Definition that corresponds with the requested scope.
+The client MUST support the Submission Requirement Feature [PE].
 The endpoint has a single query parameter `scope` that contains the requested scope. The parameter may contain multiple values.
 Values are separated by a space and MUST be URL encoded.
 
@@ -177,7 +178,7 @@ To simplify processing, this specification only allows a single main scope and m
 Allowing mixing of different main scopes in a single access token request is out of scope of this specification.
 The Authorization Server MUST reject any request that contains multiple main scopes.
 
-A main scope is defined as the first scope in the scope parameter.
+The main scope MUST be the first value in the scope parameter.
 It MUST be present and MUST be a string and can't contain `:`.
 A sub-scope is defined as any scope after the main scope.
 It MUST be a string and can contain `:` to indicate specific resources that need to be accessed.
@@ -219,7 +220,7 @@ All endpoints MUST be protected by TLS, version 1.2 as a minimum.
 ## 9. Privacy considerations
 
 This RFC is meant to be used in a machine to machine context.
-If any personal data may be accessed with an `vp_token-bearer` access token, it's recommended to reevaluate and use the OpenID4VP specification and include user authorization.
+If any personal data may be accessed with an `vp_token-bearer` access token, it's recommended to reevaluate and use the OpenID4VP specification and include user authentication.
 
 Extra care should be taken when designing the scope to Presentation Definition mapping.
 Scopes on the personal data level should not result in different Presentation Definitions. 
