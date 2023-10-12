@@ -164,6 +164,7 @@ The Presentation Definition endpoint MUST return a single Presentation Definitio
 The client MUST support the Submission Requirement Feature [PE].
 The endpoint has a single query parameter `scope` that contains the requested scope. The parameter may contain multiple values.
 Values are separated by a space and MUST be URL encoded.
+An empty scope MAY be used. The Authorization Server MUST return a Presentation Definition which MAY contain constraints.
 
 The following example shows a request to the Presentation Definition endpoint:
 
