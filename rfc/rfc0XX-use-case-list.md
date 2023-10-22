@@ -71,10 +71,14 @@ Content-Type: application/json
 }
 ```
 
-### 3.3 Loading and processing the list
+### 3.3 Reading the list
 
-Clients can load the list by sending an HTTP GET to the maintainer's list endpoint.
+Clients MUST load the list by sending an HTTP GET to the maintainer's list endpoint.
 The maintainer MUST return a 200 OK response with the list as the HTTP response body.
+
+Clients MUST validate each presentation in the list as specified in section 4.
+If a presentation is valid, the client use it in its system. If a presentation is not valid, it MUST be rejected.
+If one or more presentations are not valid, it SHOULD NOT reject the other presentations.
 
 ### 3.4 List pruning
 
