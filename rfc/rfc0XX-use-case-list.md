@@ -82,6 +82,13 @@ If one or more presentations are not valid, it SHOULD NOT reject the other prese
 
 ### 3.4 List pruning
 
+To only keep relevant presentations on the list, maintainers MUST remove entries after a specified period of time.
+For instance, a presentations could be removed a week after they were added.
+
+Clients MUST re-submit their registration before that period of time has passed, if they want to keep their presentation on the list (once a day, for instance).
+
+Maintainers MUST remove presentations which ``expirationDate`` has passed from the list.
+
 ### 3.5 Caching
 
 Since processing the list becomes more costly as it grows, HTTP cache headers MUST be used to avoid reprocessing unchanged lists.
@@ -96,7 +103,7 @@ To process a presentation, the following validation steps MUST be performed:
 - ``issuanceDate`` of the presentation MUST have passed.
 - ``expirationDate`` of the presentation MUST NOT have passed.
 - ``expirationDate`` MUST be after ``issuanceDate``.
-- all credential issuers MUST be trusted (see Trust). 
+- all credential issuers MUST be trusted (see section 5). 
 - all credentials subjects MUST be the same DID.
 - the key used to sign the presentation MUST be owned by the credential subject (see 4.1).
 
@@ -125,6 +132,8 @@ Validators and clients SHOULD share a list of credential issuers they trust.
 Issuers MUST be trusted for specific a credential types.
 For instance, a driver's license governing body should only be trusted for issuing credentials with type ``DriversLicense``.
 
-## 6. Supporting multiple lists
+## Appendix A - Design Decisions
+
+### Supporting multiple lists
 
 This RFC does not specify nested or multiple lists as this can be achieved by hosting a separate list on an alternate HTTP endpoint.
