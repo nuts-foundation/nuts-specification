@@ -107,14 +107,13 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 2. The Authorization Server MUST validate the VP and Presentation Submission according to section 6.1 of the Presentation Exchange [PE] specification.
 3. The Presentation Submission MUST be an answer to the Presentation Definition that corresponds with the requested scope.
    How an Authorization Server determines the Presentation Definition based on scope is out of scope of this specification.
-4. The Verifiable Presentation validity determines the upper bound of access token validity.
-5. A clock skew of no more than 5 seconds MAY be applied when validating the Verifiable Presentation.
+4. A clock skew of no more than 5 seconds MAY be applied when validating the Verifiable Presentation.
 
 ### 4.2 JWT format requirements
 
 1. The assertion MUST be a valid JWT according to §6.3.1 of the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 2. The `vp` field of the JWT MUST be valid according to §4.10 the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
-3. The `iss` field MUST be a Decentralized Identifier [DID].
+3. The `iss` field MUST be a Decentralized Identifier [DID] and match the `sub` field.
 4. The `kid` header MUST be a DID URL and MUST resolve to a verificationMethod in the DID Document. The DID part of the DID URL MUST match the `iss` field.
 5. The `sub` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
 6. The `aud` field MUST match the DID of the Authorization Server.
