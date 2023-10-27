@@ -172,7 +172,8 @@ The Authorization Server MAY support an access token introspection endpoint as d
 The introspection endpoint SHOULD map the fields as follows:
 
 * `iss`: The issuer of the access token (DID).
-* `sub`: The subject of the access token (DID).
+* `sub`: The subject of the access token (DID), this is the resource owner. Usually the same as the `iss` field.
+* `client_id`: The client (DID) that requested the access token.
 * `exp`: The expiration time of the access token.
 * `iat`: The time the access token was issued.
 * `scope`: The granted scope.
