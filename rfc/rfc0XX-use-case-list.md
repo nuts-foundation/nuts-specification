@@ -32,11 +32,10 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 ## 3. List endpoint
 
 The list endpoint is an HTTP endpoint exposed by the list maintainer.
-It acts like a REST resource, which can be read like a list and updated to by sending a Verifiable Presentation to it.
+It acts like a REST resource, which returns the list when read. It can be updated by sending a Verifiable Presentation to it.
+All presentations on the list MUST conform to the Presentation Definition associated with the list (see Use Case List Definition).
 
-### 3.1 Format
-
-The list is a JSON array containing zero or more Verifiable Presentations. Entries MUST be encoded in JWT format as JSON string.
+When read, list MUST be returned as JSON array containing zero or more Verifiable Presentations, encoded in JWT format as JSON string.
 
 ### 3.2 Registering on the list
 
@@ -82,7 +81,7 @@ Clients SHOULD add the ``If-Modified-Since`` header to the list request, specify
 Maintainers MUST add the ``Modified-Since`` header to HTTP their responses, specifying when the list was last updated (presentation added or removed).
 If the list is requested, but nothing changed after ``If-Modified-Since``, the maintainer MUST return a 304 Not Modified response.
 
-## 4. Presentation validation
+## 4. Presentation processing
 
 To process a presentation, the following validation steps MUST be performed:
 
@@ -91,29 +90,61 @@ To process a presentation, the following validation steps MUST be performed:
 - ``expirationDate`` MUST be after ``issuanceDate``.
 - all credential issuers MUST be trusted (see section 5). 
 - all credentials MUST have the same `credentialSubject.id`.
-- the key used to sign the presentation MUST be owned by the credential subject (see 4.1).
+- the key used to sign the presentation MUST be owned by the credential subject (see 4.1):
+  the JWT ``kid`` header MUST reference an `assertionMethod` key from the subject's DID document.
+- the credentials MUST conform to the Presentation Definition associated with the list (see Use Case List Definition).
+  There MUST NOT be more credentials in the presentation than matched by the Presentation Definition.
 
 If a validation step fails, the presentation MUST be rejected.
 
 JWT credential and presentation encoding as specified by [VC data model](https://www.w3.org/TR/vc-data-model/#jwt-decoding) MUST be applied.
 
-### 4.1 Signing key validation
-
-The key used to sign the presentation MUST be owned by the credential subject.
-This is validated as follows:
-
-- Parse the ``kid`` JWT header from the presentation as DID URL
-- Resolve the DID document referenced by the DID URL
-- Resolve the signing key from ``assertionMethod`` property of the DID document.
-
-If any of the steps above fail, the presentation MUST be rejected.
-
-### 4.2 Supported formats
+### 4.1 Supported formats
 
 The ``did:web`` DID method MUST be supported. Support for other methods is optional.
 Presentations and credentials MUST be in JWT format.
 
-## 5. Trust
+## 5. Use Case List Definition
+
+Maintainers MUST share a JSON document describing the list. This document is known as the _list definition_.
+The document MUST contain the following properties:
+- `endpoint` property with the URL of the list endpoint.
+- `definition` property with the Presentation Definition (see [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition)) describing requirements for presentations on the list.
+
+For example:
+
+```json
+{
+  "endpoint": "https://example.com/usecase/university/v1",
+  "definition": {
+    "id": "pd_university",
+    "input_descriptors": [
+      {
+        "id": "pd_university_type",
+        "constraints": {
+          "fields": [
+            {
+              "path": ["$.type"],
+              "filter": {
+                "type": "string",
+                "const": "UniversityCredential"
+              }
+            },
+            {
+              "path": "$.credentialSubject.name",
+              "filter": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+## 6. Trust
 
 Validators and clients SHOULD share a list of credential issuers they trust.
 Issuers MUST be trusted for specific a credential types.
