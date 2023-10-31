@@ -36,20 +36,17 @@ It acts like a REST resource, which can be read like a list and updated to by se
 
 ### 3.1 Format
 
-The list is a JSON array containing zero or more Verifiable Presentations.
-List entries can be a:
-
-- presentation in JWT format as JSON string.
-- presentation in JSON-LD format as JSON object.
+The list is a JSON array containing zero or more Verifiable Presentations. Entries MUST be encoded in JWT format as JSON string.
 
 ### 3.2 Registering on the list
 
 Clients can register a Verifiable Presentation on the list by sending an HTTP POST to the maintainer's list endpoint.
-The HTTP request body MUST be a Verifiable Presentation encoded as JSON. The content type of the request MUST be `application/json`.
+The HTTP request body MUST be a Verifiable Presentation (in JWT format) encoded as JSON string. The content type of the request MUST be `application/json`.
 
 The maintainer MUST validate the Verifiable Presentation as specified in section 4. If the validation fails, it MUST return a 400 Bad Request response.
 If the validation succeeds, the Verifiable Presentation MUST be added to the list and the maintainer MUST return a 201 Created response.
-Credential subjects on the list MUST be unique, so if the subject already exists, the new presentation replaces the old one. 
+The presenter (meaning the credential holder, identified by `credentialSubject.id`) MUST only appear once on the list,
+so a new registration MUST replace the previous one from the same presenter. 
 
 An example posting a Verifiable Presentation in JWT format to the list:
 
@@ -58,17 +55,6 @@ POST /list HTTP/1.1
 Content-Type: application/json
 
 "eyCAFE.etc.etc"
-```
-
-An example posting a Verifiable Presentation in JSON-LD format to the list:
-
-```http request
-POST /list HTTP/1.1
-Content-Type: application/json
-
-{
-    (JSON-LD object)
-}
 ```
 
 ### 3.3 Reading the list
@@ -104,27 +90,28 @@ To process a presentation, the following validation steps MUST be performed:
 - ``expirationDate`` of the presentation MUST NOT have passed.
 - ``expirationDate`` MUST be after ``issuanceDate``.
 - all credential issuers MUST be trusted (see section 5). 
-- all credentials subjects MUST be the same DID.
+- all credentials MUST have the same `credentialSubject.id`.
 - the key used to sign the presentation MUST be owned by the credential subject (see 4.1).
 
 If a validation step fails, the presentation MUST be rejected.
 
 JWT credential and presentation encoding as specified by [VC data model](https://www.w3.org/TR/vc-data-model/#jwt-decoding) MUST be applied.
-For instance, ``issuanceDate`` might come from the JWT ``nbf`` claim or the JSON-LD ``issuanceDate`` property.
 
 ### 4.1 Signing key validation
 
-Validators MUST check that the key used to sign the presentation is owned by the credential subject.
-To validate the key, resolve the DID of the credential subject.
-The signing key MUST be listed in the ``assertionMethod`` property of the DID document.
+The key used to sign the presentation MUST be owned by the credential subject.
+This is validated as follows:
 
-For JWT presentations, the ``kid`` claim MUST be used specify the key used to sign the presentation.
-For JSON-LD presentations, the ``verificationMethod`` property  of the ``proof`` object MUST be used to specify the key used to sign the presentation.
+- Parse the ``kid`` JWT header from the presentation as DID URL
+- Resolve the DID document referenced by the DID URL
+- Resolve the signing key from ``assertionMethod`` property of the DID document.
+
+If any of the steps above fail, the presentation MUST be rejected.
 
 ### 4.2 Supported formats
 
 The ``did:web`` DID method MUST be supported. Support for other methods is optional.
-Presentations and credentials MUST be either in JWT or JSON-LD format.
+Presentations and credentials MUST be in JWT format.
 
 ## 5. Trust
 
