@@ -61,26 +61,26 @@ Content-Type: application/json
 
 Clients MUST load the list by sending an HTTP GET to the maintainer's list endpoint.
 The maintainer MUST return a 200 OK response with a JSON object containing:
-- property `entries` containing a JSON array with zero or more presentations.
-- property `state` containing an opaque JSON string.
+- `entries` REQUIRED. MUST contain a JSON array with zero or more presentations.
+- `lamport_timestamp` REQUIRED. MUST be a JSON number containing the Lamport timestamp of the last entry.
 
-The `state` property MAY be used by the client to request a delta next time it reads the list.
-To request a delta, the client MUST provide the `state` value as query parameter in the HTTP GET request.
-A delta MUST only contain the last presentation of a particular credential subject.
-If no `state` query parameter is provided, the maintainer MUST return the full list.
+The `lamport_timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
+If no `lamport_timestamp` query parameter is provided, the maintainer MUST return the full list.
+Regardless whether the full list or a delta is returned, credential subjects MUST be unique.
+Maintainers MUST only return the latest presentation for each credential subject.
 
 Example:
 
 ```http request
-GET /list?state=J7ah-0LASKD HTTP/1.1
+GET /list?lamport_timestamp=510 HTTP/1.1
 Content-Type: application/json
 
 {
   "entries": [
-    "eyCAFE.etc.etc"
-    "eyEABE.etc.etc"
+    "ey1234.etc.etc"
+    "ey5678.etc.etc"
   ],
-  "state": "qw-_890KLSDNMS"
+  "lamport_timestamp": 515
 }
 ```
 
@@ -90,20 +90,24 @@ If one or more presentations are not valid, it SHOULD NOT reject the other prese
 
 ### 3.4 List pruning
 
-To only keep relevant presentations on the list, maintainers MUST remove entries after a specified period of time.
-For instance, a presentations could be removed a week after they were added.
+To only keep valid presentations on the list, maintainers MUST remove presentations which `exp` (expiration) has passed from the list.
 
-Clients MUST re-submit their registration before that period of time has passed, if they want to keep their presentation on the list (once a day, for instance).
+Clients that wish to retain their presentation MUST re-submit their registration before that period of time has passed, if they want to keep their presentation on the list (once a day, for instance).
 
-Maintainers MUST remove presentations which ``expirationDate`` has passed from the list.
+Maintainers SHOULD remove presentations which contains credentials that have been revoked.
+
+### 3.5. Removing entries
+
+TODO: Clients may remove a credential subject by performing an HTTP DELETE to the list endpoint, where the body contains an empty Verifiable Presentation signed by the credential subject.
+TODO: If we support this: we need to serve a tombstone set as well (and also for revocations)
 
 ## 4. Presentation processing
 
 To process a presentation, the following validation steps MUST be performed:
 
-- ``issuanceDate`` of the presentation MUST have passed.
-- ``expirationDate`` of the presentation MUST NOT have passed.
-- ``expirationDate`` MUST be after ``issuanceDate``.
+- ``nbf`` (not before) of the presentation MUST have passed.
+- ``exp`` (expiration) of the presentation MUST NOT have passed.
+- ``exp`` MUST be after ``nbf``.
 - all credential issuers MUST be trusted (see section 5). 
 - all credentials MUST have the same `credentialSubject.id`.
 - the key used to sign the presentation MUST be owned by the credential subject (see 4.1):
@@ -124,8 +128,9 @@ Presentations and credentials MUST be in JWT format.
 
 Maintainers MUST share a JSON document describing the list. This document is known as the _list definition_.
 The document MUST contain the following properties:
-- `endpoint` property with the URL of the list endpoint.
-- `definition` property with the Presentation Definition (see [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition)) describing requirements for presentations on the list.
+- `endpoint` REQUIRED. JSON string containing the URL where the maintainer serves the list.
+- `presentation_definition` REQUIRED. JSON object with the Presentation Definition (see [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition)) describing requirements for presentations on the list.
+- `presentation_max_validity` REQUIRED. JSON number containing the maximum validity period (number of seconds between `nbf` and `exp`) of a presentation in seconds.
 
 For example:
 
@@ -162,9 +167,27 @@ For example:
 
 ## 6. Trust
 
-Validators and clients SHOULD share a list of credential issuers they trust.
-Issuers MUST be trusted for specific a credential types.
-For instance, a driver's license governing body should only be trusted for issuing credentials with type ``DriversLicense``.
+Trust of credential issuers (e.g. `did:example:education-accredetor` issuing `EducationalInstitutionCredential`) should be defined by the presentation definition.
+In this case, there should be 2 constraints: one for the type and one for the issuer:
+
+```json
+[
+  {
+    "path": ["$.type"],
+    "filter": {
+      "type": "string",
+      "const": "EducationalInstitutionCredential"
+    }
+  },
+  {
+    "path": "$.issuer",
+    "filter": {
+      "type": "string",
+      "const": "did:example:education-accredetor"
+    }
+  }
+]
+```
 
 ## Appendix A - Design Decisions
 
