@@ -32,15 +32,16 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 ## 3. List endpoint
 
 The list endpoint is an HTTP endpoint exposed by the list maintainer.
-It acts like a REST resource, which returns the list when read. It can be updated by sending a Verifiable Presentation to it.
+It can be read in full, or only the Verifiable Presentations that changed after the last time it was read.
+It can be updated by sending a Verifiable Presentation to it.
 All presentations on the list MUST conform to the Presentation Definition associated with the list (see Use Case List Definition).
 
-When read, list MUST be returned as JSON array containing zero or more Verifiable Presentations, encoded in JWT format as JSON string.
+Presentations MUST be encoded in JWT format as JSON string.
 
 ### 3.2 Registering on the list
 
 Clients can register a Verifiable Presentation on the list by sending an HTTP POST to the maintainer's list endpoint.
-The HTTP request body MUST be a Verifiable Presentation (in JWT format) encoded as JSON string. The content type of the request MUST be `application/json`.
+The HTTP request body MUST be a Verifiable Presentation (in JWT format). The content type of the request MUST be `application/json`.
 
 The maintainer MUST validate the Verifiable Presentation as specified in section 4. If the validation fails, it MUST return a 400 Bad Request response.
 If the validation succeeds, the Verifiable Presentation MUST be added to the list and the maintainer MUST return a 201 Created response.
@@ -59,7 +60,29 @@ Content-Type: application/json
 ### 3.3 Reading the list
 
 Clients MUST load the list by sending an HTTP GET to the maintainer's list endpoint.
-The maintainer MUST return a 200 OK response with the list as the HTTP response body.
+The maintainer MUST return a 200 OK response with a JSON object containing:
+- property `entries` containing a JSON array with zero or more presentations.
+- property `state` containing an opaque JSON string.
+
+The `state` property MAY be used by the client to request a delta next time it reads the list.
+To request a delta, the client MUST provide the `state` value as query parameter in the HTTP GET request.
+A delta MUST only contain the last presentation of a particular credential subject.
+If no `state` query parameter is provided, the maintainer MUST return the full list.
+
+Example:
+
+```http request
+GET /list?state=J7ah-0LASKD HTTP/1.1
+Content-Type: application/json
+
+{
+  "entries": [
+    "eyCAFE.etc.etc"
+    "eyEABE.etc.etc"
+  ],
+  "state": "qw-_890KLSDNMS"
+}
+```
 
 Clients MUST validate each presentation in the list as specified in section 4.
 If a presentation is valid, the client use it in its system. If a presentation is not valid, it MUST be rejected.
@@ -73,13 +96,6 @@ For instance, a presentations could be removed a week after they were added.
 Clients MUST re-submit their registration before that period of time has passed, if they want to keep their presentation on the list (once a day, for instance).
 
 Maintainers MUST remove presentations which ``expirationDate`` has passed from the list.
-
-### 3.5 Caching
-
-Since processing the list becomes more costly as it grows, HTTP cache headers MUST be used to avoid reprocessing unchanged lists.
-Clients SHOULD add the ``If-Modified-Since`` header to the list request, specifying the value of the ``Modified-Since`` header of the last successful HTTP response. 
-Maintainers MUST add the ``Modified-Since`` header to HTTP their responses, specifying when the list was last updated (presentation added or removed).
-If the list is requested, but nothing changed after ``If-Modified-Since``, the maintainer MUST return a 304 Not Modified response.
 
 ## 4. Presentation processing
 
@@ -155,3 +171,8 @@ For instance, a driver's license governing body should only be trusted for issui
 ### Supporting multiple lists
 
 This RFC does not specify nested or multiple lists as this can be achieved by hosting a separate list on an alternate HTTP endpoint.
+
+### Using deltas to reduce indexing overhead
+
+When only the full list is available, clients need to validate and re-index (for fulltext search) all presentations.
+By having the maintainer return only new presentations instead, clients can only process those new entries.
