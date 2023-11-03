@@ -93,7 +93,7 @@ The assertion parameter can either be encoded in JSON or JWT.
 The Authorization Server determines the encoding by adding the correct parameters to the Authorization Server metadata [RFC8414]].
 The following parameter MUST be added:
 
-* `vp_formats`: An object defining the formats and proof types of Verifiable Presentations and Verifiable Credentials that a Verifier supports as stated by §9 of the OpenID for Verifiable Presentations specification [OIDC4VP].
+* `vp_formats`: An object defining the formats and proof types of Verifiable Presentations and Verifiable Credentials that a Verifier supports as stated by §9 of the OpenID for Verifiable Presentations specification [OpenID4VP].
 
 ## 4. JWT Format and Processing Requirements
 
@@ -117,22 +117,22 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 4. The `kid` header MUST be a DID URL and MUST resolve to a verificationMethod in the DID Document. The DID part of the DID URL MUST match the `iss` field.
 5. The `sub` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
 6. The `aud` field MUST match the DID of the Authorization Server.
-7. The `iat` field MUST be present and contain a valid timestamp. It MUST be before the current time.
-8. The `exp` field MUST be present and contain a valid timestamp. It MUST be after the current time.
+7. The `iat` field MUST be present and contain a valid unix timestamp. It MUST be before the current time.
+8. The `exp` field MUST be present and contain a valid unix timestamp. It MUST be after the current time.
 9. The difference between the `exp` and `iat` fields MUST be equal or less than 5 seconds.
 10. The `jti` field MUST be present and contain a string that is unique for each access token request.
 
 ### 4.3 JSON format requirements
 
 1. The assertion MUST be a valid JSON object according to §4.10 the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
-2. The proof of the VP MUST be a valid [JSONWebSignature2020] object.
-3. The `challenge` field of the JSON object MUST be a string that is unique for each token request.
-4. The `domain` field of the JSON object MUST be a DID under control of the Authorization Server.
-5. The `verificationMethod` field of the Proof MUST be a DID URL.
-6. The `verificationMethod` field of the proof MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
-7. The `created` field of the proof MUST be present and contain a valid timestamp. It MUST be before the current time.
-8. The `expires` field of the proof MUST be present and contain a valid timestamp. It MUST be after the current time.
-9. The difference between the `expires` and `created` fields MUST be equal or less than 5 seconds.
+2. The proof of the VP MUST be a valid [JSONWebSignature2020] object. Additional requirements for the proof object:
+   1. The `challenge` field MUST be a string that is unique for each token request.
+   2. The `domain` field MUST be a DID under control of the Authorization Server.
+   3. The `verificationMethod` field MUST be a DID URL.
+   4. The `verificationMethod` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
+   5. The `created` field MUST be present and contain a valid ISO8601 formatted date string. It MUST be before the current time.
+   6. The `expires` field MUST be present and contain a valid ISO8601 formatted date string. It MUST be after the current time.
+   7. The difference between the `expires` and `created` fields MUST be equal or less than 5 seconds.
 
 ### 4.4 Preventing Token Replay
 
@@ -148,7 +148,8 @@ In addition to the error response defined in OAuth 2.0 [RFC6749], the Authorizat
 
 * `invalid_verifiable_presentation`: The VP is invalid. This error code is used when the signature is incorrect or when a required field is missing.
 * `invalid_presentation_submission`: The Presentation Submission is invalid. This error code is used when the Presentation Submission is not an answer to the Presentation Definition that corresponds with the requested scope.
-* `invalid_verifiable_credentials`: The submitted Verifiable Credentials do not meet the requirements. This error code is used when the Verifiable Credentials aren't corresponding to the Presentation Definition or when the Verifiable Credentials are expired, not trusted or invalid. 
+
+An `invalid_request` is returned for any submitted Verifiable Credentials that do not meet the requirements, when the Verifiable Credentials aren't corresponding to the Presentation Definition or when the Verifiable Credentials are expired, not trusted or invalid. 
 It is also used when the Verifiable Credentials are not issued to the signer of the Verifiable Presentation.
 
 ## 5. Presentation Definition endpoint
@@ -171,13 +172,14 @@ The following example shows a request to the Presentation Definition endpoint:
 The Authorization Server MAY support an access token introspection endpoint as defined in OAuth 2.0 [RFC7662].
 The introspection endpoint SHOULD map the fields as follows:
 
+* `active`: If the access token is valid.
 * `iss`: The issuer of the access token (DID).
 * `sub`: The subject of the access token (DID), this is the resource owner. Usually the same as the `iss` field.
 * `client_id`: The client (DID) that requested the access token.
 * `exp`: The expiration time of the access token.
 * `iat`: The time the access token was issued.
 * `scope`: The granted scope.
-* `vcs`: The Verifiable Credentials that were used to request the access token using the same encoding as used in the access token request.
+* `vps`: The Verifiable Presentations that were used to request the access token using the same encoding as used in the access token request.
 
 ## 7. Security Considerations
 
@@ -206,7 +208,7 @@ Privacy-sensitive data in the scope parameter should be avoided.
 * [VC-DATA-MODEL] M. Sporny, D. Longley, D. Chadwick, "Verifiable Credentials Data Model 1.1", W3C Recommendation, 3 March 2022, <https://www.w3.org/TR/vc-data-model/>.
 * [PE] D. Buchner, B. Zundel, M. Riedel, K.H. Duffy, "Presentation Exchange 2.0.0", 12 September 2023, <https://identity.foundation/presentation-exchange/spec/v2.0.0/>.
 * [JSONWebSignature2020] O. Steel, M. Prorock, C.E. Lehner, "JSON Web Signature 2020", W3C Community Group Report, 21 July 2022, <https://w3c-ccg.github.io/lds-jws2020/>.
-* [OIDC4VP] O. Terbu, T. Lodderstedt, K. Yasuda, T. Looker, "OpenID for Verifiable Presentations Draft 18", OpenID connect working group, 21 April 2023, <https://openid.net/specs/openid-4-verifiable-presentations-1_0.html>.
+* [OpenID4VP] O. Terbu, T. Lodderstedt, K. Yasuda, T. Looker, "OpenID for Verifiable Presentations Draft 18", OpenID connect working group, 21 April 2023, <https://openid.net/specs/openid-4-verifiable-presentations-1_0.html>.
 * [RFC8414] M. Jones, N. Sakimura, J. Bradley, "OAuth 2.0 Authorization Server Metadata", RFC 8414, June 2018, <https://www.rfc-editor.org/info/rfc8414>.
 * [RFC7662] J. Richer, "OAuth 2.0 Token Introspection", RFC 7662, October 2015, <https://www.rfc-editor.org/info/rfc7662>.
 * [DID] M. Sporny, D. Longley, M. Sabadello, D. Reed, O. Steele, C. Allen, "Decentralized Identifiers (DIDs) v1.0", W3C Recommendation, 19 July 2022, <https://www.w3.org/TR/did-core/>.
