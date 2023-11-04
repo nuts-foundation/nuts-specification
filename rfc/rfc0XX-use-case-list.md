@@ -80,7 +80,7 @@ Content-Type: application/json
     "ey1234.etc.etc"
     "ey5678.etc.etc"
   ],
-  "lamport_timestamp": 515
+  "timestamp": 515
 }
 ```
 
@@ -128,6 +128,7 @@ Presentations and credentials MUST be in JWT format.
 
 Maintainers MUST share a JSON document describing the list. This document is known as the _list definition_.
 The document MUST contain the following properties:
+- `id` REQUIRED. JSON string containing a value identifies the list. MAY be used to version the definition.
 - `endpoint` REQUIRED. JSON string containing the URL where the maintainer serves the list.
 - `presentation_definition` REQUIRED. JSON object with the Presentation Definition (see [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition)) describing requirements for presentations on the list.
 - `presentation_max_validity` REQUIRED. JSON number containing the maximum validity period (number of seconds between `nbf` and `exp`) of a presentation in seconds.
