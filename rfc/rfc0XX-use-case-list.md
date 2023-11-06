@@ -57,22 +57,25 @@ Content-Type: application/json
 "eyCAFE.etc.etc"
 ```
 
+The Verifiable Presentation MUST NOT be valid longer than the Verifiable Credentials it contains. 
+
 ### 3.3 Reading the list
 
 Clients MUST load the list by sending an HTTP GET to the maintainer's list endpoint.
 The maintainer MUST return a 200 OK response with a JSON object containing:
 - `entries` REQUIRED. MUST contain a JSON array with zero or more presentations.
-- `lamport_timestamp` REQUIRED. MUST be a JSON number containing the Lamport timestamp of the last entry.
+- `tombstones` REQUIRED. MUST contain a JSON array with zero or more presentation IDs that have been removed from the list.
+- `timestamp` REQUIRED. MUST be a JSON number containing the Lamport timestamp of the last entry.
 
-The `lamport_timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
-If no `lamport_timestamp` query parameter is provided, the maintainer MUST return the full list.
+The `timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
+If no `timestamp` query parameter is provided, the maintainer MUST return the full list.
 Regardless whether the full list or a delta is returned, credential subjects MUST be unique.
 Maintainers MUST only return the latest presentation for each credential subject.
 
 Example:
 
 ```http request
-GET /list?lamport_timestamp=510 HTTP/1.1
+GET /list?timestamp=510 HTTP/1.1
 Content-Type: application/json
 
 {
@@ -80,7 +83,11 @@ Content-Type: application/json
     "ey1234.etc.etc"
     "ey5678.etc.etc"
   ],
-  "timestamp": 515
+  "tombstones": [
+      "did:web:example.com#1",
+      "did:web:example.com#2"
+  ]
+  "timestamp": 515,
 }
 ```
 
@@ -96,10 +103,18 @@ Clients that wish to retain their presentation MUST re-submit their registration
 
 Maintainers SHOULD remove presentations which contains credentials that have been revoked.
 
-### 3.5. Removing entries
+### 3.5. Removing presentations
 
-TODO: Clients may remove a credential subject by performing an HTTP DELETE to the list endpoint, where the body contains an empty Verifiable Presentation signed by the credential subject.
-TODO: If we support this: we need to serve a tombstone set as well (and also for revocations)
+Clients can remove presentations from a specific credential subject from a list, e.g. when a care organization stops supporting the use case.
+To remove presentations of a credential subject the client MUST send an HTTP DELETE request to the list endpoint,
+where the body contains an empty Verifiable Presentation signed by the credential subject.
+Any credentials in the presentation MUST be ignored by the maintainer.
+
+If the signing key (identified by `kid`) and signature are valid, the maintainer MUST remove all presentations of the credential subject from the list.
+The maintainer MUST add the removed presentations to the tombstone set.
+If the request was valid (regardless whether there were any presentations), the maintainer MUST respond with a `201 No Content` response.
+
+Presentations that have expired SHOULD be removed from the tombstone set by the maintainer, to keep it as small as possible.
 
 ## 4. Presentation processing
 
@@ -110,6 +125,7 @@ To process a presentation, the following validation steps MUST be performed:
 - ``exp`` MUST be after ``nbf``.
 - all credential issuers MUST be trusted (see section 5). 
 - all credentials MUST have the same `credentialSubject.id`.
+- ``exp`` (expiration) of the presentation MUST NOT be after the expiration date of the credentials.
 - the key used to sign the presentation MUST be owned by the credential subject (see 4.1):
   the JWT ``kid`` header MUST reference an `assertionMethod` key from the subject's DID document.
 - the credentials MUST conform to the Presentation Definition associated with the list (see Use Case List Definition).
