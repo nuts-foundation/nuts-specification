@@ -120,6 +120,7 @@ Presentations that have expired SHOULD be removed from the tombstone set by the 
 
 To process a presentation, the following validation steps MUST be performed:
 
+- ``jti`` (JWT ID) of the presentation MUST be a non-empty JSON string.
 - ``nbf`` (not before) of the presentation MUST have passed.
 - ``exp`` (expiration) of the presentation MUST NOT have passed.
 - ``exp`` MUST be after ``nbf``.
