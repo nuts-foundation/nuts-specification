@@ -154,8 +154,10 @@ For example:
 
 ```json
 {
+  "id": "uc_university_v1",
   "endpoint": "https://example.com/usecase/university/v1",
-  "definition": {
+  "presentation_max_validity": 259200,
+  "presentation_definition": {
     "id": "pd_university",
     "input_descriptors": [
       {
