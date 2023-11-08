@@ -129,7 +129,7 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
    1. The `challenge` field MUST be a string that is unique for each token request.
    2. The `domain` field MUST be a DID under control of the Authorization Server.
    3. The `verificationMethod` field MUST be a DID URL.
-   4. The `verificationMethod` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
+   4. The id part of the DID in the `verificationMethod` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
    5. The `created` field MUST be present and contain a valid ISO8601 formatted date string. It MUST be before the current time.
    6. The `expires` field MUST be present and contain a valid ISO8601 formatted date string. It MUST be after the current time.
    7. The difference between the `expires` and `created` fields MUST be equal or less than 5 seconds.
