@@ -69,8 +69,7 @@ The maintainer MUST return a 200 OK response with a JSON object containing:
 
 The `timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
 If no `timestamp` query parameter is provided, the maintainer MUST return the full list.
-Regardless whether the full list or a delta is returned, credential subjects MUST be unique.
-Maintainers MUST only return the latest presentation for each credential subject.
+Maintainers MUST only return the latest valid presentation per credential subject.
 
 Example:
 
