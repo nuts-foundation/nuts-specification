@@ -97,7 +97,7 @@ If one or more presentations are not valid, it SHOULD NOT reject the other prese
 
 ### 3.4 List pruning
 
-To only keep valid presentations on the list, maintainers MUST remove presentations which `exp` (expiration) has passed from the list.
+To only keep valid presentations on the list, maintainers MUST remove presentations whose `exp` (expiration) time has passed from the list.
 
 Clients that wish to retain their presentation MUST re-submit their registration before that period of time has passed, if they want to keep their presentation on the list (once a day, for instance).
 
