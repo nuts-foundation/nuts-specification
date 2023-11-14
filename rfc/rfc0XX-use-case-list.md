@@ -92,7 +92,7 @@ Content-Type: application/json
 ```
 
 Clients MUST validate each presentation in the list as specified in section 4.
-If a presentation is valid, the client use it in its system. If a presentation is not valid, it MUST be rejected.
+If a presentation is valid, the client uses it in its system. If a presentation is not valid, it MUST be rejected.
 If one or more presentations are not valid, it SHOULD NOT reject the other presentations.
 
 ### 3.4 List pruning
