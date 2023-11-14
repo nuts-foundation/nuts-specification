@@ -1,4 +1,4 @@
-# RFC0XX Use Case List
+# RFC0XX Discovery Service
 
 |                          |           |
 |:-------------------------|:----------|
@@ -6,7 +6,7 @@
 | Request for Comments: 0  | Nedap     |
 | Amends:                  |           |
 
-## Use Case List
+## Discovery Service
 
 ### Abstract
 
@@ -28,112 +28,109 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 * **Credential subject**: entity the credential is about (e.g. organization, person, system or device). The credential subject is identified by the `id` property of the credential subject.
 * **Verifiable Presentation**: cryptographically verifiable presentation of a credential signed by the subject, according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
 * **Presentation Definition**: format specifying what constraints a presentation must conform to, according to the [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition).
-* **Maintainer**: system hosting the list and accepting new list registrations.
+* **Server**: system hosting the discovery service and accepting new registrations.
 * **Client**: system registering presentations on the list and reading it to discover other systems/parties.
 
-## 3. List endpoint
+## 3. Service endpoint
 
-The list endpoint is an HTTP endpoint exposed by the list maintainer.
-It can be read in full, or only the Verifiable Presentations that changed after the last time it was read.
-It can be updated by sending a Verifiable Presentation to it.
-All presentations on the list MUST conform to the Presentation Definition associated with the list (see Use Case List Definition).
+The service endpoint is an HTTP endpoint exposed by the server which hosts a list of Verifiable Presentations.
+Clients can query the list or submit a new Verifiable Presentation to it.
+All presentations MUST conform to the Presentation Definition associated with the discovery service (see Service Definition).
 
 Presentations MUST be encoded in JWT format as string.
 
-### 3.2 Registering on the list
+### 3.1 Registration
 
-Clients can register a Verifiable Presentation on the list by sending an HTTP POST to the maintainer's list endpoint.
+Clients can add a Verifiable Presentation to the list by sending an HTTP POST to the service endpoint.
 The HTTP request body MUST be a Verifiable Presentation (in JWT format). The content type of the request MUST be `application/json`.
 
-The maintainer MUST validate the Verifiable Presentation as specified in section 4. If the validation fails, it MUST return a 400 Bad Request response.
-If the validation succeeds, the Verifiable Presentation MUST be added to the list and the maintainer MUST return a 201 Created response.
-The presenter (meaning the credential holder, identified by `credentialSubject.id`) MUST NOT appear more than once on the list,
-so a new registration MUST replace the previous one from the same presenter. 
+The server MUST validate the Verifiable Presentation as specified in section 4. If the validation fails, it MUST return a 400 Bad Request response.
+If the validation succeeds, the Verifiable Presentation MUST be added to the list and the server MUST return a 201 Created response.
+
+The credential subject (identified by `credentialSubject.id`) MUST NOT appear more than once on the list,
+so a new registration MUST replace the previous one from the same credential subject.
 
 An example posting a Verifiable Presentation in JWT format to the list:
 
-```http request
+``http request
 POST /list HTTP/1.1
 Content-Type: application/json
 
 "eyCAFE.etc.etc"
-```
+``
 
 The Verifiable Presentation MUST NOT be valid longer than the Verifiable Credentials it contains. 
 
-### 3.3 Reading the list
+### 3.2 Reading
 
-Clients MUST load the list by sending an HTTP GET to the maintainer's list endpoint.
-The maintainer MUST return a 200 OK response with a JSON object containing:
+Clients MUST read the list by sending an HTTP GET to the server's service endpoint.
+The server MUST return a 200 OK response with a JSON object containing:
 - `entries` REQUIRED. MUST contain a JSON array with zero or more presentations.
-- `tombstones` REQUIRED. MUST contain a JSON array with zero or more presentation IDs that have been removed from the list.
 - `timestamp` REQUIRED. MUST be a JSON number containing the timestamp of the last entry. The timestamp is an opaque value; the client SHOULD NOT derive any meaning from it.
 
 The `timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
-If no `timestamp` query parameter is provided, the maintainer MUST return the full list.
-Maintainers MUST only return the latest valid presentation per credential subject.
+If no `timestamp` query parameter is provided, the server MUST return the full list.
+Servers MUST only return the latest (valid) presentation per credential subject.
 
 Example:
 
-```http request
+``http request
 GET /list?timestamp=510 HTTP/1.1
 Content-Type: application/json
 
 {
   "entries": [
-    "ey1234.etc.etc"
+    "ey1234.etc.etc",
     "ey5678.etc.etc"
   ],
-  "tombstones": [
-      "did:web:example.com#1",
-      "did:web:example.com#2"
-  ]
   "timestamp": 515,
 }
-```
+``
 
 Clients MUST validate each presentation in the list as specified in section 4.
 If a presentation is valid, the client uses it in its system. If a presentation is not valid, it MUST be rejected.
 If one or more presentations are not valid, it SHOULD NOT reject the other presentations.
 
-### 3.4 List pruning
+### 3.3 List pruning
 
-To only keep valid presentations on the list, maintainers MUST remove presentations whose `exp` (expiration) time has passed from the list.
+To only keep valid presentations on the list, servers MUST remove presentations whose `exp` (expiration) time has passed from the list.
 
 Clients that wish to retain their presence on the list MUST submit a new registration before the current entry's `exp` time has passed (once a day, for instance).
 
-Maintainers SHOULD remove presentations which contain credentials that have been revoked.
+Servers SHOULD remove presentations which contain credentials that have been revoked.
 
-### 3.5. Removing presentations
+### 3.4 Retracting presentations
 
-Clients can remove presentations from a specific credential subject from a list, e.g. when a care organization stops supporting the use case.
-To remove presentations of a credential subject the client MUST send an HTTP DELETE request to the list endpoint,
-where the body contains an empty Verifiable Presentation signed by the credential subject.
-Any credentials in the presentation MUST be ignored by the maintainer.
+Clients can remove presentations from the list, e.g. when a care organization stops supporting the use case.
+To remove presentations of a credential subject the client MUST send an HTTP DELETE request to the service endpoint,
+where the body contains a Verifiable Presentation signed by the credential subject.
+In addition to the validation steps specified in section 4, the presentation MUST conform to the following requirements:
 
-If the signing key (identified by `kid`) and signature are valid, the maintainer MUST remove all presentations of the credential subject from the list.
-The maintainer MUST add the removed presentations to the tombstone set.
-If the request was valid (regardless whether there were any presentations), the maintainer MUST respond with a `201 No Content` response.
+- it MUST specify `RetractedVerifiablePresentation` as type, in addition to the `VerifiablePresentation`.
+- it MUST contain a `retract_jti` JWT claim, containing the `jti` of the presentation to retract.
+- it MUST NOT contain any credentials.
 
-To keep the tombstone set small, the maintainer SHOULD remove:
-- Entries that reference a presentation that has expired
-- Entries that reference a presentation that has been replaced by a newer presentation of the same credential subject.
+The content type of the request MUST be `application/json`.
+If the request was valid (regardless whether there were any presentations), the server MUST respond with a `201 No Content` response.
+
+Clients processing a presentation retraction, SHOULD remove the presentation indicated by `retract_jti` from its local copy of the list.
 
 ## 4. Presentation processing
 
 To process a presentation, the following validation steps MUST be performed:
 
-- ``jti`` (JWT ID) of the presentation MUST be a non-empty string.
-- ``nbf`` (not before) of the presentation MUST have passed.
-- ``exp`` (expiration) of the presentation MUST NOT have passed.
-- ``exp`` MUST be after ``nbf``.
-- the number of seconds between ``nbf`` and ``exp`` MUST NOT exceed `presentation_max_validity` (see use Case List Definition).
+- `jti` (JWT ID) of the presentation MUST be a non-empty string.
+- the presentation ID  (`jti`) MUST NOT already exist on the list.
+- `nbf` (not before) of the presentation MUST have passed.
+- `exp` (expiration) of the presentation MUST NOT have passed.
+- `exp` MUST be after `nbf`.
+- the number of seconds between `nbf` and `exp` MUST NOT exceed `presentation_max_validity` (see Service Definition).
 - all credential issuers MUST be trusted (see section 5). 
 - all credentials MUST have the same `credentialSubject.id`.
-- ``exp`` (expiration) of the presentation MUST NOT be after the expiration date of the credentials.
+- `exp` (expiration) of the presentation MUST NOT be after the expiration date of the credentials.
 - the key used to sign the presentation MUST be owned by the credential subject (see 4.1):
-  the JWT ``kid`` header MUST reference an `assertionMethod` key from the subject's DID document.
-- the credentials MUST conform to the Presentation Definition associated with the list (see Use Case List Definition).
+  the JWT `kid` header MUST reference an `assertionMethod` key from the subject's DID document.
+- the credentials MUST conform to the Presentation Definition associated with the list (see Service Definition).
   The Verifiable Presentation MUST NOT contain other Verifiable Credentials than required by the Presentation Definition.
 
 If a validation step fails, the presentation MUST be rejected.
@@ -142,21 +139,21 @@ JWT credential and presentation encoding as specified by [VC data model](https:/
 
 ### 4.1 Supported formats
 
-The ``did:web`` DID method MUST be supported. Support for other methods is optional.
+The `did:web` DID method MUST be supported. Support for other methods is optional.
 Verifiable Presentations and Verifiable Credentials MUST be in JWT format.
 
-## 5. Use Case List Definition
+## 5. Service Definition
 
-Maintainers MUST share a JSON document describing the list. This document is known as the _list definition_.
+Servers MUST share a JSON document describing the discovery service. This document is known as the _service definition_.
 The document MUST contain the following properties:
-- `id` REQUIRED. string containing a value identifies the list. MAY be used to version the definition.
-- `endpoint` REQUIRED. string containing the URL where the maintainer serves the list.
+- `id` REQUIRED. String containing a value that identifies the service definition. MAY be used to version the definition.
+- `endpoint` REQUIRED. String containing the URL where the server hosts the service endpoint.
 - `presentation_definition` REQUIRED. JSON object with the Presentation Definition (see [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition)) describing requirements for presentations on the list.
 - `presentation_max_validity` REQUIRED. JSON number containing the maximum validity period (number of seconds between `nbf` and `exp`) of a presentation in seconds.
 
 For example:
 
-```json
+``json
 {
   "id": "uc_university_v1",
   "endpoint": "https://example.com/usecase/university/v1",
@@ -187,14 +184,14 @@ For example:
     ]
   }
 }
-```
+``
 
 ## 6. Trust
 
 Trust of credential issuers (e.g. `did:example:education-accredetor` issuing `EducationalInstitutionCredential`) SHOULD be defined by the presentation definition.
 In this case, there should be 2 constraints: one for the type and one for the issuer:
 
-```json
+``json
 [
   {
     "path": ["$.type"],
@@ -211,7 +208,7 @@ In this case, there should be 2 constraints: one for the type and one for the is
     }
   }
 ]
-```
+``
 
 ## Appendix A - Design Decisions
 
@@ -222,11 +219,11 @@ This RFC does not specify nested or multiple lists as this can be achieved by ho
 ### Using deltas to reduce indexing overhead
 
 When only the full list is available, clients need to validate and re-index (for fulltext search) all presentations.
-By having the maintainer return only new presentations instead, clients can only process those new entries.
+By having the server return only new presentations instead, clients can only process those new entries.
 
 ### Timestamp implementation
 
-The timestamp is specified as an opaque value (number). It is up to maintainers to decide how to implement this.
+The timestamp is specified as an opaque value (number). It is up to server to decide how to implement this.
 
 One way to implement this is to use a [Lamport timestamp](https://en.wikipedia.org/wiki/Lamport_timestamp) which is incremented for every presentation received.
 That way, timestamps unambiguously reference the last presentation the client received.
