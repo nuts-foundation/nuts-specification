@@ -130,7 +130,7 @@ To process a presentation, the following validation steps MUST be performed:
 - the key used to sign the presentation MUST be owned by the credential subject (see 4.1):
   the JWT ``kid`` header MUST reference an `assertionMethod` key from the subject's DID document.
 - the credentials MUST conform to the Presentation Definition associated with the list (see Use Case List Definition).
-  There MUST NOT be more credentials in the presentation than matched by the Presentation Definition.
+  The Verifiable Presentation MUST NOT contain other Verifiable Credentials than required by the Presentation Definition.
 
 If a validation step fails, the presentation MUST be rejected.
 
