@@ -101,7 +101,7 @@ To only keep valid presentations on the list, maintainers MUST remove presentati
 
 Clients that wish to retain their presentation MUST re-submit their registration before that period of time has passed, if they want to keep their presentation on the list (once a day, for instance).
 
-Maintainers SHOULD remove presentations which contains credentials that have been revoked.
+Maintainers SHOULD remove presentations which contain credentials that have been revoked.
 
 ### 3.5. Removing presentations
 
