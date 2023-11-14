@@ -99,7 +99,7 @@ If one or more presentations are not valid, it SHOULD NOT reject the other prese
 
 To only keep valid presentations on the list, maintainers MUST remove presentations whose `exp` (expiration) time has passed from the list.
 
-Clients that wish to retain their presentation MUST re-submit their registration before that period of time has passed, if they want to keep their presentation on the list (once a day, for instance).
+Clients that wish to retain their presence on the list MUST submit a new registration before the current entry's `exp` time has passed (once a day, for instance).
 
 Maintainers SHOULD remove presentations which contain credentials that have been revoked.
 
