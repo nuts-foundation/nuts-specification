@@ -24,8 +24,8 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 2. Terminology
 
-* **VerifiableCredential**: Verifiable Credential according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
-* **VerifiablePresentation**: Verifiable Presentation according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
+* **Verifiable Credential**: Verifiable Credential according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
+* **Verifiable Presentation**: Verifiable Presentation according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
 * **Maintainer**: party or system hosting the list and accepting new list registrations.
 * **Client**: party or system reading the list and using it to execute use cases.
 
