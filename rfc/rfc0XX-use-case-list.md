@@ -45,7 +45,7 @@ The HTTP request body MUST be a Verifiable Presentation (in JWT format). The con
 
 The maintainer MUST validate the Verifiable Presentation as specified in section 4. If the validation fails, it MUST return a 400 Bad Request response.
 If the validation succeeds, the Verifiable Presentation MUST be added to the list and the maintainer MUST return a 201 Created response.
-The presenter (meaning the credential holder, identified by `credentialSubject.id`) MUST only appear once on the list,
+The presenter (meaning the credential holder, identified by `credentialSubject.id`) MUST NOT appear more than once on the list,
 so a new registration MUST replace the previous one from the same presenter. 
 
 An example posting a Verifiable Presentation in JWT format to the list:
