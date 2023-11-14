@@ -139,7 +139,7 @@ JWT credential and presentation encoding as specified by [VC data model](https:/
 ### 4.1 Supported formats
 
 The ``did:web`` DID method MUST be supported. Support for other methods is optional.
-Presentations and credentials MUST be in JWT format.
+Verifiable Presentations and Verifiable Credentials MUST be in JWT format.
 
 ## 5. Use Case List Definition
 
