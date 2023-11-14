@@ -26,8 +26,9 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 * **Verifiable Credential**: Verifiable Credential according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
 * **Verifiable Presentation**: Verifiable Presentation according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
-* **Maintainer**: party or system hosting the list and accepting new list registrations.
-* **Client**: party or system reading the list and using it to execute use cases.
+* **Presentation Definition**: Presentation Definition according to the [Presentation Exchange specification](https://identity.foundation/presentation-exchange/).
+* **Maintainer**: system hosting the list and accepting new list registrations.
+* **Client**: system registering presentations on the list and reading it to discover other systems/parties.
 
 ## 3. List endpoint
 
@@ -36,7 +37,7 @@ It can be read in full, or only the Verifiable Presentations that changed after 
 It can be updated by sending a Verifiable Presentation to it.
 All presentations on the list MUST conform to the Presentation Definition associated with the list (see Use Case List Definition).
 
-Presentations MUST be encoded in JWT format as JSON string.
+Presentations MUST be encoded in JWT format as string.
 
 ### 3.2 Registering on the list
 
@@ -65,7 +66,7 @@ Clients MUST load the list by sending an HTTP GET to the maintainer's list endpo
 The maintainer MUST return a 200 OK response with a JSON object containing:
 - `entries` REQUIRED. MUST contain a JSON array with zero or more presentations.
 - `tombstones` REQUIRED. MUST contain a JSON array with zero or more presentation IDs that have been removed from the list.
-- `timestamp` REQUIRED. MUST be a JSON number containing the Lamport timestamp of the last entry.
+- `timestamp` REQUIRED. MUST be a JSON number containing the timestamp of the last entry. The timestamp is an opaque value; the client SHOULD NOT derive any meaning from it.
 
 The `timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
 If no `timestamp` query parameter is provided, the maintainer MUST return the full list.
@@ -113,13 +114,15 @@ If the signing key (identified by `kid`) and signature are valid, the maintainer
 The maintainer MUST add the removed presentations to the tombstone set.
 If the request was valid (regardless whether there were any presentations), the maintainer MUST respond with a `201 No Content` response.
 
-Presentations that have expired SHOULD be removed from the tombstone set by the maintainer, to keep it as small as possible.
+To keep the tombstone set small, the maintainer SHOULD remove:
+- Entries that reference a presentation that has expired
+- Entries that reference a presentation that has been replaced by a newer presentation of the same credential subject.
 
 ## 4. Presentation processing
 
 To process a presentation, the following validation steps MUST be performed:
 
-- ``jti`` (JWT ID) of the presentation MUST be a non-empty JSON string.
+- ``jti`` (JWT ID) of the presentation MUST be a non-empty string.
 - ``nbf`` (not before) of the presentation MUST have passed.
 - ``exp`` (expiration) of the presentation MUST NOT have passed.
 - ``exp`` MUST be after ``nbf``.
@@ -144,8 +147,8 @@ Verifiable Presentations and Verifiable Credentials MUST be in JWT format.
 
 Maintainers MUST share a JSON document describing the list. This document is known as the _list definition_.
 The document MUST contain the following properties:
-- `id` REQUIRED. JSON string containing a value identifies the list. MAY be used to version the definition.
-- `endpoint` REQUIRED. JSON string containing the URL where the maintainer serves the list.
+- `id` REQUIRED. string containing a value identifies the list. MAY be used to version the definition.
+- `endpoint` REQUIRED. string containing the URL where the maintainer serves the list.
 - `presentation_definition` REQUIRED. JSON object with the Presentation Definition (see [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition)) describing requirements for presentations on the list.
 - `presentation_max_validity` REQUIRED. JSON number containing the maximum validity period (number of seconds between `nbf` and `exp`) of a presentation in seconds.
 
@@ -218,3 +221,13 @@ This RFC does not specify nested or multiple lists as this can be achieved by ho
 
 When only the full list is available, clients need to validate and re-index (for fulltext search) all presentations.
 By having the maintainer return only new presentations instead, clients can only process those new entries.
+
+### Timestamp implementation
+
+The timestamp is specified as an opaque value (number). It is up to maintainers to decide how to implement this.
+
+One way to implement this is to use a [Lamport timestamp](https://en.wikipedia.org/wiki/Lamport_timestamp) which is incremented for every presentation received.
+That way, timestamps unambiguously reference the last presentation the client received.
+
+A Unix timestamp does not offer this property, as it is possible that multiple presentations are received at the second,
+possibly serving clients duplicate presentations.
