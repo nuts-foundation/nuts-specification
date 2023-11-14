@@ -24,9 +24,10 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 2. Terminology
 
-* **Verifiable Credential**: Verifiable Credential according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
-* **Verifiable Presentation**: Verifiable Presentation according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
-* **Presentation Definition**: Presentation Definition according to the [Presentation Exchange specification](https://identity.foundation/presentation-exchange/).
+* **Verifiable Credential**: cryptographically verifiable claim by a trusted third party over a subject, according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
+* **Credential subject**: entity the credential is about (e.g. organization, person, system or device). The credential subject is identified by the `id` property of the credential subject.
+* **Verifiable Presentation**: cryptographically verifiable presentation of a credential signed by the subject, according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
+* **Presentation Definition**: format specifying what constraints a presentation must conform to, according to the [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition).
 * **Maintainer**: system hosting the list and accepting new list registrations.
 * **Client**: system registering presentations on the list and reading it to discover other systems/parties.
 
@@ -126,6 +127,7 @@ To process a presentation, the following validation steps MUST be performed:
 - ``nbf`` (not before) of the presentation MUST have passed.
 - ``exp`` (expiration) of the presentation MUST NOT have passed.
 - ``exp`` MUST be after ``nbf``.
+- the number of seconds between ``nbf`` and ``exp`` MUST NOT exceed `presentation_max_validity` (see use Case List Definition).
 - all credential issuers MUST be trusted (see section 5). 
 - all credentials MUST have the same `credentialSubject.id`.
 - ``exp`` (expiration) of the presentation MUST NOT be after the expiration date of the credentials.
