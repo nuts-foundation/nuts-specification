@@ -180,6 +180,7 @@ The introspection endpoint SHOULD map the fields as follows:
 * `iat`: The time the access token was issued.
 * `scope`: The granted scope.
 * `vps`: The Verifiable Presentations that were used to request the access token using the same encoding as used in the access token request.
+* `presentation_submission`: The Presentation Submission that was used to request the access token.
 
 ## 7. Security Considerations
 
