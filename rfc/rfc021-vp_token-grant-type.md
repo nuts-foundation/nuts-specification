@@ -61,14 +61,14 @@ This section defines specific parameters and treatments of those parameters for 
 
 To use a VP as an authorization grant, the client uses an access token request as defined in Section 4 of the OAuth Assertion Framework [RFC7521] with the following specific parameter values and encodings.
 
-The value of the "grant_type" is "vp_token-bearer".
+The value of the `grant_type` is `vp_token-bearer`.
 
 The value of the "assertion" parameter MUST contain a Verifiable Presentation. The Verifiable Presentation MUST be encoded as either:
 
 * The Verifiable Presentation is encoded as JSON using the application/x-www-form-urlencoded content type.
 * The Verifiable Presentation is encoded as JWT according to section §6.3.1 of the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 
-The "scope" parameter MUST be used, as defined in the OAuth Assertion Framework [RFC6749], to indicate the requested scope. 
+The `scope` parameter MUST be used, as defined in the OAuth Assertion Framework [RFC6749], to indicate the requested scope. 
 The scope parameter determines the set of credentials the Authorization Server expects.
 
 The "presentation_submission" parameter MUST be used, as defined in Presentation Exchange [PE], to indicate how the VP matches the requested Verifiable Credentials.
