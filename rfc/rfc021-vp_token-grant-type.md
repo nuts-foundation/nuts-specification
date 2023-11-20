@@ -24,9 +24,9 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 1.  Introduction
 
-A Verifiable Presentation [VP] is an encoding that enables identity and security information based on Verifiable Credentials to be shared across security domains. 
-A security token is generally issued by an Authorization Server and consumed by a client that relies on its content to make authorization decisions. 
-In the case of Verifiable Credentials, the presentation is self-signed by the holder using a wallet.
+A Verifiable Presentation (VP) [VP] is an encoding that enables identity and security information based on Verifiable Credentials (VC) to be shared across security domains. 
+A security token is generally issued by an Authorization Server and consumed by a client that relies on its content to make authorization decisions.
+A Verifiable Presentation can be used as a security token. When used as a security token, the wallet of the holder assumes the role of the Authorization Server.
 
 The OAuth 2.0 Authorization Framework [RFC6749] provides a method for making authenticated HTTP requests to a resource using an access token. 
 Access tokens are issued to third-party clients by an Authorization Server (AS) with the (sometimes implicit) approval of the resource owner. 
@@ -43,7 +43,7 @@ The holder will need to know which Verifiable Credentials are required to access
 The Authorization Server provides this information in the form of a Presentation Definition [PE].
 The complete flow consists of the following steps:
 
-1. The client requests a Presentation Definition from the Authorization Server based on a scope.
+1. The client requests a Presentation Definition from the Authorization Server based on an OAuth scope.
 2. The client creates a Verifiable Presentation and a Presentation Submission that describes how the VP fulfills the requirements of the Presentation Definition.
 3. The client requests an access token from the Authorization Server using the Verifiable Presentation as an authorization grant.
 4. The Authorization Server validates the Verifiable Presentation and Presentation Submission.
@@ -63,15 +63,15 @@ To use a VP as an authorization grant, the client uses an access token request a
 
 The value of the `grant_type` is `vp_token-bearer`.
 
-The value of the "assertion" parameter MUST contain a Verifiable Presentation. The Verifiable Presentation MUST be encoded as either:
+The value of the `assertion` parameter MUST contain a Verifiable Presentation. The Verifiable Presentation MUST be encoded as either:
 
-* The Verifiable Presentation is encoded as JSON using the application/x-www-form-urlencoded content type.
-* The Verifiable Presentation is encoded as JWT according to section §6.3.1 of the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
+* JSON object using the application/x-www-form-urlencoded content type.
+* JWT according to section §6.3.1 of the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 
 The `scope` parameter MUST be used, as defined in the OAuth Assertion Framework [RFC6749], to indicate the requested scope. 
 The scope parameter determines the set of credentials the Authorization Server expects.
 
-The "presentation_submission" parameter MUST be used, as defined in Presentation Exchange [PE], to indicate how the VP matches the requested Verifiable Credentials.
+The `presentation_submission` parameter MUST be used, as defined in Presentation Exchange [PE], to indicate how the VP matches the requested Verifiable Credentials.
 The Presentation Submission MUST be in JSON format, URL encoded.
 
 The following example demonstrates an access token request with a VP as an authorization grant (with extra line breaks for display purposes only):
@@ -84,28 +84,26 @@ The following example demonstrates an access token request with a VP as an autho
      &assertion=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
      eyJpc3Mi[...omitted for brevity...].
      J9l-ZhwP[...omitted for brevity...]
-     &presentation_submission= {..}
+     &presentation_submission=%7B...omitted for brevity...%7D
      &scope=a_scope
 
 ## 3.1 Assertion Encoding
 
 The assertion parameter can either be encoded in JSON or JWT.
 The Authorization Server determines the encoding by adding the correct parameters to the Authorization Server metadata [RFC8414]].
-The following parameter MUST be added:
-
-* `vp_formats`: An object defining the formats and proof types of Verifiable Presentations and Verifiable Credentials that a Verifier supports as stated by §9 of the OpenID for Verifiable Presentations specification [OpenID4VP].
+The `vp_formats` parameter MUST be added. It MUST contain an object defining the formats and proof types of Verifiable Presentations and Verifiable Credentials that a Verifier supports as stated by §9 of the OpenID for Verifiable Presentations specification [OpenID4VP].
 
 ## 4. JWT Format and Processing Requirements
 
 In order to issue an access token response as described in OAuth 2.0 [RFC6749], the Authorization Server MUST validate the VP.
 The validation requirements are split into three paragraphs. The first paragraph describes the requirements that apply to all VP's.
-The second paragraph describes the requirements that apply to JWT encoded VP's. The third paragraph describes the requirements that apply to JSON encoded VP's.
+The second paragraph describes the requirements that apply to JWT encoded VP's. The third paragraph describes the requirements that apply to JSON-LD encoded VP's.
 
 ### 4.1 General processing requirements
 
 1. The Authorization Server MUST validate the Presentation Submission according to section 6 of the Presentation Exchange [PE] specification.
 2. The Authorization Server MUST validate the VP and Presentation Submission according to section 6.1 of the Presentation Exchange [PE] specification.
-3. The Presentation Submission MUST be an answer to the Presentation Definition that corresponds with the requested scope.
+3. The Presentation Submission MUST fulfill the Presentation Definition that corresponds with the requested scope.
    How an Authorization Server determines the Presentation Definition based on scope is out of scope of this specification.
 4. A clock skew of no more than 5 seconds MAY be applied when validating the Verifiable Presentation.
 
@@ -117,26 +115,26 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 4. The `kid` header MUST be a DID URL and MUST resolve to a verificationMethod in the DID Document. The DID part of the DID URL MUST match the `iss` field.
 5. The `sub` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
 6. The `aud` field MUST match the DID of the Authorization Server.
-7. The `iat` field MUST be present and contain a valid unix timestamp. It MUST be before the current time.
-8. The `exp` field MUST be present and contain a valid unix timestamp. It MUST be after the current time.
+7. The `iat` field MUST be present and contain a valid unix timestamp. It MUST be before the the current time (time at which the JWT is processed).
+8. The `exp` field MUST be present and contain a valid unix timestamp. It MUST be after the current time (time at which the JWT is processed).
 9. The difference between the `exp` and `iat` fields MUST be equal or less than 5 seconds.
 10. The `jti` field MUST be present and contain a string that is unique for each access token request.
 
-### 4.3 JSON format requirements
+### 4.3 JSON-LD format requirements
 
 1. The assertion MUST be a valid JSON object according to §4.10 the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
 2. The proof of the VP MUST be a valid [JSONWebSignature2020] object. Additional requirements for the proof object:
    1. The `challenge` field MUST be a string that is unique for each token request.
    2. The `domain` field MUST be a DID under control of the Authorization Server.
    3. The `verificationMethod` field MUST be a DID URL.
-   4. The id part of the DID in the `verificationMethod` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
-   5. The `created` field MUST be present and contain a valid ISO8601 formatted date string. It MUST be before the current time.
-   6. The `expires` field MUST be present and contain a valid ISO8601 formatted date string. It MUST be after the current time.
+   4. The ID part of the DID in the `verificationMethod` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
+   5. The `created` field MUST be present and contain a valid ISO8601 formatted date string. It MUST be before the current time (time at which the assertion is processed).
+   6. The `expires` field MUST be present and contain a valid ISO8601 formatted date string. It MUST be after the current time (time at which the assertion is processed).
    7. The difference between the `expires` and `created` fields MUST be equal or less than 5 seconds.
 
 ### 4.4 Preventing Token Replay
 
-The Authorization Server MUST reject any request that uses the unique value (`jti` or `challenge`) that has been used before.
+The Authorization Server MUST reject any request that uses the a value for `jti` (JWT proofs) or `challenge` (JSON Web Proofs) that has been used before.
 This approach has been chosen over the `nonce` field because there's no initial request to get a nonce from the Authorization Server.
 The Authorization Server MUST store the unique value for 10 seconds and MUST reject any request that uses a unique value that has been used before.
 The 10 seconds is based on the 5-second clock skew and the 5-second maximum difference between the expires and issued fields.
@@ -144,13 +142,16 @@ The 10 seconds is based on the 5-second clock skew and the 5-second maximum diff
 ### 4.5 Error Response
 
 If the Authorization Server determines that the VP is invalid, the Authorization Server MUST return an error response as defined in OAuth 2.0 [RFC6749].
-In addition to the error response defined in OAuth 2.0 [RFC6749], the Authorization Server MUST return a HTTP 400 (Bad Request) and use the following error codes when the VP is invalid:
+This RFC reuses the `invalid_request` error code for all errors related to the VP.
+The Authorization Server SHOULD include a description in the error response.
+Errors that could occur are: 
 
-* `invalid_verifiable_presentation`: The VP is invalid. This error code is used when the signature is incorrect or when a required field is missing.
-* `invalid_presentation_submission`: The Presentation Submission is invalid. This error code is used when the Presentation Submission is not an answer to the Presentation Definition that corresponds with the requested scope.
-
-An `invalid_request` is returned for any submitted Verifiable Credentials that do not meet the requirements, when the Verifiable Credentials aren't corresponding to the Presentation Definition or when the Verifiable Credentials are expired, not trusted or invalid. 
-It is also used when the Verifiable Credentials are not issued to the signer of the Verifiable Presentation.
+- The signature is incorrect.
+- A required field is missing.
+- The Presentation Submission is not an answer to the Presentation Definition that corresponds with the requested scope.
+- The submitted Verifiable Credentials do not meet the requirements of the Presentation Definition.
+- The Verifiable Credentials are expired, not trusted or invalid. 
+- The Verifiable Credentials are not issued to the signer of the Verifiable Presentation.
 
 ## 5. Presentation Definition endpoint
 
