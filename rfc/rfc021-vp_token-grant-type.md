@@ -63,10 +63,7 @@ To use a VP as an authorization grant, the client uses an access token request a
 
 The value of the `grant_type` is `vp_token-bearer`.
 
-The value of the `assertion` parameter MUST contain a Verifiable Presentation. The Verifiable Presentation MUST be encoded as either:
-
-* JSON object using the application/x-www-form-urlencoded content type.
-* JWT according to section §6.3.1 of the Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL].
+The  `assertion` parameter MUST follow the encoding requirements of the `vp_token` as defined in the OpenID for Verifiable Presentations specification [OpenID4VP].
 
 The `scope` parameter MUST be used, as defined in the OAuth Assertion Framework [RFC6749], to indicate the requested scope. 
 The scope parameter determines the set of credentials the Authorization Server expects.
