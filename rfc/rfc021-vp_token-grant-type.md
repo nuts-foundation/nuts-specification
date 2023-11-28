@@ -115,7 +115,7 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 7. The `nbf` field MUST be present and contain a valid unix timestamp. It MUST be before the the current time (time at which the JWT is processed).
 8. The `exp` field MUST be present and contain a valid unix timestamp. It MUST be after the current time (time at which the JWT is processed).
 9. The difference between the `exp` and `nbf` fields MUST be equal or less than 5 seconds.
-10. The `jti` field MUST be present and contain a string that is unique for each access token request.
+10. The `nonce` field MUST be present and contain a string that is unique for each access token request.
 
 ### 4.3 JSON-LD format requirements
 
@@ -131,8 +131,8 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 
 ### 4.4 Preventing Token Replay
 
-The Authorization Server MUST reject any request that uses the a value for `jti` (JWT proofs) or `nonce` (JSON Web Proofs) that has been used before.
-This approach has been chosen over the `nonce` field because there's no initial request to get a nonce from the Authorization Server.
+The Authorization Server MUST reject any request that uses a `nonce` that has been used before.
+The `nonce` field in this case is determined by the client because there's no initial request to get a nonce from the Authorization Server.
 The Authorization Server MUST store the unique value for 10 seconds and MUST reject any request that uses a unique value that has been used before.
 The 10 seconds is based on the 5-second clock skew and the 5-second maximum difference between the expires and issued fields.
 
