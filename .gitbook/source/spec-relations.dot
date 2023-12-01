@@ -22,16 +22,26 @@ digraph D {
         RFC017 [label = "RFC017\nV2 Network Protocol",href = "rfc017-distributed-network-grpc-v2"];
         RFC019 [label = "RFC019\nEmployee Identity Means",href = "rfc019-employee-identity-means"];
         RFC020 [label = "RFC020\nAuthorization Credential Extension",href = "rfc020-authorization-credential-extension"];
+        RFC021 [label = "RFC021\nVP Token Grant Type",href = "rfc021-nuts-vp-token-grant-type"];
     }
 
     // External RFCs
     subgraph cluster_external {
         RFC7779_EXT [label = "RFC7779\nJSON Web Signature (JWS) Unencoded Payload Option", href = "https://datatracker.ietf.org/doc/html/rfc7797", fillcolor = azure2, style = filled]
         RFC7662_EXT [label = "RFC7662\nOAuth 2.0 Token Introspection", href = "https://tools.ietf.org/html/rfc7662", fillcolor = azure2, style = filled]
-        RFC7523_EXT [label = "RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants", href = "https://tools.ietf.org/html/rfc7523", fillcolor = azure2, style = filled,]
+        RFC7523_EXT [label = "RFC7523\nJSON Web Token (JWT) Profile\nfor OAuth 2.0 Client Authentication and Authorization Grants", href = "https://tools.ietf.org/html/rfc7523", fillcolor = azure2, style = filled]
         RFC7515_EXT [label = "RFC7515\nJSON Web Signature (JWS)", href = "https://tools.ietf.org/html/rfc7515", fillcolor = azure2, style = filled]
         DID_EXT [label = "W3C DID\nDecentralized Identifiers (DIDs) v1.0", href = "https://www.w3.org/TR/2022/REC-did-core-20220719/", fillcolor = azure2, style = filled]
         VC_EXT  [label = "W3C VC\nVerifiable Credentials Data Model v1.1", href = "https://www.w3.org/TR/2022/REC-vc-data-model-20220303/", fillcolor = azure2, style = filled]
+        RFC6749_EXT [label = "The OAuth 2.0 Authorization Framework", href = "https://www.rfc-editor.org/info/rfc6749", fillcolor = azure2, style = filled]
+        RFC7521_EXT [label = "Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants", href = "https://www.rfc-editor.org/info/rfc7521", fillcolor = azure2, style = filled]
+        JWT_EXT [label = "JSON Web Token (JWT)", href = "https://www.rfc-editor.org/info/rfc7519", fillcolor = azure2, style = filled]
+        PE_EXT [label = "Presentation Exchange 2.0.0", href = "https://identity.foundation/presentation-exchange/spec/v2.0.0/", fillcolor = azure2, style = filled]
+        JSONWebSignature2020_EXT [label = "JSON Web Signature 2020", href = "https://w3c-ccg.github.io/lds-jws2020/", fillcolor = azure2, style = filled]
+        OpenID4VP_EXT [label = "OpenID for Verifiable Presentations Draft 18", href = "https://openid.net/specs/openid-4-verifiable-presentations-1_0.html", fillcolor = azure2, style = filled]
+        RFC8414_EXT [label = "OAuth 2.0 Authorization Server Metadata", href = "https://www.rfc-editor.org/info/rfc8414", fillcolor = azure2, style = filled]
+        RFC7662_EXT [label = "OAuth 2.0 Token Introspection", href = "https://www.rfc-editor.org/info/rfc7662", fillcolor = azure2, style = filled]
+
     }
 
     RFC002 -> RFC001
@@ -87,4 +97,15 @@ digraph D {
 
     RFC020 -> RFC014
     RFC020 -> RFC019
+
+    RFC021 -> DID_EXT
+    RFC021 -> VC_EXT
+    RFC021 -> RFC6749_EXT
+    RFC021 -> RFC7521_EXT
+    RFC021 -> JWT_EXT
+    RFC021 -> PE_EXT
+    RFC021 -> JSONWebSignature2020_EXT
+    RFC021 -> OpenID4VP_EXT
+    RFC021 -> RFC8414_EXT
+    RFC021 -> RFC7662_EXT
 }

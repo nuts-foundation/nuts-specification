@@ -19,6 +19,7 @@
 * [RFC017 Distributed Network Protocol (v2) using gRPC](rfc/rfc017-distributed-network-grpc-v2.md)
 * [RFC019 Employee Identity Authentication Means](rfc/rfc019-employee-identity-means.md)
 * [RFC020 Authorization credential extension](rfc/rfc020-authorization-credential-extension.md)
+* [RFC021 VP Token Grant Type](rfc/rfc021-vp_token-grant-type.md)
 
 ## templates
 
