@@ -66,16 +66,16 @@ The Verifiable Presentation MUST NOT be valid longer than the Verifiable Credent
 Clients MUST read the list by sending an HTTP GET to the server's service endpoint.
 The server MUST return a 200 OK response with a JSON object containing:
 - `entries` REQUIRED. MUST contain a JSON array with zero or more presentations.
-- `timestamp` REQUIRED. MUST be a JSON number containing the timestamp of the last entry. The timestamp is an opaque value; the client SHOULD NOT derive any meaning from it.
+- `tag` REQUIRED. MUST be a JSON string referring to the last entry. The tag is an opaque value; the client SHOULD NOT derive any meaning from it.
 
-The `timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
-If no `timestamp` query parameter is provided, the server MUST return the full list.
+The `tag` query parameter MAY be used by the client to request a delta next time it reads the list.
+If no `tag` query parameter is provided, the server MUST return the full list.
 Servers MUST only return the latest (valid) presentation per credential subject.
 
 Example:
 
 ``http request
-GET /list?timestamp=510 HTTP/1.1
+GET /list?tag=510 HTTP/1.1
 Content-Type: application/json
 
 {
@@ -83,7 +83,7 @@ Content-Type: application/json
     "ey1234.etc.etc",
     "ey5678.etc.etc"
   ],
-  "timestamp": 515,
+  "tag": 515,
 }
 ``
 
@@ -221,9 +221,9 @@ This RFC does not specify nested or multiple lists as this can be achieved by ho
 When only the full list is available, clients need to validate and re-index (for fulltext search) all presentations.
 By having the server return only new presentations instead, clients can only process those new entries.
 
-### Timestamp implementation
+### Tag implementation
 
-The timestamp is specified as an opaque value (number). It is up to server to decide how to implement this.
+The tag is specified as an opaque value (JSON string). It is up to server to decide how to implement this.
 
 One way to implement this is to use a [Lamport timestamp](https://en.wikipedia.org/wiki/Lamport_timestamp) which is incremented for every presentation received.
 That way, timestamps unambiguously reference the last presentation the client received.
