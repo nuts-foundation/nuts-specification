@@ -120,7 +120,7 @@ To process a presentation, the following validation steps MUST be performed:
 - `nbf` (not before) of the presentation MUST have passed.
 - `exp` (expiration) of the presentation MUST NOT have passed.
 - `exp` MUST be after `nbf`.
-- `aud` MUST contain the service endpoint URL.
+- `aud` MUST contain the ID of the service.
 - the number of seconds between `nbf` and `exp` MUST NOT exceed `presentation_max_validity` (see Service Definition).
 - all credential issuers MUST be trusted (see section 5). 
 - all credentials MUST have the same `credentialSubject.id`.
