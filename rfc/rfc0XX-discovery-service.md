@@ -102,18 +102,14 @@ Servers SHOULD remove presentations which contain credentials that have been rev
 ### 3.4 Retracting presentations
 
 Clients can remove presentations from the list, e.g. when a care organization stops supporting the use case.
-To remove presentations of a credential subject the client MUST send an HTTP DELETE request to the service endpoint,
-where the body contains a Verifiable Presentation signed by the credential subject.
-In addition to the validation steps specified in section 4, the presentation MUST conform to the following requirements:
+To remove presentations of a credential subject the client MUST register a Verifiable Presentation as specified in section 3.1,
+with the following additional requirements:
 
 - it MUST specify `RetractedVerifiablePresentation` as type, in addition to the `VerifiablePresentation`.
 - it MUST contain a `retract_jti` JWT claim, containing the `jti` of the presentation to retract.
 - it MUST NOT contain any credentials.
 
-The content type of the request MUST be `application/json`.
-If the request was valid (regardless whether there were any presentations), the server MUST respond with a `201 No Content` response.
-
-Clients processing a presentation retraction, SHOULD remove the presentation indicated by `retract_jti` from its local copy of the list.
+Clients processing a presentation retraction MUST remove the presentation indicated by `retract_jti`.
 
 ## 4. Presentation processing
 
