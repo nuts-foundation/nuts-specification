@@ -83,7 +83,7 @@ Content-Type: application/json
     "ey1234.etc.etc",
     "ey5678.etc.etc"
   ],
-  "tag": 515,
+  "tag": "515",
 }
 ``
 
