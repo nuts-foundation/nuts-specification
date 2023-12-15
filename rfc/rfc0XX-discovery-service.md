@@ -109,7 +109,14 @@ with the following additional requirements:
 - it MUST contain a `retract_jti` JWT claim, containing the `jti` of the presentation to retract.
 - it MUST NOT contain any credentials.
 
+If a server receives a retraction that references an unknown presentation it MUST respond with a 400 Bad Request response.
+The response MUST be a JSON error response describing the error.
+
 Clients processing a presentation retraction MUST remove the presentation indicated by `retract_jti`.
+
+### 3.5 Error responses
+
+If a server encounters an error while processing a request, it MUST respond with a JSON response containing an `error` property, describing the error.
 
 ## 4. Presentation processing
 
