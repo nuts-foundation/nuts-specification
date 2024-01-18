@@ -47,7 +47,7 @@ The HTTP request body MUST be a Verifiable Presentation (in JWT format). The con
 The server MUST validate the Verifiable Presentation as specified in section 4. If the validation fails, it MUST return a 400 Bad Request response.
 If the validation succeeds, the Verifiable Presentation MUST be added to the list and the server MUST return a 201 Created response.
 
-The credential subject (identified by `credentialSubject.id`) MUST NOT appear more than once on the list,
+A credential subject (identified by `credentialSubject.id`) MUST NOT appear more than once on the list,
 so a new registration MUST replace the previous one from the same credential subject.
 
 An example posting a Verifiable Presentation in JWT format to the list:
