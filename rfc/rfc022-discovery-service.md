@@ -1,14 +1,16 @@
-# RFC0XX Discovery Service
+# RFC022 Discovery Service
 
-|                          |           |
-|:-------------------------|:----------|
-| Nuts foundation          | R.G. Krul |
-| Request for Comments: 0  | Nedap     |
-| Amends:                  |           |
+|                           |           |
+|:--------------------------|:----------|
+| Nuts foundation           | R.G. Krul |
+| Request for Comments: 022 | Nedap     |
+|                           |           |
 
 ## Discovery Service
 
 ### Abstract
+
+This specification defines the use of a Verifiable Presentation for Service Discovery using a client-server model.
 
 ### Status of document
 
@@ -21,6 +23,13 @@ This document is currently in draft.
 This document is released under the [Attribution-ShareAlike 4.0 International \(CC BY-SA 4.0\) license](https://creativecommons.org/licenses/by-sa/4.0/).
 
 ## 1.  Introduction
+
+Service Discovery is the starting point of most data exchange protocols.
+Users need to know which (remote) systems offer a particular service and systems need to know how to connect to those systems.
+
+This RFC defines a protocol for Service Discovery using Verifiable Presentations using a client-server model.
+The advantage of using Verifiable Presentations is that the client needs little trust in the server:
+clients can verify the authenticity and integrity of the Verifiable Presentation and Verifiable Credential.
 
 ## 2. Terminology
 
