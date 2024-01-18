@@ -193,7 +193,7 @@ For example:
 ## 6. Trust
 
 Trust of credential issuers (e.g. `did:example:education-accredetor` issuing `EducationalInstitutionCredential`) SHOULD be defined by the presentation definition.
-In this case, there should be 2 constraints: one for the type and one for the issuer:
+In this case, there should be 2 constraints in the input descriptor object: one for the type and one for the issuer:
 
 ``json
 [
