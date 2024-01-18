@@ -24,12 +24,12 @@ This document is released under the [Attribution-ShareAlike 4.0 International \(
 
 ## 2. Terminology
 
-* **Verifiable Credential**: cryptographically verifiable claim by a trusted third party over a subject, according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
-* **Credential subject**: entity the credential is about (e.g. organization, person, system or device). The credential subject is identified by the `id` property of the credential subject.
-* **Verifiable Presentation**: cryptographically verifiable presentation of a credential signed by the subject, according to the [Verifiable Credential Data Model](https://www.w3.org/TR/vc-data-model/).
-* **Presentation Definition**: format specifying what constraints a presentation must conform to, according to the [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition).
+* **Discovery Service**: collection of Verifiable Presentations that allows discovery of systems/parties that offer a particular service.
+* **Discovery Definition**: document describing the Discovery Service.
 * **Server**: system hosting the discovery service and accepting new registrations.
 * **Client**: system registering presentations on the list and reading it to discover other systems/parties.
+
+Other terms are as defined in the following specifications: "JSON Web Token (JWT)" [JWT], Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL], Verifiable Credentials Presentation Exchange [PE], Decentralized Identifiers 1.0 [DID].
 
 ## 3. Service endpoint
 
@@ -37,7 +37,7 @@ The service endpoint is an HTTP endpoint exposed by the server which hosts a lis
 Clients can query the list or submit a new Verifiable Presentation to it.
 All presentations MUST conform to the Presentation Definition associated with the discovery service (see Service Definition).
 
-Presentations MUST be encoded in JWT format as string.
+Presentations MUST be encoded in JWT format as string ([JWT]).
 
 ### 3.1 Registration
 
@@ -101,7 +101,7 @@ Servers SHOULD remove presentations which contain credentials that have been rev
 
 ### 3.4 Retracting presentations
 
-Clients can remove presentations from the list, e.g. when a care organization stops supporting the use case.
+Clients can remove presentations from the list, e.g. when a organization stops supporting the use case.
 To remove presentations of a credential subject the client MUST register a Verifiable Presentation as specified in section 3.1,
 with the following additional requirements:
 
@@ -112,7 +112,7 @@ with the following additional requirements:
 If a server receives a retraction that references an unknown presentation it MUST respond with a 400 Bad Request response.
 The response MUST be a JSON error response describing the error.
 
-Clients processing a presentation retraction MUST remove the presentation indicated by `retract_jti`.
+Clients processing a retraction entry MUST remove the presentation indicated by `retract_jti`.
 
 ### 3.5 Error responses
 
@@ -139,11 +139,11 @@ To process a presentation, the following validation steps MUST be performed:
 
 If a validation step fails, the presentation MUST be rejected.
 
-JWT credential and presentation encoding as specified by [VC data model](https://www.w3.org/TR/vc-data-model/#jwt-decoding) MUST be applied.
+JWT credential and presentation encoding as specified by [VC-DATA-MODEL] MUST be applied.
 
 ### 4.1 Supported formats
 
-The `did:web` DID method MUST be supported. Support for other methods is optional.
+The `did:web` DID method ([DID]) MUST be supported. Support for other methods is optional.
 Verifiable Presentations and Verifiable Credentials MUST be in JWT format.
 
 ## 5. Service Definition
@@ -152,7 +152,7 @@ Servers MUST share a JSON document describing the discovery service. This docume
 The document MUST contain the following properties:
 - `id` REQUIRED. String containing a value that identifies the service definition. MAY be used to version the definition.
 - `endpoint` REQUIRED. String containing the URL where the server hosts the service endpoint.
-- `presentation_definition` REQUIRED. JSON object with the Presentation Definition (see [Presentation Exchange](https://identity.foundation/presentation-exchange/#presentation-definition)) describing requirements for presentations on the list.
+- `presentation_definition` REQUIRED. JSON object with the Presentation Definition (see [PE]) describing requirements for presentations on the list.
 - `presentation_max_validity` REQUIRED. JSON number containing the maximum validity period (number of seconds between `nbf` and `exp`) of a presentation in seconds.
 
 For example:
@@ -193,7 +193,7 @@ For example:
 ## 6. Trust
 
 Trust of credential issuers (e.g. `did:example:education-accredetor` issuing `EducationalInstitutionCredential`) SHOULD be defined by the presentation definition.
-In this case, there should be 2 constraints in the input descriptor object: one for the type and one for the issuer:
+In this case, there should be 2 constraints: one for the type and one for the issuer:
 
 ``json
 [
@@ -234,3 +234,10 @@ That way, timestamps unambiguously reference the last presentation the client re
 
 A Unix timestamp does not offer this property, as it is possible that multiple presentations are received at the second,
 possibly serving clients duplicate presentations.
+
+## References
+
+* [JWT] M. Jones, J. Bradley, N. Sakimura, "JSON Web Token (JWT)", RFC 7519, May 2015, <https://www.rfc-editor.org/info/rfc7519>.
+* [VC-DATA-MODEL] M. Sporny, D. Longley, D. Chadwick, "Verifiable Credentials Data Model 1.1", W3C Recommendation, 3 March 2022, <https://www.w3.org/TR/vc-data-model/>.
+* [PE] D. Buchner, B. Zundel, M. Riedel, K.H. Duffy, "Presentation Exchange 2.0.0", 12 September 2023, <https://identity.foundation/presentation-exchange/spec/v2.0.0/>.
+* [DID] M. Sporny, D. Longley, M. Sabadello, D. Reed, O. Steele, C. Allen, "Decentralized Identifiers (DIDs) v1.0", W3C Recommendation, 19 July 2022, <https://www.w3.org/TR/did-core/>.
