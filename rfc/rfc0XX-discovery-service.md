@@ -41,7 +41,7 @@ Presentations MUST be encoded in JWT format as string.
 
 ### 3.1 Registration
 
-Clients can add a Verifiable Presentation to the list by sending an HTTP POST to the service endpoint.
+Clients can publish a Verifiable Presentation to the list by sending it in an HTTP POST to the service endpoint.
 The HTTP request body MUST be a Verifiable Presentation (in JWT format). The content type of the request MUST be `application/json`.
 
 The server MUST validate the Verifiable Presentation as specified in section 4. If the validation fails, it MUST return a 400 Bad Request response.
