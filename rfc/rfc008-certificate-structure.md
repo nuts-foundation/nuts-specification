@@ -46,17 +46,21 @@ The PKIoverheid CA tree is the choice of CA to trust for production use. It's wi
 
 ### 3.1 Certificate Authority trust chain
 
-A node will need to configure the correct CA-tree so other nodes can connect. The certificate to configure are:
+A node will need to configure the correct CA-tree so other nodes can connect. 
+All certificates that are part of the `Domein Private Services` trust chain as identified by intermediate certificate `Staat der Nederlanden Private Services CA – G1` should be configured.
+The certificates in this chain may change over time, and can be viewed and downloaded from the [PKIoverheid](https://cert.pkioverheid.nl/cert-pkioverheid-nl.htm) website.
 
+At the time of writing the chain consists of the following certificates:
 - **Staat der Nederlanden Private Root CA G1** (root certificate)
   - **Staat der Nederlanden Private Services CA – G1**
     - **KPN PKIoverheid Private Services CA - G1**
     - **QuoVadis PKIoverheid Private Services CA - G1** 
+    - **DigiCert QuoVadis PKIoverheid Private Services CA - 2023**
     - **UZI-register Private Server CA G1**
+    - **ZOVAR Private Server CA G1**
+    - **Digidentity BV PKIoverheid Private Services CA - G1**
 
 Do not include other PKIoverheid CA certificates.
-
-All certificates can be downloaded from the [PKIoverheid](https://cert.pkioverheid.nl/cert-pkioverheid-nl.htm) website.
 
 The PKIoverheid private services CA is not by default accepted by browsers and operating systems.
 
