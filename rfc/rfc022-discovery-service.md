@@ -56,9 +56,8 @@ Clients can publish a Verifiable Presentation to the server by sending it in an 
 The HTTP request body MUST be a Verifiable Presentation (in JWT format). The content type of the request MUST be `application/json`.
 
 The server MUST validate the Verifiable Presentation as specified in section 4. If the validation fails, it MUST return a 400 Bad Request response.
-If the validation succeeds, the Verifiable Presentation MUST be added to the internal list and the server MUST return a 201 Created response.
-If the Verifiable Presentation is already on the list, the server MUST return a 304 Not Modified response.
-If the server is configured as client, it MUST send the presentation to the server it has configured.
+If the validation succeeds, the Verifiable Presentation MUST be added to the list and the server MUST return a 201 Created response.
+If an implementation is configured as client and receives a registration, it MUST send the presentation to the server it has configured.
 
 A credential subject (identified by `credentialSubject.id`) MUST NOT appear more than once on the list,
 so a new registration MUST replace the previous one from the same credential subject.
@@ -86,7 +85,7 @@ The timestamp definition used here is a lamport clock, which is a monotonically 
 
 The `timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
 The server SHOULD return the presentations with a timestamp greater than the provided value.
-The server MUST return the latest `timestamp` value based on its internal state.
+The server MUST return the latest `timestamp` value based on the value of the last presentation on the list.
 If the query parameter is not provided, the server MUST return the full list.
 If based on the timestamp the server has no new presentations it returns an empty list for the `entries` object.
 Servers MUST only return the latest (valid) presentation per credential subject.
@@ -108,7 +107,7 @@ Content-Type: application/json
 Clients MUST validate each presentation in the list as specified in section 4.
 If a presentation is valid, the client uses it in its system. If a presentation is not valid, it MUST be rejected.
 If one or more presentations are not valid, it SHOULD NOT reject the other presentations.
-Clients SHOULD update the `timestamp` value based on the value of the return object.
+Clients SHOULD use the `timestamp` value in the return object for their next call.
 
 ### 3.3 List pruning
 
@@ -124,13 +123,12 @@ with the following additional requirements:
 
 - it MUST specify `RetractedVerifiablePresentation` as type, in addition to the `VerifiablePresentation`.
 - it MUST contain a `retract_jti` JWT claim, containing the `jti` of the presentation to retract.
-- it MUST contain a `retract_hash` JWT claim, containing the sha256 of the presentation to retract.
 - it MUST NOT contain any credentials.
 
 If a server receives a retraction that references an unknown presentation it MUST respond with a 400 Bad Request response.
 The response MUST be a JSON error response describing the error.
 
-Clients processing a retraction entry MUST remove the presentation indicated by `retract_jti` if the `retract_hash` matches the hash of the presentation to retract.
+Clients processing a retraction entry MUST remove the presentation indicated by `retract_jti`.
 The expiration of the retraction presentation MUST be equal to the expiration of the presentation to retract.
 
 ### 3.5 Error responses
