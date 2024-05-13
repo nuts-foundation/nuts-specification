@@ -48,16 +48,21 @@ All presentations MUST conform to the Presentation Definition associated with th
 
 Presentations MUST be encoded in JWT format as string ([JWT]).
 
+The protocol identifies the server and client roles. A client can be a server and vice versa. The individual operations define what to do in certain cases.
+
 ### 3.1 Registration
 
-Clients can publish a Verifiable Presentation to the list by sending it in an HTTP POST to the service endpoint.
+Clients can publish a Verifiable Presentation to the server by sending it in an HTTP POST to the service endpoint.
 The HTTP request body MUST be a Verifiable Presentation (in JWT format). The content type of the request MUST be `application/json`.
 
 The server MUST validate the Verifiable Presentation as specified in section 4. If the validation fails, it MUST return a 400 Bad Request response.
 If the validation succeeds, the Verifiable Presentation MUST be added to the list and the server MUST return a 201 Created response.
+If an implementation is configured as client and receives a registration, it MUST send the presentation to the server it has configured.
 
 A credential subject (identified by `credentialSubject.id`) MUST NOT appear more than once on the list,
 so a new registration MUST replace the previous one from the same credential subject.
+The server MUST assign a timestamp to each new registration. It MUST not assign the same timestamp more than once.
+The timestamp definition used here is a lamport clock, which is a monotonically increasing integer.
 
 An example posting a Verifiable Presentation in JWT format to the list:
 
@@ -74,39 +79,42 @@ The Verifiable Presentation MUST NOT be valid longer than the Verifiable Credent
 
 Clients MUST read the list by sending an HTTP GET to the server's service endpoint.
 The server MUST return a 200 OK response with a JSON object containing:
-- `entries` REQUIRED. MUST contain a JSON array with zero or more presentations.
-- `tag` REQUIRED. MUST be a JSON string referring to the last entry. The tag is an opaque value; the client SHOULD NOT derive any meaning from it.
+- `entries` REQUIRED. MUST contain a JSON object with a mapping of timestamp (as string) to presentation.
+- `timestamp` REQUIRED. MUST be a JSON integer equal to the timestamp of the last presentation.
 
-The `tag` query parameter MAY be used by the client to request a delta next time it reads the list.
-If no `tag` query parameter is provided, the server MUST return the full list.
+The `timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
+The server SHOULD return the presentations with a timestamp greater than the provided value.
+The server MUST return the latest `timestamp` value based on the value of the last presentation on the list.
+If the query parameter is not provided, the server MUST return the full list.
+If based on the timestamp the server has no new presentations it returns an empty list for the `entries` object.
 Servers MUST only return the latest (valid) presentation per credential subject.
 
 Example:
 
 ``http request
-GET /list?tag=510 HTTP/1.1
+GET /list?timestamp=6 HTTP/1.1
 Content-Type: application/json
 
 {
-  "entries": [
-    "ey1234.etc.etc",
-    "ey5678.etc.etc"
-  ],
-  "tag": "515",
+  "entries": {
+    "7": "ey1234..."
+  }
+  "timestamp": 7
 }
 ``
 
 Clients MUST validate each presentation in the list as specified in section 4.
 If a presentation is valid, the client uses it in its system. If a presentation is not valid, it MUST be rejected.
 If one or more presentations are not valid, it SHOULD NOT reject the other presentations.
+If new presentations contain an already known credential subject (identified by `credentialSubject.id`), 
+the client MUST replace the old presentation with the new one if the timestamp of the new presentation is greater than the timestamp of the old presentation.
+Clients SHOULD use the `timestamp` value in the return object for their next call.
 
 ### 3.3 List pruning
 
-To only keep valid presentations on the list, servers MUST remove presentations whose `exp` (expiration) time has passed from the list.
+To only keep valid presentations on the list, servers and clients MUST remove presentations whose `exp` (expiration) time has passed from the list.
 
 Clients that wish to retain their presence on the list MUST submit a new registration before the current entry's `exp` time has passed (once a day, for instance).
-
-Servers SHOULD remove presentations which contain credentials that have been revoked.
 
 ### 3.4 Retracting presentations
 
@@ -122,6 +130,7 @@ If a server receives a retraction that references an unknown presentation it MUS
 The response MUST be a JSON error response describing the error.
 
 Clients processing a retraction entry MUST remove the presentation indicated by `retract_jti`.
+The expiration of the retraction presentation MUST be equal to the expiration of the presentation to retract.
 
 ### 3.5 Error responses
 
@@ -132,7 +141,6 @@ If a server encounters an error while processing a request, it MUST respond with
 To process a presentation, the following validation steps MUST be performed:
 
 - `jti` (JWT ID) of the presentation MUST be a non-empty string.
-- the presentation ID  (`jti`) MUST NOT already exist on the list.
 - `nbf` (not before) of the presentation MUST have passed.
 - `exp` (expiration) of the presentation MUST NOT have passed.
 - `exp` MUST be after `nbf`.
@@ -149,6 +157,7 @@ To process a presentation, the following validation steps MUST be performed:
 If a validation step fails, the presentation MUST be rejected.
 
 JWT credential and presentation encoding as specified by [VC-DATA-MODEL] MUST be applied.
+A clock skew of 5 seconds MAY be applied to `nbf` and `exp` claims.
 
 ### 4.1 Supported formats
 
@@ -234,15 +243,16 @@ This RFC does not specify nested or multiple lists as this can be achieved by ho
 When only the full list is available, clients need to validate and re-index (for fulltext search) all presentations.
 By having the server return only new presentations instead, clients can only process those new entries.
 
-### Tag implementation
+### Timestamp implementation
 
-The tag is specified as an opaque value (JSON string). It is up to server to decide how to implement this.
-
-One way to implement this is to use a [Lamport timestamp](https://en.wikipedia.org/wiki/Lamport_timestamp) which is incremented for every presentation received.
+The timestamp is specified as an integer. It should be implemented as a [Lamport timestamp](https://en.wikipedia.org/wiki/Lamport_timestamp) which is incremented for every presentation received.
 That way, timestamps unambiguously reference the last presentation the client received.
 
 A Unix timestamp does not offer this property, as it is possible that multiple presentations are received at the second,
 possibly serving clients duplicate presentations.
+
+A strict implementation requirement for a Lamport timestamp is that the client will have the same timestamp as the server.
+This makes it possible for the client to become the server and vice versa. Changing the server still requires a well orchestrated migration.
 
 ## References
 
