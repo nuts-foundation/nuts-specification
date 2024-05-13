@@ -61,7 +61,8 @@ If an implementation is configured as client and receives a registration, it MUS
 
 A credential subject (identified by `credentialSubject.id`) MUST NOT appear more than once on the list,
 so a new registration MUST replace the previous one from the same credential subject.
-If two presentations have the same issuance date, the server MUST keep the one with the highest byte value of the sha256 of the presentation. 
+The server MUST assign a timestamp to each new registration. It MUST not assign the same timestamp more than once.
+The timestamp definition used here is a lamport clock, which is a monotonically increasing integer.
 
 An example posting a Verifiable Presentation in JWT format to the list:
 
@@ -80,8 +81,6 @@ Clients MUST read the list by sending an HTTP GET to the server's service endpoi
 The server MUST return a 200 OK response with a JSON object containing:
 - `entries` REQUIRED. MUST contain a JSON object with a mapping of timestamp (as string) to presentation.
 - `timestamp` REQUIRED. MUST be a JSON integer equal to the timestamp of the last presentation.
-
-The timestamp definition used here is a lamport clock, which is a monotonically increasing integer.
 
 The `timestamp` query parameter MAY be used by the client to request a delta next time it reads the list.
 The server SHOULD return the presentations with a timestamp greater than the provided value.
@@ -107,6 +106,8 @@ Content-Type: application/json
 Clients MUST validate each presentation in the list as specified in section 4.
 If a presentation is valid, the client uses it in its system. If a presentation is not valid, it MUST be rejected.
 If one or more presentations are not valid, it SHOULD NOT reject the other presentations.
+If new presentations contains an already known credential subject (identified by `credentialSubject.id`), 
+the client MUST replace the old presentation with the new one if the timestamp of the new presentation is greater than the timestamp of the old presentation.
 Clients SHOULD use the `timestamp` value in the return object for their next call.
 
 ### 3.3 List pruning
