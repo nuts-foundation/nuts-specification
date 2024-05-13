@@ -106,7 +106,7 @@ Content-Type: application/json
 Clients MUST validate each presentation in the list as specified in section 4.
 If a presentation is valid, the client uses it in its system. If a presentation is not valid, it MUST be rejected.
 If one or more presentations are not valid, it SHOULD NOT reject the other presentations.
-If new presentations contains an already known credential subject (identified by `credentialSubject.id`), 
+If new presentations contain an already known credential subject (identified by `credentialSubject.id`), 
 the client MUST replace the old presentation with the new one if the timestamp of the new presentation is greater than the timestamp of the old presentation.
 Clients SHOULD use the `timestamp` value in the return object for their next call.
 
