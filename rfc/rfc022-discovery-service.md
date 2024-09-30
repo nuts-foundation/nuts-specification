@@ -1,10 +1,11 @@
 # RFC022 Discovery Service
 
-|                           |           |
-|:--------------------------|:----------|
-| Nuts foundation           | R.G. Krul |
-| Request for Comments: 022 | Nedap     |
-|                           |           |
+|                           |                |
+|:--------------------------|:---------------|
+| Nuts foundation           | R.G. Krul      |
+| Request for Comments: 022 | Nedap          |
+|                           | W.M. Slakhorst |
+|                           | October 2024   |
 
 ## Discovery Service
 
@@ -37,8 +38,9 @@ clients can verify the authenticity and integrity of the Verifiable Presentation
 * **Discovery Definition**: document describing the Discovery Service.
 * **Server**: system hosting the discovery service and accepting new registrations.
 * **Client**: system registering presentations on the list and reading it to discover other systems/parties.
+* **List**: refers to the list of Verifiable Presentations hosted by the server for a specific service.
 
-Other terms are as defined in the following specifications: "JSON Web Token (JWT)" [JWT], Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL], Verifiable Credentials Presentation Exchange [PE], Decentralized Identifiers 1.0 [DID].
+Other terms are as defined in the following specifications: "JSON Web Token (JWT)" [JWT], Verifiable Credentials Data Model 1.1 [VC-DATA-MODEL], Verifiable Credentials Presentation Exchange [PEX], Decentralized Identifiers 1.0 [DID].
 
 ## 3. Service endpoint
 
@@ -104,7 +106,7 @@ Content-Type: application/json
 ``
 
 Clients MUST validate each presentation in the list as specified in section 4.
-If a presentation is valid, the client uses it in its system. If a presentation is not valid, it MUST be rejected.
+If a presentation is not valid, it MUST be rejected.
 If one or more presentations are not valid, it SHOULD NOT reject the other presentations.
 If new presentations contain an already known credential subject (identified by `credentialSubject.id`), 
 the client MUST replace the old presentation with the new one if the timestamp of the new presentation is greater than the timestamp of the old presentation.
@@ -114,7 +116,7 @@ Clients SHOULD use the `timestamp` value in the return object for their next cal
 
 To only keep valid presentations on the list, servers and clients MUST remove presentations whose `exp` (expiration) time has passed from the list.
 
-Clients that wish to retain their presence on the list MUST submit a new registration before the current entry's `exp` time has passed (once a day, for instance).
+Clients that wish to retain their presence on the list MUST submit a new registration before the current entry's `exp` time has passed.
 
 ### 3.4 Retracting presentations
 
@@ -127,50 +129,61 @@ with the following additional requirements:
 - it MUST NOT contain any credentials.
 
 If a server receives a retraction that references an unknown presentation it MUST respond with a 400 Bad Request response.
-The response MUST be a JSON error response describing the error.
+The response MUST be a JSON error response (§3.5) describing the error.
 
 Clients processing a retraction entry MUST remove the presentation indicated by `retract_jti`.
 The expiration of the retraction presentation MUST be equal to the expiration of the presentation to retract.
 
 ### 3.5 Error responses
 
-If a server encounters an error while processing a request, it MUST respond with a JSON response containing an `error` property, describing the error.
+If a server encounters an error while processing a request, it MUST respond with a JSON response according to [RFC7807].
 
 ## 4. Presentation processing
 
+The abbreviations below are conform definitions by [IANA](https://www.iana.org/assignments/jwt/jwt.xhtml#claims). 
 To process a presentation, the following validation steps MUST be performed:
 
-- `jti` (JWT ID) of the presentation MUST be a non-empty string.
-- `nbf` (not before) of the presentation MUST have passed.
-- `exp` (expiration) of the presentation MUST NOT have passed.
+- `jti` of the presentation MUST be a non-empty string.
+- `nbf` of the presentation MUST have passed.
+- `exp` of the presentation MUST NOT have passed.
 - `exp` MUST be after `nbf`.
 - `aud` MUST contain the ID of the service.
 - the number of seconds between `nbf` and `exp` MUST NOT exceed `presentation_max_validity` (see Service Definition).
-- all credential issuers MUST be trusted (see section 5). 
 - all credentials MUST have the same `credentialSubject.id`.
-- `exp` (expiration) of the presentation MUST NOT be after the expiration date of the credentials.
+- `exp` of the presentation MUST NOT be after the expiration date of the credentials.
 - the key used to sign the presentation MUST be owned by the credential subject (see 4.1):
   the JWT `kid` header MUST reference an `assertionMethod` key from the subject's DID document.
+- The DID of the credential subject MUST be of a DID method defined in the service definition.
+- the presentation MAY contain a `DiscoveryRegistrationCredential` credential defined by the Nuts JSON-LD context (https://nuts.nl/credentials/v1).
+  If present, it MUST NOT be included in the next validation steps.
 - the credentials MUST conform to the Presentation Definition associated with the list (see Service Definition).
-  The Verifiable Presentation MUST NOT contain other Verifiable Credentials than required by the Presentation Definition.
+  The Verifiable Presentation MUST NOT contain any Verifiable Credentials besides the ones that conform to the Presentation Definition and the `DiscoveryRegistrationCredential`.
 
 If a validation step fails, the presentation MUST be rejected.
 
 JWT credential and presentation encoding as specified by [VC-DATA-MODEL] MUST be applied.
 A clock skew of 5 seconds MAY be applied to `nbf` and `exp` claims.
 
-### 4.1 Supported formats
+### 4.1 DiscoveryRegistrationCredential
 
-The `did:web` DID method ([DID]) MUST be supported. Support for other methods is optional.
-Verifiable Presentations and Verifiable Credentials MUST be in JWT format.
+The optional `DiscoveryRegistrationCredential` is used to add additional parameters to the registration.
+It's a _holder_ credential, meaning it has been self issued. Fields under `credentialSubject` (except `id`) can be used by clients depending on the use case.
+The credential has the following requirements:
+- `type` MUST be `DiscoveryRegistrationCredential`.
+- `@context` MUST contain the Nuts JSON-LD context (https://nuts.nl/credentials/v1).
+- `credentialSubject` MUST contain a JSON object with additional parameters.
+- `credentialSubject.id` MUST be the same as the `issuer` of the credential.
+- `id` MUST be a unique identifier for the credential.
+- `issuanceDate` MUST be a valid date.
 
 ## 5. Service Definition
 
 Servers MUST share a JSON document describing the discovery service. This document is known as the _service definition_.
 The document MUST contain the following properties:
 - `id` REQUIRED. String containing a value that identifies the service definition. MAY be used to version the definition.
+- `did_methods` OPTIONAL. Array of strings containing the DID methods enabled for the service. If not present, all DID methods are allowed.
 - `endpoint` REQUIRED. String containing the URL where the server hosts the service endpoint.
-- `presentation_definition` REQUIRED. JSON object with the Presentation Definition (see [PE]) describing requirements for presentations on the list.
+- `presentation_definition` REQUIRED. JSON object with the Presentation Definition (see [PEX]) describing requirements for presentations on the list.
 - `presentation_max_validity` REQUIRED. JSON number containing the maximum validity period (number of seconds between `nbf` and `exp`) of a presentation in seconds.
 
 For example:
@@ -210,7 +223,7 @@ For example:
 
 ## 6. Trust
 
-Trust of credential issuers (e.g. `did:example:education-accredetor` issuing `EducationalInstitutionCredential`) SHOULD be defined by the presentation definition.
+Trust of credential issuers (e.g. `did:example:education-accreditor` issuing `EducationalInstitutionCredential`) SHOULD be defined by the presentation definition.
 In this case, there should be 2 constraints: one for the type and one for the issuer:
 
 ``json
@@ -226,11 +239,34 @@ In this case, there should be 2 constraints: one for the type and one for the is
     "path": "$.issuer",
     "filter": {
       "type": "string",
-      "const": "did:example:education-accredetor"
+      "const": "did:example:education-accreditor"
     }
   }
 ]
 ``
+
+## 7. Security Considerations
+
+## 7.1 Denial of Service
+
+Since the server is hosting a public endpoint, it should take the following measures to prevent denial-of-service attacks:
+- rate limiting on the number of requests per client.
+- rate limiting on the number of requests per second.
+- limit the size of the list.
+- limit the size of the presentations that can be uploaded.
+
+Clients should also take measures when the server has been compromised and is hosting malicious content:
+- limit the number of presentations to process.
+- limit the size of the presentations to process.
+- use streaming processing to prevent excessive memory usage.
+
+## 7.2 Trust
+
+Designers of services should build trust into the Presentation Definition of the server. This can be done by specifying specific issuers of credentials.
+
+## 8. Privacy Considerations
+
+All Verifiable Presentations are public and can be read by anyone. Clients should be aware of this when submitting presentations.
 
 ## Appendix A - Design Decisions
 
@@ -258,5 +294,6 @@ This makes it possible for the client to become the server and vice versa. Chang
 
 * [JWT] M. Jones, J. Bradley, N. Sakimura, "JSON Web Token (JWT)", RFC 7519, May 2015, <https://www.rfc-editor.org/info/rfc7519>.
 * [VC-DATA-MODEL] M. Sporny, D. Longley, D. Chadwick, "Verifiable Credentials Data Model 1.1", W3C Recommendation, 3 March 2022, <https://www.w3.org/TR/vc-data-model/>.
-* [PE] D. Buchner, B. Zundel, M. Riedel, K.H. Duffy, "Presentation Exchange 2.0.0", 12 September 2023, <https://identity.foundation/presentation-exchange/spec/v2.0.0/>.
+* [PEX] D. Buchner, B. Zundel, M. Riedel, K.H. Duffy, "Presentation Exchange 2.0.0", 12 September 2023, <https://identity.foundation/presentation-exchange/spec/v2.0.0/>.
 * [DID] M. Sporny, D. Longley, M. Sabadello, D. Reed, O. Steele, C. Allen, "Decentralized Identifiers (DIDs) v1.0", W3C Recommendation, 19 July 2022, <https://www.w3.org/TR/did-core/>.
+* [RFC7807] M. Nottingham, E. Wilde, "Problem Details for HTTP APIs", RFC 7807, March 2016, <https://www.rfc-editor.org/info/rfc7807>.
