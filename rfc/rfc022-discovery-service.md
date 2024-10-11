@@ -262,7 +262,7 @@ Clients should also take measures when the server has been compromised and is ho
 
 ## 7.2 Trust
 
-Designers of services should build trust into the Presentation Definition of the server. This can be done by specifying specific issuers of credentials.
+Designers of services should write trust into the Presentation Definition of the Service Definition. This can be done by specifying specific issuers of credentials.
 
 ## 8. Privacy Considerations
 
