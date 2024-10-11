@@ -30,7 +30,7 @@ Users need to know which (remote) systems offer a particular service and systems
 
 This RFC defines a protocol for Service Discovery using Verifiable Presentations using a client-server model.
 The advantage of using Verifiable Presentations is that the client needs little trust in the server:
-clients can verify the authenticity and integrity of the Verifiable Presentation and Verifiable Credential.
+clients can verify the authenticity and integrity of the Verifiable Presentations and Verifiable Credentials.
 
 ## 2. Terminology
 
@@ -155,21 +155,22 @@ To process a presentation, the following validation steps MUST be performed:
   the JWT `kid` header MUST reference an `assertionMethod` key from the subject's DID document.
 - The DID of the credential subject MUST be of a DID method defined in the service definition.
 - the presentation MAY contain a `DiscoveryRegistrationCredential` credential defined by the Nuts JSON-LD context (https://nuts.nl/credentials/v1).
-  If present, it MUST NOT be included in the next validation steps.
+  If present, it MUST NOT be included in the next validation steps unless specifically referenced in the Presentation Definition.
 - the credentials MUST conform to the Presentation Definition associated with the list (see Service Definition).
   The Verifiable Presentation MUST NOT contain any Verifiable Credentials besides the ones that conform to the Presentation Definition and the `DiscoveryRegistrationCredential`.
 
 If a validation step fails, the presentation MUST be rejected.
 
-JWT credential and presentation encoding as specified by [VC-DATA-MODEL] MUST be applied.
+JWT presentation encoding as specified by [VC-DATA-MODEL] MUST be applied.
 A clock skew of 5 seconds MAY be applied to `nbf` and `exp` claims.
 
 ### 4.1 DiscoveryRegistrationCredential
 
 The optional `DiscoveryRegistrationCredential` is used to add additional parameters to the registration.
-It's a _holder_ credential, meaning it has been self issued. Fields under `credentialSubject` (except `id`) can be used by clients depending on the use case.
+It's a _self-asserted_ credential, meaning it has been issued by the holder itself and doesn't contain a proof. 
+Fields under `credentialSubject` (except `id`) can be used by clients depending on the use case.
 The credential has the following requirements:
-- `type` MUST be `DiscoveryRegistrationCredential`.
+- `type` MUST contain `DiscoveryRegistrationCredential`.
 - `@context` MUST contain the Nuts JSON-LD context (https://nuts.nl/credentials/v1).
 - `credentialSubject` MUST contain a JSON object with additional parameters.
 - `credentialSubject.id` MUST be the same as the `issuer` of the credential.
