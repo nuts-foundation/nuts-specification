@@ -191,6 +191,7 @@ The document MUST contain the following properties:
 - `did_methods` OPTIONAL. Array of strings containing the DID methods enabled for the service. If not present, all DID methods are allowed.
 - `endpoint` REQUIRED. String containing the URL where the server hosts the service endpoint.
 - `presentation_definition` REQUIRED. JSON object with the Presentation Definition (see [PEX]) describing requirements for presentations on the list.
+  Contents of the `format` field are ignored for the Verifiable Presentation. The Verifiable Presentation is always encoded in JWT format.
 - `presentation_max_validity` REQUIRED. JSON number containing the maximum validity period (number of seconds between `nbf` and `exp`) of a presentation in seconds.
 
 For example:
