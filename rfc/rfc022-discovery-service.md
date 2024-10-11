@@ -52,6 +52,9 @@ Presentations MUST be encoded in JWT format as string ([JWT]).
 
 The protocol identifies the server and client roles. A client can be a server and vice versa. The individual operations define what to do in certain cases.
 
+Each list has a unique `seed` value. The seed value is used by a server to identify a specific instance of a list.
+This is used to prevent client _locking_ based on timestamps and enables switching between servers for the same service.
+
 ### 3.1 Registration
 
 Clients can publish a Verifiable Presentation to the server by sending it in an HTTP POST to the service endpoint.
@@ -81,6 +84,7 @@ The Verifiable Presentation MUST NOT be valid longer than the Verifiable Credent
 
 Clients MUST read the list by sending an HTTP GET to the server's service endpoint.
 The server MUST return a 200 OK response with a JSON object containing:
+- `seed` REQUIRED. MUST be a JSON string containing the seed value of the list.
 - `entries` REQUIRED. MUST contain a JSON object with a mapping of timestamp (as string) to presentation.
 - `timestamp` REQUIRED. MUST be a JSON integer equal to the timestamp of the last presentation.
 
@@ -90,6 +94,7 @@ The server MUST return the latest `timestamp` value based on the value of the la
 If the query parameter is not provided, the server MUST return the full list.
 If based on the timestamp the server has no new presentations it returns an empty list for the `entries` object.
 Servers MUST only return the latest (valid) presentation per credential subject.
+If the `seed` value has changed, the client MUST discard all entries and query the entire list again.
 
 Example:
 
@@ -98,6 +103,7 @@ GET /list?timestamp=6 HTTP/1.1
 Content-Type: application/json
 
 {
+  "seed": "1234-5678-90ab-cdef",
   "entries": {
     "7": "ey1234..."
   }
