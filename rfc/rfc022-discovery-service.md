@@ -121,6 +121,7 @@ Clients SHOULD use the `timestamp` value in the return object for their next cal
 ### 3.3 List pruning
 
 To only keep valid presentations on the list, servers and clients MUST remove presentations whose `exp` (expiration) time has passed from the list.
+Verifiable Presentations that contain revoked credentials MUST be removed from the list.
 
 Clients that wish to retain their presence on the list MUST submit a new registration before the current entry's `exp` time has passed.
 
