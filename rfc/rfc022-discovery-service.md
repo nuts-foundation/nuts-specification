@@ -161,10 +161,8 @@ To process a presentation, the following validation steps MUST be performed:
 - the key used to sign the presentation MUST be owned by the credential subject (see 4.1):
   the JWT `kid` header MUST reference an `assertionMethod` key from the subject's DID document.
 - The DID of the credential subject MUST be of a DID method defined in the service definition.
-- the presentation MAY contain a `DiscoveryRegistrationCredential` credential defined by the Nuts JSON-LD context (https://nuts.nl/credentials/v1).
-  If present, it MUST NOT be included in the next validation steps unless specifically referenced in the Presentation Definition.
 - the credentials MUST conform to the Presentation Definition associated with the list (see Service Definition).
-  The Verifiable Presentation MUST NOT contain any Verifiable Credentials besides the ones that conform to the Presentation Definition and the `DiscoveryRegistrationCredential`.
+  The Verifiable Presentation MUST NOT contain any Verifiable Credentials besides the ones that conform to the Presentation Definition.
 
 If a validation step fails, the presentation MUST be rejected.
 
@@ -173,7 +171,7 @@ A clock skew of 5 seconds MAY be applied to `nbf` and `exp` claims.
 
 ### 4.1 DiscoveryRegistrationCredential
 
-The optional `DiscoveryRegistrationCredential` is used to add additional parameters to the registration.
+This rfc defines the `DiscoveryRegistrationCredential` which can be used to add additional parameters to the registration.
 It's a _self-asserted_ credential, meaning it has been issued by the holder itself and doesn't contain a proof. 
 Fields under `credentialSubject` (except `id`) can be used by clients depending on the use case.
 The credential has the following requirements:
