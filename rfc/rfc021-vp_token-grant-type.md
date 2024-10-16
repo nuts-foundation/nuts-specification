@@ -111,7 +111,7 @@ The second paragraph describes the requirements that apply to JWT encoded VP's. 
 3. The `iss` field MUST be a Decentralized Identifier [DID] and match the `sub` field.
 4. The `kid` header MUST be a DID URL and MUST resolve to a verificationMethod in the DID Document. The DID part of the DID URL MUST match the `iss` field.
 5. The `sub` field MUST match the `credentialSubject.id` field from all the Verifiable Credentials that are used to request the access token.
-6. The `aud` field MUST match the DID of the Authorization Server.
+6. The `aud` field MUST contain the Authorization Server URL, also known as issuer URL. [RFC8414]
 7. The `nbf` field MUST be present and contain a valid unix timestamp. It MUST be before the the current time (time at which the JWT is processed).
 8. The `exp` field MUST be present and contain a valid unix timestamp. It MUST be after the current time (time at which the JWT is processed).
 9. The difference between the `exp` and `nbf` fields MUST be equal or less than 5 seconds.
@@ -203,6 +203,7 @@ Privacy-sensitive data in the scope parameter should be avoided.
 
 * [RFC6749] D. Hardt, "The OAuth 2.0 Authorization Framework", RFC 6749, October 2012, <https://www.rfc-editor.org/info/rfc6749>.
 * [RFC7521] D. Campbell, Ed., B. Zaninovich, Ed., "Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521, May 2015, <https://www.rfc-editor.org/info/rfc7521>.
+* [RFC8414] M. Jones, N. Sakimura, J. Bradley, "OAuth 2.0 Authorization Server Metadata", RFC 8414, June 2018, <https://www.rfc-editor.org/info/rfc8414>.
 * [JWT] M. Jones, J. Bradley, N. Sakimura, "JSON Web Token (JWT)", RFC 7519, May 2015, <https://www.rfc-editor.org/info/rfc7519>.
 * [VC-DATA-MODEL] M. Sporny, D. Longley, D. Chadwick, "Verifiable Credentials Data Model 1.1", W3C Recommendation, 3 March 2022, <https://www.w3.org/TR/vc-data-model/>.
 * [PE] D. Buchner, B. Zundel, M. Riedel, K.H. Duffy, "Presentation Exchange 2.0.0", 12 September 2023, <https://identity.foundation/presentation-exchange/spec/v2.0.0/>.
