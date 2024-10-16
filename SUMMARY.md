@@ -20,6 +20,7 @@
 * [RFC019 Employee Identity Authentication Means](rfc/rfc019-employee-identity-means.md)
 * [RFC020 Authorization credential extension](rfc/rfc020-authorization-credential-extension.md)
 * [RFC021 VP Token Grant Type](rfc/rfc021-vp_token-grant-type.md)
+* [RFC022 Discovery Service](rfc/rfc022-discovery-service.md)
 
 ## templates
 
