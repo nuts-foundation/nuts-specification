@@ -139,7 +139,6 @@ If a server receives a retraction that references an unknown presentation it MUS
 The response MUST be a JSON error response (§3.5) describing the error.
 
 Clients processing a retraction entry MUST remove the presentation indicated by `retract_jti`.
-The expiration of the retraction presentation MUST be equal to the expiration of the presentation to retract.
 
 ### 3.5 Error responses
 
