@@ -5,6 +5,7 @@
 | Nuts foundation           | R.G. Krul      |
 | Request for Comments: 022 | Nedap          |
 |                           | W.M. Slakhorst |
+|                           | Nedap          |
 |                           | October 2024   |
 
 ## Discovery Service
@@ -71,12 +72,12 @@ The timestamp definition used here is a lamport clock, which is a monotonically 
 
 An example posting a Verifiable Presentation in JWT format to the list:
 
-``http request
+```http request
 POST /list HTTP/1.1
 Content-Type: application/json
 
 "eyCAFE.etc.etc"
-``
+```
 
 The Verifiable Presentation MUST NOT be valid longer than the Verifiable Credentials it contains. 
 
@@ -98,7 +99,7 @@ If the `seed` value has changed, the client MUST discard all entries and query t
 
 Example:
 
-``http request
+```http request
 GET /list?timestamp=6 HTTP/1.1
 Content-Type: application/json
 
@@ -109,7 +110,7 @@ Content-Type: application/json
   }
   "timestamp": 7
 }
-``
+```
 
 Clients MUST validate each presentation in the list as specified in section 4.
 If a presentation is not valid, it MUST be rejected.
@@ -194,7 +195,7 @@ The document MUST contain the following properties:
 
 For example:
 
-``json
+```json
 {
   "id": "uc_university_v1",
   "endpoint": "https://example.com/usecase/university/v1",
@@ -225,14 +226,14 @@ For example:
     ]
   }
 }
-``
+```
 
 ## 6. Trust
 
 Trust of credential issuers (e.g. `did:example:education-accreditor` issuing `EducationalInstitutionCredential`) SHOULD be defined by the presentation definition.
 In this case, there should be 2 constraints: one for the type and one for the issuer:
 
-``json
+```json
 [
   {
     "path": ["$.type"],
@@ -249,7 +250,7 @@ In this case, there should be 2 constraints: one for the type and one for the is
     }
   }
 ]
-``
+```
 
 ## 7. Security Considerations
 
