@@ -90,8 +90,8 @@ No additional services other than the Nuts network are required.
   "id": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY#90382475609238467",
   "type": ["VerifiableCredential", "NutsOrganizationCredential"],
   "issuer": "did:nuts:B8PUHs2AUHbFF1xLLK4eZjgErEcMXHxs68FteY7NDtCY",
-  "issuanceDate": "2010-01-01T19:73:24Z",
-  "expirationDate": "2010-02-01T19:73:24Z",
+  "issuanceDate": "2010-01-01T19:53:24Z",
+  "expirationDate": "2010-02-01T19:53:24Z",
   "credentialSubject": {
     "id": "did:nuts:8jx6GU9JipE6TXY2nak8RgFXMk3zaoPWsCb53N1Zjw9R",
     "organization": {
