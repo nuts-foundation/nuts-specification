@@ -10,20 +10,45 @@
 
 ## Abstract
 
+Trust is a key element in the Nuts network. This RFC describes how x509 certificates can be used to source trust from
+outside the Nuts network. The x509 certification process has been around for a long time and is widely used in the
+internet. This RFC describes how x509 certificates can be used in the Nuts network to establish trust between parties by
+being able to link the x509 certificate to a Nuts identity by as a Verifiable Credential that is issued by the holder of
+the x509 identity.
+
 This RFC specifies the requirements and validation process for the `X509Credential`, a W3C Verifiable Credential (VC)
-type issued by a `did:x509` DID. The `X509Credential` ensures strong alignment with the properties of the associated
-X.509 certificate and defines mechanisms to validate the credential and verify its association with a `did:x509` DID.
+type issued by the holder of a x509 certificate, represented by a `did:x509` DID. The `X509Credential` ensures strong
+alignment with the properties of the associated X.509 certificate and defines mechanisms to validate the credential and
+verify its association with a `did:x509` DID.
 
 ## Status of this document
 
-This document is a proposal for discussion and implementation. Feedback is welcome to improve the interoperability
-and robustness of the specification.
+This document is currently in draft. Feedback is welcome to improve the interoperability and robustness of the
+specification.
+
+### Copyright Notice
+
+![](../.gitbook/assets/license.png)
 
 ## Introduction
+
+The Nuts network is a network of trust. The trust is established by the use of Verifiable Credentials. These credentials
+are issued by a trusted party and can be used to establish trust between parties. The Nuts network is a decentralised
+network and the trust is established between parties that are not necessarily known to each other. The trust is
+established by the use of Verifiable Credentials that are issued by trusted sources. Members of the Nuts network can
+then trust their peers by verifying the Verifiable Credentials that are presented to them.
+
+At this time of writing, there are not many sources of trust available that act as trusted source of identity AND that
+are capable of providing such trust in the form of Verifiable Credentials. Even tough work is being done in this area.
+Most trusted sources in The Netherlands make use of systems like the x509 certificates to establish trust. This RFC
+describes how x509 certificates can be used to establish trust in the Nuts network by bridging the gap between the x509
+certificates and the Nuts network. This is done by issuing a Verifiable Credential that is based on the x509 certificate
+that makes use of the did:x509 method.
 
 The `X509Credential` is a W3C Verifiable Credential type designed for use cases where trust anchors are based on X.509
 certificates. It leverages the `did:x509` method, as specified in
 the [Trust Over IP DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/).
+
 By aligning credential subject validation with the fields of the associated `did:x509` DID and enforcing
 certificate revocation checks, the `X509Credential` ensures integrity and adherence to the PKI trust model.
 
@@ -41,7 +66,112 @@ but do issue X.509 certificates containing relevant information about the creden
 - **Revocation Check**: The process of verifying the revocation status of the issuer certificate using mechanisms like
   OCSP or CRL.
 
-## Credential Structure
+## Used standards and technologies
+
+This RFC builds on the following standards and technologies:
+
+* [X.509 Certificate Standard](https://datatracker.ietf.org/doc/html/rfc5280)
+* [JSON Web Signature (JWS)](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.6)
+* [did:x509 method specification](https://trustoverip.github.io/tswg-did-x509-method-specification/), with modifications
+* W3C Verifiable Credentials Data Model
+
+### x509 certificates, a brief introduction
+
+The structure of an x509 certificate is defined by the X.509 standard. An x509 certificate contains information about
+the holder and is signed by a Certificate Authority (CA). The CA is a trusted party that is capable of verifying the
+identity of the holder of the certificate. The CA signs the certificate with its own private key. The holder of the
+certificate can then use the public key of the CA to verify the signature of the certificate. This way the holder of the
+certificate can prove that the certificate is valid and that the information in the certificate is correct.
+
+The verifier of a x509 certificate can then trust the information in the certificate by verifying the signature of the
+certificate chain of the certificate. The verifier can then trust the information in the certificate by trusting the CA
+that signed the certificate.
+
+The chain of certificates can be viewed as a hierarchy, where the root certificate is the certificate is trusted, and
+signing is delegated to intermediate certificates. The root certificate is the certificate that is trusted by the
+holder. The holder maintains a list of trusted CAs that the holder trusts. The holder can then
+verify the signature of the certificate chain by verifying the signature of the CA that signed the intermediate
+certificate and the intermediate certificates that lead to the signing certificate.
+
+<pre>
+┌────────────────────┐
+│        CA          │
+└─────────┬──────────┘
+          │           
+┌─────────▼──────────┐
+│    Intermediate    │
+└─────────┬──────────┘
+          │           
+┌─────────▼──────────┐
+│    Intermediate    │
+└─────────┬──────────┘
+          │           
+┌─────────▼──────────┐
+│Signing Certificate │
+└────────────────────┘
+</pre>
+
+### Using x509 for signing JWEs
+
+The JWE is a standard that is used to sign and encrypt JSON objects. Thus standard allows for the signing and encryption
+of JSON objects with certificates part of the a certificate chain. This allows for the signing of JSON objects with the
+private key of the certificate and the verification of the signature with the public key of the certificate, and the
+verification of the certificate chain with the public key of the CA. This is done by using the following headers fields:
+
+* x5c, the certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate
+  first and the root certificate last.
+* x5t, the thumbprint of the signing certificate.
+* x5t#S256, the thumbprint of the signing certificate as a SHA256 hash.
+
+### The `did:x509` DID Method
+
+The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an x509
+certificate chain. This is done by creating a DID that is based on the root CA of the certificate chain. The did:x509
+method is used to specify specific attributes of the signing certificate to specify the holder of the signing
+certificate. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specifica
+attributes that are assigned to the signing certificate. So, for example following did:x509:
+
+```
+did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:C:US:ST:California:O:My%20Organisation
+```
+
+ties down the holder of the signing certificate by, first having a digitally signed certificate by the root CA with the
+thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk` and then having the following attributes in the certificate:
+
+* Subjects:
+  * C: US
+  * ST: California
+  * O: My Organisation
+
+The did:x509 defines various attribute types that can be used as attributes, such as:
+
+* Subject
+  * C: Country
+  * CN: Common Name
+  * L: Locality
+  * ST: State
+  * O: Organisation
+  * OU: Organisation Unit
+  * STREET: Street Address
+* Subject Other Name (san)
+  * email
+  * dns
+  * uri
+* Extended Key Usage (eku)
+  * Any OID
+* A Free-to-Use CA For Code Signing (fulcio-issuer)
+  * Any issuer hostname
+
+### Expanding the x509 specification
+
+This RFC extends the Subject Other Name (san) attribute with the following attribute:
+
+* otherName: A free-form attribute that can be used to specify any attribute that is not covered by the other
+  attributes.
+
+The otherName attribute can be used to specify extra attributes in a x509 certificate. This attribute is added to the specification of this RFC to cater for the use case where the san:otherName attribute is used in the x509 certificate and plays a role in the identification of the holder of the certificate.
+
+## The X509Credential Structure
 
 An `X509Credential` must conform to the general structure of a W3C Verifiable Credential and conform to the following
 rules:
@@ -172,3 +302,7 @@ entity controlling the `did:x509` DID.
 - [W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/)
 - [DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/)
 - [X.509 Certificate Revocation (OCSP/CRL)](https://datatracker.ietf.org/doc/html/rfc5280)
+
+## PKI overheid & UZI certificates
+
+## The use of x509 Verifiable Credential in the Nuts network
