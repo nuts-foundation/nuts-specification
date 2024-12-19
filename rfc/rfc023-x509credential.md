@@ -347,7 +347,7 @@ contains the following information (of intrest):
   * `<rol>` is the role of the holder of the certificate, always "0.00"
   * `<AGB-code>` is the AGB code of the holder of the certificate.
 
-## The use of x509 Verifiable Credential in the Nuts network
+## The use of UZI server certificate in the Nuts network
 
 The focus on trust in the NUTS network for organizations lies primarily on the URA number identified as the
 `<Abonnee-nr>` on the UZI certificate. This number is used to identify the holder of the certificate within the Dutch
