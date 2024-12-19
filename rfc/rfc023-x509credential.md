@@ -93,7 +93,7 @@ holder. The holder maintains a list of trusted CAs that the holder trusts. The h
 verify the signature of the certificate chain by verifying the signature of the CA that signed the intermediate
 certificate and the intermediate certificates that lead to the signing certificate.
 
-<pre>
+```asciidoc
 ┌────────────────────┐
 │        CA          │
 └─────────┬──────────┘
@@ -109,7 +109,7 @@ certificate and the intermediate certificates that lead to the signing certifica
 ┌─────────▼──────────┐
 │Signing Certificate │
 └────────────────────┘
-</pre>
+```
 
 ### Using x509 for signing JWEs
 
@@ -162,12 +162,13 @@ The did:x509 defines various attribute types that can be used as attributes, suc
 * A Free-to-Use CA For Code Signing (fulcio-issuer)
   * Any issuer hostname
 
-### Expanding the x509 specification
+### Extending the x509 specification
 
 This RFC extends the Subject Other Name (san) attribute with the following attribute:
 
-* otherName: A free-form attribute that can be used to specify any attribute that is not covered by the other
-  attributes.
+* Subject Other Name (san)
+  * otherName: A free-form attribute that can be used to specify any attribute that is not covered by the other
+    attributes.
 
 The otherName attribute can be used to specify extra attributes in a x509 certificate. This attribute is added to the specification of this RFC to cater for the use case where the san:otherName attribute is used in the x509 certificate and plays a role in the identification of the holder of the certificate.
 
@@ -179,7 +180,8 @@ rules:
 - The credential MUST be in JWT format.
 - `type`: MUST include `VerifiableCredential` and `X509Credential`.
 - `issuer`: MUST be a valid `did:x509` identifier.
-- `credentialSubject`: MUST only contain fields explicitly present in the `did:x509` DID policies.
+- `credentialSubject`: MUST only contain fields explicitly present in the `did:x509` DID policies with the format <
+  policy_type>:<policy_attribute>, for example `subject:O` or `san:otherName`.
 
 The credential subject can be identified by any DID method (e.g. `did:web`) accepted by the credential verifier.
 
@@ -196,9 +198,9 @@ The first snippet is the JWT header, and the second snippet is the credential pa
   "alg": "PS256",
   "typ": "JWT",
   "x5c": [
-    "<base64 encoded leaf-certificate>",
-    "<base64 encoded issuer-intermediate-certificate>",
-    "<base64 encoded issuer-certificate>"
+    "<base64 encoded leaf-certificate in the DER format>",
+    "<base64 encoded issuer-intermediate-certificate in the DER format>",
+    "<base64 encoded issuer-certificate in the DER format>"
   ],
   "x5t": "<thumbprint>",
   "kid": "did:x509:0:sha256:<hash>::subject:O:Library%20The%20Bookworm::subject:L:Bookland::san:otherName:123#1"
@@ -236,7 +238,9 @@ To validate an `X509Credential`, the following steps MUST be performed:
 
 - Verify that the credential is in JWT format.
 - Verify that the issuer's DID is a `did:x509` DID.
-- Resolve the `did:x509` DID document according to the did:x509 specification and check the certificate chain for
+- Resolve the `did:x509` DID document according to
+  the [did:x509 specification](https://trustoverip.github.io/tswg-did-x509-method-specification/) and check the
+  certificate chain for
   revocation.
 - Validate that the `credentialSubject` fields match the policies in the `did:x509` DID.
 
@@ -305,4 +309,92 @@ entity controlling the `did:x509` DID.
 
 ## PKI overheid & UZI certificates
 
+The Dutch government has a Public Key Infrastructure (PKI) that is used to establish trust between parties. The PKI
+framework is currently in place and makes use of PKI Overheid Certificates issued by the root CAs of the Dutch
+government. In healthcare a specific instance of PKI overheid certificates are issued: the UZI certificates. These
+certificates are used to establish trust between parties in the healthcare sector. The UZI certificates are issued by
+the UZI register, which is a trusted party that is capable of verifying the identity of the holder of the certificate.
+The UZI register signs the certificate with its own private key. The holder of the certificate can then use the public
+key of the UZI register to verify the signature of the certificate. This way the holder of the certificate can prove
+that the certificate is valid and that the information in the certificate is correct. The UZI certificates are issued
+to:
+
+* Individuals that work in healthcare, such as doctors, nurses, etc. They hold this certificate on a UZI card.
+* Organisations that work in healthcare, such as hospitals, pharmacies, etc. They hold this certificate as server
+  certificates.
+
+#### UZI certificate structure for organisations
+
+The UZI certificate is used to identify the holder of the certificate. The UZI certificate contains information about
+the holder of the certificate. This information is used to identify the holder of the certificate. The UZI certificate
+contains the following information (of intrest):
+
+* The `subject.CN` The full FQN.
+* The `subject:O` the name of the holder of the certificate.
+* The `subject.serialNumber ` The URI number
+* The `subject.C` The subject country
+* The `subject.ST` The subject state
+* The `subject.L` The subject locality (city)
+* The `subject.commonName` the full FQN.
+* The `san:dNSName` the DNS name of the holder of the certificate.
+* The `san:otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
+  where:
+  * `<OID CA>` is the OID of the CA that issued the certificate, `2.16.528.1.1007.99.2110` for CIBG.
+  * `<versie-nr>` is the version number of the certificate.
+  * `<UZI-nr>` is the UZI number of the holder of the certificate, same as `subject.serialNumber`.
+  * `<pastype>` is the type of the holder of the certificate, always `S`.
+  * `<Abonnee-nr>` is the subscriber URA of the holder of the certificate.
+  * `<rol>` is the role of the holder of the certificate, always "0.00"
+  * `<AGB-code>` is the AGB code of the holder of the certificate.
+
 ## The use of x509 Verifiable Credential in the Nuts network
+
+The focus on trust in the NUTS network for organizations lies primarily on the URA number identified as the
+`<Abonnee-nr>` on the UZI certificate. This number is used to identify the holder of the certificate within the Dutch
+healthcare ecosystem . The holder of the certificate can use the UZI certificate in combination with the private
+key to proof the ownership of the URA number. The diagram below shows how the UZI certificate can be used to transfer
+the trust from the CIBG register into the NUTS ecosystem using the `did:x509` method and the `X509Credential` Verifiable
+Credential.
+
+```asciidoc
+                            ┌─────────┐       ┌──────────┐                                        
+                            │ Keypair ┼───────┤ did:x509 │                                        
+                            └────┬────┘       └────┬─────┘                                        
+                                 │                 │                                              
+                                 │                 │                                              
+┌───────────┐            ┌───────┴───────┐         │                                              
+│  ROOT CA  │            │     UZI       │ ┌───────┴────────┐               ┌────┐                
+└─────┬─────┘            │  Certificate  │ │ X509Credential ┼───────────────► VP │                
+      │                  └───────────────┘ └───────┬──┬─────┘               └─┬──┘                
+      │                          │                 │  │    ┌────────────┐     │     ┌────────────┐
+┌─────┴─────┐  Request   ┌───────┴───────┐         │  │    │            │     │     │            │
+│ Source of ◄────────────┼   Holder of   ┼─────────┴──┼────►   Wallet   ┼─────┴─────►  Verifier  │
+│   Trust   ┌────────────►     Trust     │       Issue│    │            │   Present │            │
+└───────────┘   Issue    └───────────────┘            │    └──────┬─────┘           └────────────┘
+                                                      │           │                               
+                                                      │           │                               
+                                              ┌───────┴─┐    ┌────┴────┐                          
+                                              │ did:web ├────┤ Keypair │                          
+                                              └─────────┘    └─────────┘                          
+```
+
+The main steps in the diagram are:
+
+* The holder generates a keypair and requests a UZI certificate from the UZI register with a Certificate Signing
+  Request (CSR).
+* The UZI register issues the certificate to the holder of the UZI certificate and signs the request with the
+  intermediate CA, linked to the root CA.
+* The holder of the UZI creates a `X509Credential` Verifiable Credential:
+  * The holder set the `did:x509` of the UZI certificate as issuer to the `X509Credential` Verifiable Credential.
+  * The holder includes the complete chain in the `X509Credential` Verifiable Credential.
+  * The holder issues the `X509Credential` Verifiable Credential to its own NUTS identity as `did:web` .
+  * The holder signs the `X509Credential` Verifiable Credential with the keypair associated with the UZI certificate.
+* The holder places the `X509Credential` Verifiable Credential in the wallet.
+* The holder presents the `X509Credential` Verifiable Credential to the verifier, and signs the presentation with the
+  keypair associated with the `did:web` of the holder.
+* The verifier now can verify that:
+  * The `X509Credential` Verifiable Credential is issued by a `did:x509` issued by the the UZI register.
+  * The `X509Credential` Verifiable Credential is signed by the holder of the UZI certificate.
+  * The attributes of the `X509Credential` Verifiable Credential match the attributes of the UZI certificate.
+  * The URA number of the holder of the UZI certificate is present in the `X509Credential` Verifiable Credential.
+
