@@ -240,8 +240,7 @@ To validate an `X509Credential`, the following steps MUST be performed:
 - Verify that the issuer's DID is a `did:x509` DID.
 - Resolve the `did:x509` DID document according to
   the [did:x509 specification](https://trustoverip.github.io/tswg-did-x509-method-specification/) and check the
-  certificate chain for
-  revocation.
+  certificate chain for revocation.
 - Validate that the `credentialSubject` fields match the policies in the `did:x509` DID.
 
 ### 1. Verify Credential Structure
@@ -256,7 +255,8 @@ Ensure that the credential:
 
 The certificate associated with the `did:x509` issuer MUST be validated as follows:
 
-- **Certificate Chain Validation**: The certificate must have a valid trust chain to a known root CA.
+- **Certificate Chain Validation**: The certificate must have a valid trust chain. The use case determines if the CA is
+  trusted.
 - **Revocation Check**: Verify the revocation status of the certificate using OCSP or CRL.
 
 Failure to validate the issuer certificate invalidates the credential.
@@ -337,6 +337,41 @@ contains the following information (of intrest):
 * The `subject.L` The subject locality (city)
 * The `subject.commonName` the full FQN.
 * The `san:dNSName` the DNS name of the holder of the certificate.
+* The `san:otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
+  where:
+  * `<OID CA>` is the OID of the CA that issued the certificate, `2.16.528.1.1007.99.2110` for CIBG.
+  * `<versie-nr>` is the version number of the certificate.
+  * `<UZI-nr>` is the UZI number of the holder of the certificate, same as `subject.serialNumber`.
+  * `<pastype>` is the type of the holder of the certificate, always `S`.
+  * `<Abonnee-nr>` is the subscriber URA of the holder of the certificate.
+  * `<rol>` is the role of the holder of the certificate, always "0.00"
+  * `<AGB-code>` is the AGB code of the holder of the certificate.
+
+## Mapping UZI certificate to X509Credential
+
+### The ROOT Ca
+
+The `did:x509` specification dictates that the fingerprint of the Root CA is part of the did:x509. For mapping an UZI
+certificate to an X509Credential the ROOT CA MUST match one of the certificates in the UZI register hierarchy. 
+
+```asciidoc
+        ┌────────────────────────────────────┐        
+        │ Staat der Nederlanden Root CA - G3 │        
+        └────────────────┬───────────────────┘        
+                         │                            
+┌────────────────────────▼───────────────────────────┐
+│ Staat der Nederlanden Organisatie Services CA - G3 │
+└────────────────────────┬───────────────────────────┘
+                         │                            
+    ┌────────────────────▼───────────────────────┐    
+    │ UZI-register Medewerker niet op naam CA G3 │    
+    └────────────────────────────────────────────┘    
+```
+
+### Field mapping
+The following fields are commonly used for mapping UZI cetificates to X509Credentials
+* The `subject:O` the name of the holder of the certificate.
+* The `subject.L` The subject locality (city)
 * The `san:otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
   where:
   * `<OID CA>` is the OID of the CA that issued the certificate, `2.16.528.1.1007.99.2110` for CIBG.
