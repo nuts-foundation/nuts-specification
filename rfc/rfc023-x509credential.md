@@ -310,7 +310,9 @@ entity controlling the `did:x509` DID.
 - [DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/)
 - [X.509 Certificate Revocation (OCSP/CRL)](https://datatracker.ietf.org/doc/html/rfc5280)
 
-## PKI overheid & UZI certificates
+# An application of the RFC023: UZI server certificates
+
+## PKI overheid & UZI server certificates
 
 The Dutch government has a Public Key Infrastructure (PKI) that is used to establish trust between parties. The PKI
 framework is currently in place and makes use of PKI Overheid Certificates issued by the root CAs of the Dutch
@@ -352,10 +354,13 @@ contains the following information (of intrest):
 
 ## Mapping UZI certificate to X509Credential
 
-### The ROOT Ca
+The mapping of certificates to x509 is depending
+
+### The ROOT G3
 
 The `did:x509` specification dictates that the fingerprint of the Root CA is part of the did:x509. For mapping an UZI
-certificate to an X509Credential the ROOT CA MUST match one of the certificates in the UZI register hierarchy. 
+certificate to an X509Credential the ROOT CA MUST match one of the certificates in the UZI ROOT CA register hierarchy.
+For G3 this is:
 
 ```asciidoc
         ┌────────────────────────────────────┐        
@@ -371,9 +376,10 @@ certificate to an X509Credential the ROOT CA MUST match one of the certificates 
     └────────────────────────────────────────────┘    
 ```
 
-### Field mapping
-The following fields are commonly used for mapping UZI cetificates to X509Credentials
-* The `subject:O` the name of the holder of the certificate.
+### Field mapping of the UZI credential
+
+The following fields are commonly used for mapping UZI certificates to X509Credentials
+* The `subject:O` the name of the holder of the certificate. Maps to `subject.O` in the X509Credential.
 * The `subject.L` The subject locality (city)
 * The `san:otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
   where:
@@ -385,7 +391,7 @@ The following fields are commonly used for mapping UZI cetificates to X509Creden
   * `<rol>` is the role of the holder of the certificate, always "0.00"
   * `<AGB-code>` is the AGB code of the holder of the certificate.
 
-## The use of UZI server certificate in the Nuts network
+## The use of UZI server certificate in the Nuts network or identifying organizations
 
 The focus on trust in the NUTS network for organizations lies primarily on the URA number identified as the
 `<Abonnee-nr>` on the UZI certificate. This number is used to identify the holder of the certificate within the Dutch
