@@ -170,7 +170,7 @@ This RFC extends the Subject Other Name (san) attribute with the following attri
   * otherName: A free-form attribute that can be used to specify any attribute that is not covered by the other
     attributes.
 
-The otherName attribute can be used to specify extra attributes in a x509 certificate. This attribute is added to the specification of this RFC to cater for the use case where the san:otherName attribute is used in the x509 certificate and plays a role in the identification of the holder of the certificate.
+The otherName attribute can be used to specify extra attributes in a x509 certificate. This attribute is added to the specification of this RFC to cater for the use case where the san.otherName attribute is used in the x509 certificate and plays a role in the identification of the holder of the certificate.
 
 ## The X509Credential Structure
 
@@ -344,14 +344,14 @@ the holder of the certificate. This information is used to identify the holder o
 contains the following information (of intrest):
 
 * The `subject.CN` The full FQN.
-* The `subject:O` the name of the holder of the certificate.
+* The `subject.O` the name of the holder of the certificate.
 * The `subject.serialNumber ` The URI number
 * The `subject.C` The subject country
 * The `subject.ST` The subject state
 * The `subject.L` The subject locality (city)
 * The `subject.commonName` the full FQN.
-* The `san:dNSName` the DNS name of the holder of the certificate.
-* The `san:otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
+* The `san.dNSName` the DNS name of the holder of the certificate.
+* The `san.otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
   where:
   * `<OID CA>` is the OID of the CA that issued the certificate, `2.16.528.1.1007.99.2110` for CIBG.
   * `<versie-nr>` is the version number of the certificate.
@@ -388,9 +388,9 @@ For G3 this is:
 ### Field mapping of the UZI credential
 
 The following fields are commonly used for mapping UZI certificates to X509Credentials
-* The `subject:O` the name of the holder of the certificate. Maps to `subject.O` in the X509Credential.
+* The `subject.O` the name of the holder of the certificate. Maps to `subject.O` in the X509Credential.
 * The `subject.L` The subject locality (city)
-* The `san:otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
+* The `san.otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
   where:
   * `<OID CA>` is the OID of the CA that issued the certificate, `2.16.528.1.1007.99.2110` for CIBG.
   * `<versie-nr>` is the version number of the certificate.
