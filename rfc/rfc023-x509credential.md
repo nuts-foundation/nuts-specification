@@ -180,8 +180,17 @@ rules:
 - The credential MUST be in JWT format.
 - `type`: MUST include `VerifiableCredential` and `X509Credential`.
 - `issuer`: MUST be a valid `did:x509` identifier.
-- `credentialSubject`: MUST only contain fields explicitly present in the `did:x509` DID policies with the format <
-  policy_type>:<policy_attribute>, for example `subject:O` or `san:otherName`.
+- `credentialSubject`: MUST only contain fields explicitly present in the `did:x509` DID policies with the fields mapped by each type as a separate map. An example: 
+```
+{
+  "subject": {
+    "O" : "My Organisation"
+  },
+  "san" : {
+    "email" : "info@example.com,"
+  }
+}
+```
 
 The credential subject can be identified by any DID method (e.g. `did:web`) accepted by the credential verifier.
 
