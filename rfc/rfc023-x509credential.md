@@ -187,7 +187,7 @@ rules:
     "O" : "My Organisation"
   },
   "san" : {
-    "email" : "info@example.com,"
+    "email" : "info@example.com"
   }
 }
 ```
