@@ -135,7 +135,7 @@ attributes that are assigned to the signing certificate. So, for example followi
 did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:C:US:ST:California:O:My%20Organisation
 ```
 
-ties down the holder of the signing certificate by, first having a digitally signed certificate by the root CA with the
+ties down the holder of the signing certificate by, first having a digitally signed certificate by the CA with the
 thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk` and then having the following attributes in the certificate:
 
 * Subjects:
