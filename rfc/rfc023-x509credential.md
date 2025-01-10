@@ -162,7 +162,7 @@ The did:x509 defines various attribute types that can be used as attributes, suc
 * A Free-to-Use CA For Code Signing (fulcio-issuer)
   * Any issuer hostname
 
-### Extending the x509 specification
+### Extending the `did:x509` specification
 
 This RFC extends the Subject Other Name (san) attribute with the following attribute:
 
