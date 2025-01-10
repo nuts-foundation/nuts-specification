@@ -138,7 +138,7 @@ did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:C:US:ST:C
 ties down the holder of the signing certificate by, first having a digitally signed certificate by the CA with the
 thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk` and then having the following attributes in the certificate:
 
-* Subjects:
+* Subject:
   * C: US
   * ST: California
   * O: My Organisation
