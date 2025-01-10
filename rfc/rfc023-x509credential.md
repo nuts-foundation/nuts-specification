@@ -118,7 +118,7 @@ of JSON objects with certificates part of a certificate chain. This allows for t
 private key of the certificate and the verification of the signature with the public key of the certificate, and the
 verification of the certificate chain with the public key of the CA. This is done by using the following headers fields:
 
-* x5c, the certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate
+* x5c, the ordered certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate
   first and the root certificate last.
 * x5t, the thumbprint of the signing certificate.
 * x5t#S256, the thumbprint of the signing certificate as a SHA256 hash.
