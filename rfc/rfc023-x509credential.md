@@ -164,7 +164,7 @@ The did:x509 defines various attribute types that can be used as attributes, suc
 
 ### Extending the `did:x509` specification
 
-This RFC extends the Subject Other Name (san) attribute with the following attribute:
+This RFC extends the Subject Other Name (san) policy with the following attribute:
 
 * Subject Other Name (san)
   * otherName: A free-form attribute that can be used to specify any attribute that is not covered by the other
