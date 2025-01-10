@@ -111,10 +111,10 @@ certificate and the intermediate certificates that lead to the signing certifica
 └────────────────────┘
 ```
 
-### Using x509 for signing JWEs
+### Using x509 for signing JWTs
 
-The JWE is a standard that is used to sign and encrypt JSON objects. Thus standard allows for the signing and encryption
-of JSON objects with certificates part of the a certificate chain. This allows for the signing of JSON objects with the
+The JWT is a standard that is used to sign and encrypt JSON objects. Thus standard allows for the signing and encryption
+of JSON objects with certificates part of a certificate chain. This allows for the signing of JSON objects with the
 private key of the certificate and the verification of the signature with the public key of the certificate, and the
 verification of the certificate chain with the public key of the CA. This is done by using the following headers fields:
 
