@@ -241,9 +241,12 @@ To validate an `NutsX509Credential`, the following steps MUST be performed:
 
 The certificate associated with the `did:x509` issuer MUST be validated as follows:
 
-- **Certificate Chain Validation**: The certificate must have a valid trust chain. The use case determines if the CA is
-  trusted.
+- **Certificate Chain Validation**: The certificate must have a valid trust chain. The chain MUST be complete and all
+  signatures need to be checked.
 - **Revocation Check**: Verify the revocation status of the certificate using CRL.
+- The DID MUST specify an accepted trust anchor through its `ca-fingerprint` property and the trust anchor MUST be
+  present in the certificate chain as either the Root CA or on of the Intermediate CAs. What trust anchors are accepted
+  depends on the use case.
 
 Failure to validate the issuer certificate invalidates the credential.
 
