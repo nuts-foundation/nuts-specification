@@ -212,7 +212,7 @@ The first snippet is the JWT header, and the second snippet is the credential pa
     "<base64 encoded issuer-certificate in the DER format>"
   ],
   "x5t": "<thumbprint>",
-  "kid": "did:x509:0:sha256:<hash>::subject:O:Library%20The%20Bookworm::subject:L:Bookland::san:otherName:123#1"
+  "kid": "did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:O:OLVG%20Oost::subject:L:Amsterdam::san:otherName:23419943234#1"
 }
 ```
 
@@ -229,13 +229,13 @@ Payload:
       "VerifiableCredential",
       "NutsX509Credential"
     ],
-    "issuer": "did:x509:0:sha256:<hash>::subject:O:Library%20The%20Bookworm::subject:L:Bookland::san:otherName:123",
+    "issuer": "did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:O:OLVG%20Oost::subject:L:Amsterdam::san:otherName:23419943234",
     "issuanceDate": "2024-12-01T00:00:00Z",
     "credentialSubject": {
       "id": "did:web:example.com",
-      "subject:O": "Library The Bookworm",
-      "subject:L": "Bookland",
-      "san:otherName": "123"
+      "subject:O": "OLVG Oost",
+      "subject:L": "Amsterdam",
+      "san:otherName": "23419943234"
     }
   }
 }
