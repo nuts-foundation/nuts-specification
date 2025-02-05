@@ -247,6 +247,7 @@ To validate an `NutsX509Credential`, the following steps MUST be performed:
 
 - Verify that the credential is in JWT format.
 - Verify that the issuer's DID is a `did:x509` DID.
+- Verify that the DID specifies an accepted trust anchor (CA certificate) for ca-fingerprint.
 - Resolve the `did:x509` DID document according to
   the [did:x509 specification](https://trustoverip.github.io/tswg-did-x509-method-specification/) and check the
   certificate chain for revocation.
