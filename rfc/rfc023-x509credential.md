@@ -32,18 +32,7 @@ specification.
 
 ## Introduction
 
-The Nuts network is a network of trust. The trust is established by the use of Verifiable Credentials. These credentials
-are issued by a trusted party and can be used to establish trust between parties. The Nuts network is a decentralised
-network and the trust is established between parties that are not necessarily known to each other. The trust is
-established by the use of Verifiable Credentials that are issued by trusted sources. Members of the Nuts network can
-then trust their peers by verifying the Verifiable Credentials that are presented to them.
-
-At this time of writing, there are not many sources of trust available that act as trusted source of identity AND that
-are capable of providing such trust in the form of Verifiable Credentials. Even tough work is being done in this area.
-Most trusted sources in The Netherlands make use of systems like the x509 certificates to establish trust. This RFC
-describes how x509 certificates can be used to establish trust in the Nuts network by bridging the gap between the x509
-certificates and the Nuts network. This is done by issuing a Verifiable Credential that is based on the x509 certificate
-that makes use of the did:x509 method.
+TThe [did:x509](https://trustoverip.github.io/tswg-did-x509-method-specification/) method aims to achieve interoperability between existing X.509 solutions and Decentralized Identifiers (DIDs) to support operational models in which a full transition to DIDs is not achievable or desired yet. It supports X.509-only verifiers as well as DID-based verifiers supporting this DID method.
 
 The `NutsX509Credential` is a W3C Verifiable Credential type designed for use cases where trust anchors are based on X.509
 certificates. It leverages the `did:x509` method, as specified in
@@ -52,8 +41,6 @@ the [Trust Over IP DID:X509 Method Specification](https://trustoverip.github.io/
 By aligning credential subject validation with the fields of the associated `did:x509` DID and enforcing
 certificate revocation checks, the `NutsX509Credential` ensures integrity and adherence to the PKI trust model.
 
-Its intended use is to bridge the gap in ecosystems where issuers don't support issuance of Verifiable Credentials yet,
-but do issue X.509 certificates containing relevant information about the credential subject.
 
 ## Definitions
 
