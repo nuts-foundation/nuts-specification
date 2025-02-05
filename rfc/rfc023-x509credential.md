@@ -295,7 +295,7 @@ validated to ensure the credential is within its valid timeframe.
 The following security considerations are to be considered:
 
 - The Root CA of the did:x509 needs to be checked against the root CA structure of the use case. For instance, in case
-  of UZI certificates the ROOT CA must match the associated root CA chain.
+  of UZI certificates the `ca-fingerprint` must match the hash of (name of G3 intermediate CA(s) here).
 
 ### Certificate Revocation
 
