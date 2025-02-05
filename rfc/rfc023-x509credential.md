@@ -267,7 +267,7 @@ The certificate associated with the `did:x509` issuer MUST be validated as follo
 
 - **Certificate Chain Validation**: The certificate must have a valid trust chain. The use case determines if the CA is
   trusted.
-- **Revocation Check**: Verify the revocation status of the certificate using OCSP or CRL.
+- **Revocation Check**: Verify the revocation status of the certificate using CRL.
 
 Failure to validate the issuer certificate invalidates the credential.
 
