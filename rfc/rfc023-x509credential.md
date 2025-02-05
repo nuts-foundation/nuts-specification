@@ -116,7 +116,6 @@ verification of the certificate chain with the public key of the CA. This is don
 
 * x5c, the ordered certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate
   first and the root certificate last.
-* x5t, the thumbprint of the signing certificate.
 * x5t#S256, the thumbprint of the signing certificate as a SHA256 hash.
 
 ### The `did:x509` DID Method
