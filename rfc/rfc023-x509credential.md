@@ -16,10 +16,10 @@ internet. This RFC describes how x509 certificates can be used in the Nuts netwo
 being able to link the x509 certificate to a Nuts identity by as a Verifiable Credential that is issued by the holder of
 the x509 identity.
 
-This RFC specifies the requirements and validation process for the `NutsX509Credential`, a W3C Verifiable Credential (VC)
-type issued by the holder of a x509 certificate, represented by a `did:x509` DID. The `NutsX509Credential` ensures strong
-alignment with the properties of the associated X.509 certificate and defines mechanisms to validate the credential and
-verify its association with a `did:x509` DID.
+This RFC specifies the requirements and validation process for the `NutsX509Credential`, a W3C Verifiable Credential (
+VC) type issued by the subject of a x509 certificate, represented by a `did:x509` DID. The `NutsX509Credential` ensures
+strong alignment with the properties of the associated X.509 certificate and defines mechanisms to validate the
+credential and verify its association with a `did:x509` DID.
 
 ## Status of this document
 
