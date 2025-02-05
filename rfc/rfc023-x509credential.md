@@ -406,7 +406,7 @@ The focus on trust in the NUTS network for organizations lies primarily on the U
 `<Abonnee-nr>` on the UZI certificate. This number is used to identify the holder of the certificate within the Dutch
 healthcare ecosystem . The holder of the certificate can use the UZI certificate in combination with the private
 key to proof the ownership of the URA number. The diagram below shows how the UZI certificate can be used to transfer
-the trust from the CIBG register into the NUTS ecosystem using the `did:x509` method and the `NutsX509Credential` Verifiable
+the trust from the UZI register into the NUTS ecosystem using the `did:x509` method and the `NutsX509Credential` Verifiable
 Credential.
 
 ```asciidoc
