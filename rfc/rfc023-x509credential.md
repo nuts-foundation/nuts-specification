@@ -423,12 +423,14 @@ The main steps in the diagram are:
   * The holder set the `did:x509` of the UZI certificate as issuer to the `NutsX509Credential` Verifiable Credential.
   * The holder includes the complete chain in the `NutsX509Credential` Verifiable Credential.
   * The holder issues the `NutsX509Credential` Verifiable Credential to its own NUTS identity as `did:web` .
-  * The holder signs the `NutsX509Credential` Verifiable Credential with the keypair associated with the UZI certificate.
+  * The holder signs the `NutsX509Credential` Verifiable Credential with the keypair associated with the UZI
+    certificate.
 * The holder places the `NutsX509Credential` Verifiable Credential in the wallet.
-* The holder presents the `NutsX509Credential` Verifiable Credential to the verifier, and signs the presentation with the
-  keypair associated with the `did:web` of the holder.
+* The holder presents the `NutsX509Credential` Verifiable Credential to the verifier, and signs the presentation with
+  the keypair associated with the `did:web` of the holder.
 * The verifier now can verify that:
-  * The `NutsX509Credential` Verifiable Credential is issued by a `did:x509` issued by the the UZI register.
+  * The `NutsX509Credential` Verifiable Credential is issued by a `did:x509`, signed with a private key which is
+    associated with a certificate issued by the UZI register.
   * The `NutsX509Credential` Verifiable Credential is signed by the holder of the UZI certificate.
   * The attributes of the `NutsX509Credential` Verifiable Credential match the attributes of the UZI certificate.
   * The URA number of the holder of the UZI certificate is present in the `NutsX509Credential` Verifiable Credential.
