@@ -272,26 +272,82 @@ validated to ensure the credential is within its valid timeframe.
 
 ## Security Considerations
 
-The following security considerations are to be considered:
+The following security considerations need to be addressed:
 
-- The Root CA of the did:x509 needs to be checked against the root CA structure of the use case. For instance, in case
-  of UZI certificates the `ca-fingerprint` must match the hash of (name of G3 intermediate CA(s) here).
+### **1. Broken Trust Chain**
 
-### Certificate Revocation
+- If the certificate chain is not validated, attackers could present fake certificates signed by an untrusted or rogue
+  Certificate Authority (CA).
+- **Consequences**:
+  - Users or systems may accept malicious certificates, allowing attackers to impersonate legitimate entities (e.g.,
+    phishing attacks or man-in-the-middle (MitM) attacks).
+  - Sensitive data (e.g., credentials, financial data) exchanged with fraudulent sites could be intercepted.
 
-The revocation status of the issuer's certificate is a critical component of `NutsX509Credential` validation. Implementers
-MUST use reliable revocation checking mechanisms (e.g., OCSP or CRL) and handle failures (e.g., network issues)
-appropriately to avoid false-positive validations.
+### **2. Revocation Checks Not Performed**
 
-### Field Alignment
+- If you fail to check the status of certificates for revocation using CRL (Certificate Revocation List), certificates
+  that have been compromised or expired could still be considered valid.
+- **Consequences**:
+  - Attackers could use stolen or revoked certificates to bypass authentication or encryption.
+  - Systems may continue to trust certificates issued to malicious actors.
 
-Restricting the `credentialSubject` fields to those present in the `did:x509` DID Document ensures alignment with the
-X.509 certificate, reducing the risk of unauthorized data inclusion.
+### **3. Expired Certificates**
 
-### Proof Verification
+- If credential expiry is ignored, certificates whose validity period has elapsed could still be used and trusted.
+- **Consequences**:
+  - Attackers may exploit outdated certificates to perform replay attacks where previously valid credentials are reused.
+  - Trust in infrastructure degrades because expired certificates no longer reflect proper certificate holder
+    responsibility/accountability.
 
-The cryptographic proof verification ensures that the credential has not been tampered with and was issued by the
-entity controlling the `did:x509` DID.
+### **4. Weak Keys or Algorithms**
+
+- If weak cryptographic algorithms (e.g., MD5, SHA-1) or small key sizes (e.g., <2048-bit RSA) are used, the
+  certificates or their signatures could be cracked by modern computational power.
+- **Consequences**:
+  - An attacker could forge or spoof certificates.
+  - Sensitive data could be decrypted easily, exposing confidential information such as passwords, personal data, etc.
+
+### **5. Improper Credential Subject Validation**
+
+- If the `credentialSubject` field in frameworks like `NutsX509Credential` is not properly validated, it may allow
+  fields not aligned with the X.509 certificate to be added or accepted.
+- **Consequences**:
+  - Attackers could inject unauthorized or false data (e.g., incorrect organization name or purpose), tricking verifiers
+    by impersonating trusted entities.
+  - Loss of trust in the system due to inconsistencies between certificates and credentials.
+
+### **6. Forged Proofs or Tampered Credentials**
+
+- Failure to verify cryptographic proofs tied to certificates could allow credentials or data to be tampered with.
+- **Consequences**:
+  - Credentials could be modified to grant unauthorized access.
+  - The integrity of systems relying on these credentials could be compromised.
+
+### **7. Missing Root CA Verification**
+
+- If the source of trust (Root CA) is not explicitly verified and trusted, attackers could use certificates issued by
+  unapproved CAs.For instance, in case of UZI certificates the `ca-fingerprint` must match the hash of either the Root
+  CA or one of the Intermediate CAs as published by the [UZI register](https://www.zorgcsp.nl/ca-certificaten).
+- **Consequences**:
+  - Fake certificates signed by rogue or unvalidated CAs could be accepted as valid.
+  - Attackers gain the ability to impersonate legitimate entities in scenarios such as encrypted communication or
+    identity verification.
+
+### **8. Certificate Misuse**
+
+- Without proper validation of certificate attributes (e.g., URA number in UZI certificates), certificates may be
+  misused in unintended contexts.
+- **Consequences**:
+  - Fraud or impersonation using certificates outside their intended scope.
+  - Misrepresentation of organizations or individuals.
+
+### **9. Lack of Reliable Revocation Handling**
+
+- If revocation checks poorly handle network issues or failures (e.g., OCSP response unavailability), it could result in
+  the acceptance of revoked or invalid certificates.
+- **Consequences**:
+  - Increased risk of improper trust, allowing revoked credentials to function within the system.
+  - Security-critical applications become susceptible to breaches.
 
 ## References
 
