@@ -429,9 +429,10 @@ The main steps in the diagram are:
 * The holder presents the `NutsX509Credential` Verifiable Credential to the verifier, and signs the presentation with
   the keypair associated with the `did:web` of the holder.
 * The verifier now can verify that:
-  * The `NutsX509Credential` Verifiable Credential is issued by a `did:x509`, signed with a private key which is
-    associated with a certificate issued by the UZI register.
-  * The `NutsX509Credential` Verifiable Credential is signed by the holder of the UZI certificate.
-  * The attributes of the `NutsX509Credential` Verifiable Credential match the attributes of the UZI certificate.
-  * The URA number of the holder of the UZI certificate is present in the `NutsX509Credential` Verifiable Credential.
+  * The `NutsX509Credential` Verifiable Credential is issued by a `did:x509` which trust anchor matches a trusted Root
+    or Intermediate CA.
+  * The `NutsX509Credential` Verifiable Credential is signed by the private key of the subject of the UZI certificate.
+  * The attributes of the `NutsX509Credential` Verifiable Credential match the attributes of the UZI certificate, and
+    more specific:
+    * The verifier verifies that the URA number as claimed by the VC is present in the (trusted) certificate. 
 
