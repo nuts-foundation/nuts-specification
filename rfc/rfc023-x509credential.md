@@ -350,8 +350,7 @@ contains the following information (of intrest):
 * The `subject.C` The subject country
 * The `subject.ST` The subject state
 * The `subject.L` The subject locality (city)
-* The `subject.commonName` the full FQN.
-* The `san.dNSName` the DNS name of the holder of the certificate.
+* The `subject.CN` the full FQN.
 * The `san.otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
   where:
   * `<OID CA>` is the OID of the CA that issued the certificate, `2.16.528.1.1007.99.2110` for CIBG.
