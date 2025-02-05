@@ -60,12 +60,12 @@ This RFC builds on the following standards and technologies:
 * [X.509 Certificate Standard](https://datatracker.ietf.org/doc/html/rfc5280)
 * [JSON Web Signature (JWS)](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.6)
 * [did:x509 method specification](https://trustoverip.github.io/tswg-did-x509-method-specification/), with modifications
-* W3C Verifiable Credentials Data Model
+* [Verifiable Credentials Data Model v1.1](https://www.w3.org/TR/vc-data-model/)
 
 ### x509 certificates, a brief introduction
 
 An **X.509 certificate** is a digital certificate that follows the X.509 Public Key Infrastructure (PKI) standard. It is widely used for secure communication over the internet, such as HTTPS, email encryption, and digital signatures.
-### Key Features of X.509 Certificates:
+#### Key Features of X.509 Certificates:
 - **Structure**: It contains information about the certificate owner (e.g., organization, common name, public key) and the issuing Certificate Authority (CA). The certificate is signed by the CA's private key to ensure authenticity.
 - **Trust Hierarchy**:
     - Trust is anchored in a **Certificate Authority (CA)**, which is a trusted third party.
@@ -351,7 +351,7 @@ The following security considerations need to be addressed:
 
 ## References
 
-- [W3C Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model/)
+- [Verifiable Credentials Data Model v1.1](https://www.w3.org/TR/vc-data-model/)
 - [DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/)
 - [X.509 Certificate Revocation (OCSP/CRL)](https://datatracker.ietf.org/doc/html/rfc5280)
 
