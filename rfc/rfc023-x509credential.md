@@ -438,10 +438,10 @@ The following fields are commonly used for mapping UZI certificates to NutsX509C
 ## The use of UZI server certificate in the Nuts network or identifying organizations
 
 The focus on trust in the NUTS network for organizations lies primarily on the URA number identified as the
-`<Abonnee-nr>` on the UZI certificate. This number is used to identify the holder of the certificate within the Dutch
-healthcare ecosystem . The holder of the certificate can use the UZI certificate in combination with the private
+`<Abonnee-nr>` on the UZI certificate. This number is used to identify the subject of the certificate within the Dutch
+healthcare ecosystem . The subject of the certificate can use the UZI certificate in combination with the private
 key to proof the ownership of the URA number. The diagram below shows how the UZI certificate can be used to transfer
-the trust from the UZI register into the NUTS ecosystem using the `did:x509` method and the `NutsX509Credential` Verifiable
+the trust from the UZI register acting as "authentieke bron" into the NUTS ecosystem using the `did:x509` method and the `NutsX509Credential` Verifiable
 Credential.
 
 ```asciidoc
@@ -451,41 +451,106 @@ Credential.
                                  │                 │                                              
                                  │                 │                                              
 ┌───────────┐            ┌───────┴───────┐         │                                              
-│  ROOT CA  │            │     UZI       │ ┌───────┴────────────┐           ┌────┐                
-└─────┬─────┘            │  Certificate  │ │ NutsX509Credential ┼───────────► VP │                
-      │                  └───────────────┘ └───────┬──┬─────────┘           └─┬──┘                
+│  ROOT CA  │            │     UZI       │ ┌───────────────────┐            ┌────┐                
+└─────┬─────┘            │  Certificate  │ │ NutsX509Credential┼────────────► VP │                
+      │                  └───────────────┘ └───────────────────┘            └─┬──┘                
       │                          │                 │  │    ┌────────────┐     │     ┌────────────┐
-┌─────┴─────┐  Request   ┌───────┴───────┐         │  │    │            │     │     │            │
-│ Source of ◄────────────┼   Holder of   ┼─────────┴──┼────►   Wallet   ┼─────┴─────►  Verifier  │
-│   Trust   ┌────────────►     Trust     │       Issue│    │            │   Present │            │
-└───────────┘   Issue    └───────────────┘            │    └──────┬─────┘           └────────────┘
-                                                      │           │                               
+┌─────┴─────┐ 1.Request  ┌───────┴───────┐         │  │    │            │     │     │            │
+│ Authentic ◄────────────┼   Holder of   ┼─────────┴──┼────►   Wallet   ┼─────┴─────►  Verifier  │
+│ Source of ┌────────────►     Trust     │   3.Issue  │    │            │ 4.Present │            │
+│   Trust   │  2.Issue   └───────────────┘            │    └──────┬─────┘           └────────────┘
+└───────────┘                                         │           │                               
                                                       │           │                               
                                               ┌───────┴─┐    ┌────┴────┐                          
                                               │ did:web ├────┤ Keypair │                          
                                               └─────────┘    └─────────┘                          
 ```
 
-The main steps in the diagram are:
+This diagram represents the process of establishing trust, based on the use of X.509 certificates, the
+`NutsX509Credential` and `did:x509` within a trust network. Below is a step-by-step explanation of the diagram:
 
-* The holder generates a keypair and requests a UZI certificate from the UZI register with a Certificate Signing
-  Request (CSR).
-* The UZI register issues the certificate to the holder of the UZI certificate and signs the request with the
-  intermediate CA, linked to the root CA.
-* The holder of the UZI creates a `NutsX509Credential` Verifiable Credential:
-  * The holder set the `did:x509` of the UZI certificate as issuer to the `NutsX509Credential` Verifiable Credential.
-  * The holder includes the complete chain in the `NutsX509Credential` Verifiable Credential.
-  * The holder issues the `NutsX509Credential` Verifiable Credential to its own NUTS identity as `did:web` .
-  * The holder signs the `NutsX509Credential` Verifiable Credential with the keypair associated with the UZI
-    certificate.
-* The holder places the `NutsX509Credential` Verifiable Credential in the wallet.
-* The holder presents the `NutsX509Credential` Verifiable Credential to the verifier, and signs the presentation with
-  the keypair associated with the `did:web` of the holder.
-* The verifier now can verify that:
-  * The `NutsX509Credential` Verifiable Credential is issued by a `did:x509` which trust anchor matches a trusted Root
-    or Intermediate CA.
-  * The `NutsX509Credential` Verifiable Credential is signed by the private key of the subject of the UZI certificate.
-  * The attributes of the `NutsX509Credential` Verifiable Credential match the attributes of the UZI certificate, and
-    more specific:
-    * The verifier verifies that the URA number as claimed by the VC is present in the (trusted) certificate. 
+### **Key Components**
 
+1. **Root CA**:
+  - The starting point for trust. The Root Certificate Authority (CA) is a trusted source that issues and signs
+    certificates to intermediate or end-user entities.
+
+2. **UZI Certificate**:
+  - A specific X.509 certificate issued by the Root CA (or its intermediaries) to establish trust for the holder (e.g.,
+    an organization or an individual).
+
+3. **Keypair**:
+  - Generated by the certificate holder, this is the private-public key pair required for signing and authentication
+    processes.
+
+4. **did:x509**:
+  - A Decentralized Identifier (DID) based on an X.509 certificate. It links decentralized systems with the trust of
+    traditional X.509 certificates.
+
+5. **NutsX509Credential**:
+  - A Verifiable Credential (VC), such as a "NutsX509Credential," which is issued by the certificate holder using its
+    `did:x509` identifier and signed with the corresponding keypair. This credential is stored in the holder's wallet.
+
+6. **Wallet**:
+  - A secure digital storage system for holding the NutsX509Credential. It manages credentials and is used for
+    presenting them to verifiers.
+
+7. **Verifier**:
+  - An entity that validates the presented credential and establishes the holder's identity based on its associated
+    trust components (e.g., did:x509, certificate chain, etc.).
+
+8. **did:web**:
+  - Another Decentralized Identifier (DID) the holder may use to represent their identity and interact within the
+    decentralized trust ecosystem.
+
+### **Process Steps**
+
+#### **Step 1: Keypair Generation and Request**
+
+The  **holder** generates a keypair (private and public key) to represent their identity. They submit the
+public key as part of a **Certificate Signing Request (CSR)** to the Root CA (or intermediate CA). Within the CSR
+terminology, the **holder** is the **subject** of the CSR.
+
+#### **Step 2: Certificate Issuance**
+
+The Root CA (or its intermediate CA) verifies the request and issues an **X.509 certificate** (e.g., a UZI certificate)
+to the subject. This certificate includes information about the subject (e.g., subject name and organization) and is
+signed by the CA. This guarantees the authenticity of the certificate. Note that the **holder** and **subject** are the
+same concepts but are named differently between the different terminologies.
+
+#### **Step 3: NutsX509Credential Issuance**
+
+The **holder** uses their X.509 certificate to create a **NutsX509Credential or Verifiable Credential**. The process
+includes:
+
+1. Using the certificate's `did:x509` identifier as the credential's **issuer**.
+2. Signing this credential with the holder's private key (from the keypair).
+3. Storing the credential securely in the **Wallet** for future use.
+
+#### **Step 4: Credential Presentation**
+
+When the holder needs to prove their identity to a verifier (e.g., during authentication), they present the *
+*NutsX509Credential** from their wallet to the **Verifier**. This process includes:
+
+1. The presentation of the digital credential as a Verifiable Presentation (VP).
+2. Signing the presentation with the holder's private key to ensure it hasn't been tampered with.
+
+#### **Step 5: Verification**
+
+The **Verifier** validates the credential and presentation. This includes:
+
+1. Checking the integrity of the credential and presentation signature.
+2. Confirming the certificate chain back to the **Root CA** to ensure the issuer of the X.509 certificate is authentic
+   and trusted.
+3. Validating the use case-specific attributes in the credential (e.g., fields like organization, UZI number, or other
+   subject information).
+4. Ensuring the credential has not been revoked using methods like CRL.
+
+#### Trust is Established:
+
+If all checks pass, the Verifier trusts the credential presented by the holder. The credential's trustworthiness is
+derived from:
+
+1. The Root CA that anchors trust.
+2. The validity of the X.509 certificate and the associated DID (`did:x509`).
+3. Alignment of attributes between the X509Credential and the certificate.
