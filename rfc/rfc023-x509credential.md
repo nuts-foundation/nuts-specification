@@ -77,39 +77,35 @@ This RFC builds on the following standards and technologies:
 
 ### x509 certificates, a brief introduction
 
-The structure of an x509 certificate is defined by the X.509 standard. An x509 certificate contains information about
-the holder and is signed by a Certificate Authority (CA). The CA is a trusted party that is capable of verifying the
-identity of the holder of the certificate. The CA signs the certificate with its own private key. The holder of the
-certificate can then use the public key of the CA to verify the signature of the certificate. This way the holder of the
-certificate can prove that the certificate is valid and that the information in the certificate is correct.
+An **X.509 certificate** is a digital certificate that follows the X.509 Public Key Infrastructure (PKI) standard. It is widely used for secure communication over the internet, such as HTTPS, email encryption, and digital signatures.
+### Key Features of X.509 Certificates:
+- **Structure**: It contains information about the certificate owner (e.g., organization, common name, public key) and the issuing Certificate Authority (CA). The certificate is signed by the CA's private key to ensure authenticity.
+- **Trust Hierarchy**:
+    - Trust is anchored in a **Certificate Authority (CA)**, which is a trusted third party.
+    - Certificates can form a chain of trust, starting from a **root certificate** (trusted CA) to **intermediate certificates**, down to the **end-user/client certificates** (specific use-case certificates).
 
-The verifier of a x509 certificate can then trust the information in the certificate by verifying the signature of the
-certificate chain of the certificate. The verifier can then trust the information in the certificate by trusting the CA
-that signed the certificate.
+Example of the trust chain hierarchy:
 
-The chain of certificates can be viewed as a hierarchy, where the root certificate is the certificate is trusted, and
-signing is delegated to intermediate certificates. The root certificate is the certificate that is trusted by the
-holder. The holder maintains a list of trusted CAs that the holder trusts. The holder can then
-verify the signature of the certificate chain by verifying the signature of the CA that signed the intermediate
-certificate and the intermediate certificates that lead to the signing certificate.
 
 ```asciidoc
 ┌────────────────────┐
-│        CA          │
+│      Root CA       │
 └─────────┬──────────┘
           │           
 ┌─────────▼──────────┐
-│    Intermediate    │
+│  Intermediate CA   │
 └─────────┬──────────┘
           │           
 ┌─────────▼──────────┐
-│    Intermediate    │
+│  Intermediate CA   │
 └─────────┬──────────┘
           │           
 ┌─────────▼──────────┐
 │Signing Certificate │
 └────────────────────┘
 ```
+### Nuts and X.509:
+The Nuts framework extends X.509 certificates into its decentralized identity (DID) ecosystem using the `did:x509` DID method. This method facilitates linking an X.509 certificate to a verifiable credential (`NutsX509Credential`), providing trust while bridging traditional PKI with decentralized trust models. This is especially relevant in systems reliant on existing X.509 implementations, such as healthcare or government frameworks.
 
 ### Using x509 for signing JWTs
 
