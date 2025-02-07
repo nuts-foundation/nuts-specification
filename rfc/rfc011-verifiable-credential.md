@@ -37,7 +37,7 @@ It's to be expected that multiple parties can assert certain claims with informa
 
 ## 3. W3C Verifiable Credential
 
-To support a variety of claims, Nuts uses the Verificable Credential (VC) format as described by [W3C Verifiable Credential specification](https://www.w3.org/TR/vc-data-model/). Every Nuts specific VC and proof type must follow the W3C specification. If the W3C specification offers optional fields then the specification of that credential must specify if and how they should be used. All VCs MUST use DIDs as specified in [RFC004](https://github.com/nuts-foundation/nuts-specification/tree/cf30c150a86ad3c717840873af1c9c1a547a4076/rfc/rfc004-distributed-document-format.md) to reference the issuer.
+To support a variety of claims, Nuts uses the Verificable Credential (VC) format as described by [W3C Verifiable Credential specification](https://www.w3.org/TR/vc-data-model/). Every Nuts specific VC and proof type must follow the W3C specification. If the W3C specification offers optional fields then the specification of that credential must specify if and how they should be used. All VCs MUST use DIDs as specified in [RFC004](rfc004-verifiable-transactional-graph.md) to reference the issuer.
 
 ### 3.1 JSON-LD context
 
