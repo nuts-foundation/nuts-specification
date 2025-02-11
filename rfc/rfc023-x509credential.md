@@ -259,6 +259,7 @@ The `credentialSubject` MUST be verified against the `did:x509` DID Document. Sp
 
 - Every field in the `credentialSubject` MUST be present in the `did:x509` DID Document.
 - Fields not present in the `did:x509` DID Document invalidate the credential.
+- For JWT based credentials, the `sub` value(s) must match the `credentialSubject.id` field.
 
 ### 4. Verify the Proof and signing algorithm
 
