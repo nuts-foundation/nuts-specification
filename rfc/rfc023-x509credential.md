@@ -176,6 +176,9 @@ rules:
 
 The credential subject can be identified by any DID method (e.g. `did:web`) accepted by the credential verifier.
 
+### Allowed signing algoritmns:
+* The `alg` value of the JWT header MUST match the `PS256` value. 
+
 ### Example `X509Credential`
 
 Below is an example of an `X509Credential` issued by a `did:x509` DID. The credential subject is identified by a
@@ -257,13 +260,14 @@ The `credentialSubject` MUST be verified against the `did:x509` DID Document. Sp
 - Every field in the `credentialSubject` MUST be present in the `did:x509` DID Document.
 - Fields not present in the `did:x509` DID Document invalidate the credential.
 
-### 4. Verify the Proof
+### 4. Verify the Proof and signing algorithm
 
 The cryptographic proof of the credential MUST be verified using the public key associated with the `did:x509` DID.
 This involves:
 
 - Resolving the public key from the DID Document.
-- Verifying the signature on the credential's `proof`.
+- Verifying the signature on the credential.
+- Verify the signing `alg` to be `PS256`.
 
 ### 5. Check Credential Expiry
 
