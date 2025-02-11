@@ -1,4 +1,4 @@
-# RFC023: NutsX509Credential
+# RFC023: X509Credential
 
 |                           |               |
 |:--------------------------|:--------------|
@@ -16,8 +16,8 @@ internet. This RFC describes how x509 certificates can be used in the Nuts netwo
 being able to link the x509 certificate to a Nuts identity by as a Verifiable Credential that is issued by the holder of
 the x509 identity.
 
-This RFC specifies the requirements and validation process for the `NutsX509Credential`, a W3C Verifiable Credential (
-VC) type issued by the subject of a x509 certificate, represented by a `did:x509` DID. The `NutsX509Credential` ensures
+This RFC specifies the requirements and validation process for the `X509Credential`, a W3C Verifiable Credential (
+VC) type issued by the subject of a x509 certificate, represented by a `did:x509` DID. The `X509Credential` ensures
 strong alignment with the properties of the associated X.509 certificate and defines mechanisms to validate the
 credential and verify its association with a `did:x509` DID.
 
@@ -34,17 +34,17 @@ specification.
 
 TThe [did:x509](https://trustoverip.github.io/tswg-did-x509-method-specification/) method aims to achieve interoperability between existing X.509 solutions and Decentralized Identifiers (DIDs) to support operational models in which a full transition to DIDs is not achievable or desired yet. It supports X.509-only verifiers as well as DID-based verifiers supporting this DID method.
 
-The `NutsX509Credential` is a W3C Verifiable Credential type designed for use cases where trust anchors are based on X.509
+The `X509Credential` is a W3C Verifiable Credential type designed for use cases where trust anchors are based on X.509
 certificates. It leverages the `did:x509` method, as specified in
 the [Trust Over IP DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/).
 
 By aligning credential subject validation with the fields of the associated `did:x509` DID and enforcing
-certificate revocation checks, the `NutsX509Credential` ensures integrity and adherence to the PKI trust model.
+certificate revocation checks, the `X509Credential` ensures integrity and adherence to the PKI trust model.
 
 
 ## Definitions
 
-- **NutsX509Credential**: A Verifiable Credential whose issuer is a `did:x509` DID and whose structure adheres to the
+- **X509Credential**: A Verifiable Credential whose issuer is a `did:x509` DID and whose structure adheres to the
   requirements in this document.
 - **did:x509**: A Decentralized Identifier (DID) method specified by the Trust Over IP Foundation, where the DID is
   derived from an X.509 certificate.
@@ -92,7 +92,7 @@ Example of the trust chain hierarchy:
 └────────────────────┘
 ```
 ### Nuts and X.509:
-The Nuts framework extends X.509 certificates into its decentralized identity (DID) ecosystem using the `did:x509` DID method. This method facilitates linking an X.509 certificate to a verifiable credential (`NutsX509Credential`), providing trust while bridging traditional PKI with decentralized trust models. This is especially relevant in systems reliant on existing X.509 implementations, such as healthcare or government frameworks.
+The Nuts framework extends X.509 certificates into its decentralized identity (DID) ecosystem using the `did:x509` DID method. This method facilitates linking an X.509 certificate to a verifiable credential (`X509Credential`), providing trust while bridging traditional PKI with decentralized trust models. This is especially relevant in systems reliant on existing X.509 implementations, such as healthcare or government frameworks.
 
 ### Using x509 for signing JWTs
 
@@ -154,13 +154,13 @@ This RFC extends the Subject Other Name (san) policy with the following attribut
 
 The otherName attribute can be used to specify extra attributes in a x509 certificate. This attribute is added to the specification of this RFC to cater for the use case where the san.otherName attribute is used in the x509 certificate and plays a role in the identification of the holder of the certificate.
 
-## The NutsX509Credential Structure
+## The X509Credential Structure
 
-An `NutsX509Credential` must conform to the general structure of a W3C Verifiable Credential and conform to the following
+An `X509Credential` must conform to the general structure of a W3C Verifiable Credential and conform to the following
 rules:
 
 - The credential MUST be in JWT format.
-- `type`: MUST include `VerifiableCredential` and `NutsX509Credential`.
+- `type`: MUST include `VerifiableCredential` and `X509Credential`.
 - `issuer`: MUST be a valid `did:x509` identifier.
 - `credentialSubject`: MUST only contain fields explicitly present in the `did:x509` DID policies with the fields mapped by each type as a separate map. An example: 
 ```
@@ -176,9 +176,9 @@ rules:
 
 The credential subject can be identified by any DID method (e.g. `did:web`) accepted by the credential verifier.
 
-### Example `NutsX509Credential`
+### Example `X509Credential`
 
-Below is an example of an `NutsX509Credential` issued by a `did:x509` DID. The credential subject is identified by a
+Below is an example of an `X509Credential` issued by a `did:x509` DID. The credential subject is identified by a
 `did:web`.
 The first snippet is the JWT header, and the second snippet is the credential payload.
 
@@ -209,7 +209,7 @@ Payload:
     ],
     "type": [
       "VerifiableCredential",
-      "NutsX509Credential"
+      "X509Credential"
     ],
     "issuer": "did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:O:OLVG%20Oost::subject:L:Amsterdam::san:otherName:23419943234",
     "issuanceDate": "2024-12-01T00:00:00Z",
@@ -227,7 +227,7 @@ Payload:
 
 ### 1. Verify Credential Structure
 
-To validate an `NutsX509Credential`, the following steps MUST be performed:
+To validate an `X509Credential`, the following steps MUST be performed:
 
 - Verify that the credential is in JWT format.
 - Verify that the issuer's DID is a `did:x509` DID.
@@ -309,7 +309,7 @@ The following security considerations need to be addressed:
 
 ### **5. Improper Credential Subject Validation**
 
-- If the `credentialSubject` field in frameworks like `NutsX509Credential` is not properly validated, it may allow
+- If the `credentialSubject` field in frameworks like `X509Credential` is not properly validated, it may allow
   fields not aligned with the X.509 certificate to be added or accepted.
 - **Consequences**:
   - Attackers could inject unauthorized or false data (e.g., incorrect organization name or purpose), tricking verifiers
@@ -396,14 +396,14 @@ contains the following information (of intrest):
   * `<rol>` is the role of the holder of the certificate, always "0.00"
   * `<AGB-code>` is the AGB code of the holder of the certificate.
 
-## Mapping UZI certificate to NutsX509Credential
+## Mapping UZI certificate to X509Credential
 
 The mapping of certificates to x509 is depending
 
 ### The ROOT G3
 
 The `did:x509` specification dictates that the fingerprint of the Root CA is part of the did:x509. For mapping an UZI
-certificate to an NutsX509Credential the ROOT CA MUST match one of the certificates in the UZI ROOT CA register hierarchy.
+certificate to an X509Credential the ROOT CA MUST match one of the certificates in the UZI ROOT CA register hierarchy.
 For G3 this is:
 
 ```asciidoc
@@ -422,8 +422,8 @@ For G3 this is:
 
 ### Field mapping of the UZI credential
 
-The following fields are commonly used for mapping UZI certificates to NutsX509Credentials
-* The `subject.O` the name of the holder of the certificate. Maps to `subject.O` in the NutsX509Credential.
+The following fields are commonly used for mapping UZI certificates to X509Credentials
+* The `subject.O` the name of the holder of the certificate. Maps to `subject.O` in the X509Credential.
 * The `subject.L` The subject locality (city)
 * The `san.otherName` a string containing `<OID CA>-<versie-nr>-<UZI-nr>-<pastype>-<Abonnee-nr>-<rol>-<AGB-code>`,
   where:
@@ -441,7 +441,7 @@ The focus on trust in the NUTS network for organizations lies primarily on the U
 `<Abonnee-nr>` on the UZI certificate. This number is used to identify the subject of the certificate within the Dutch
 healthcare ecosystem . The subject of the certificate can use the UZI certificate in combination with the private
 key to proof the ownership of the URA number. The diagram below shows how the UZI certificate can be used to transfer
-the trust from the UZI register acting as "authentieke bron" into the NUTS ecosystem using the `did:x509` method and the `NutsX509Credential` Verifiable
+the trust from the UZI register acting as "authentieke bron" into the NUTS ecosystem using the `did:x509` method and the `X509Credential` Verifiable
 Credential.
 
 ```asciidoc
@@ -452,7 +452,7 @@ Credential.
                                  │                 │                                              
 ┌───────────┐            ┌───────┴───────┐         │                                              
 │  ROOT CA  │            │     UZI       │ ┌───────────────────┐            ┌────┐                
-└─────┬─────┘            │  Certificate  │ │ NutsX509Credential┼────────────► VP │                
+└─────┬─────┘            │  Certificate  │ │ X509Credential┼────────────► VP │                
       │                  └───────────────┘ └───────────────────┘            └─┬──┘                
       │                          │                 │  │    ┌────────────┐     │     ┌────────────┐
 ┌─────┴─────┐ 1.Request  ┌───────┴───────┐         │  │    │            │     │     │            │
@@ -467,7 +467,7 @@ Credential.
 ```
 
 This diagram represents the process of establishing trust, based on the use of X.509 certificates, the
-`NutsX509Credential` and `did:x509` within a trust network. Below is a step-by-step explanation of the diagram:
+`X509Credential` and `did:x509` within a trust network. Below is a step-by-step explanation of the diagram:
 
 ### **Key Components**
 
@@ -487,12 +487,12 @@ This diagram represents the process of establishing trust, based on the use of X
   - A Decentralized Identifier (DID) based on an X.509 certificate. It links decentralized systems with the trust of
     traditional X.509 certificates.
 
-5. **NutsX509Credential**:
-  - A Verifiable Credential (VC), such as a "NutsX509Credential," which is issued by the certificate holder using its
+5. **X509Credential**:
+  - A Verifiable Credential (VC), such as a "X509Credential," which is issued by the certificate holder using its
     `did:x509` identifier and signed with the corresponding keypair. This credential is stored in the holder's wallet.
 
 6. **Wallet**:
-  - A secure digital storage system for holding the NutsX509Credential. It manages credentials and is used for
+  - A secure digital storage system for holding the X509Credential. It manages credentials and is used for
     presenting them to verifiers.
 
 7. **Verifier**:
@@ -518,9 +518,9 @@ to the subject. This certificate includes information about the subject (e.g., s
 signed by the CA. This guarantees the authenticity of the certificate. Note that the **holder** and **subject** are the
 same concepts but are named differently between the different terminologies.
 
-#### **Step 3: NutsX509Credential Issuance**
+#### **Step 3: X509Credential Issuance**
 
-The **holder** uses their X.509 certificate to create a **NutsX509Credential or Verifiable Credential**. The process
+The **holder** uses their X.509 certificate to create a **X509Credential or Verifiable Credential**. The process
 includes:
 
 1. Using the certificate's `did:x509` identifier as the credential's **issuer**.
@@ -530,7 +530,7 @@ includes:
 #### **Step 4: Credential Presentation**
 
 When the holder needs to prove their identity to a verifier (e.g., during authentication), they present the *
-*NutsX509Credential** from their wallet to the **Verifier**. This process includes:
+*X509Credential** from their wallet to the **Verifier**. This process includes:
 
 1. The presentation of the digital credential as a Verifiable Presentation (VP).
 2. Signing the presentation with the holder's private key to ensure it hasn't been tampered with.
