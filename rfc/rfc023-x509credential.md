@@ -10,21 +10,13 @@
 
 ## Abstract
 
-Trust is a key element in the Nuts network. This RFC describes how x509 certificates can be used to source trust from
-outside the Nuts network. The x509 certification process has been around for a long time and is widely used in the
-internet. This RFC describes how x509 certificates can be used in the Nuts network to establish trust between parties by
-being able to link the x509 certificate to a Nuts identity by as a Verifiable Credential that is issued by the holder of
-the x509 identity.
+Trust is a key element in the Nuts network. This RFC describes how x509 certificates can be used to make use of X509  sourced trust in the NUTS framework. The x509 certification process has been around for a long time and is widely used  in the internet. This RFC describes how x509 certificates can be used in the Nuts network to establish trust between  parties by being able to link the x509 certificate to a Nuts identity by as a Verifiable Credential that is issued by the holder of the x509 identity.
 
-This RFC specifies the requirements and validation process for the `X509Credential`, a W3C Verifiable Credential (
-VC) type issued by the subject of a x509 certificate, represented by a `did:x509` DID. The `X509Credential` ensures
-strong alignment with the properties of the associated X.509 certificate and defines mechanisms to validate the
-credential and verify its association with a `did:x509` DID.
+This RFC specifies the requirements and validation process for the `X509Credential`, a W3C Verifiable Credential ( VC) type issued by the subject of a x509 certificate, represented by a `did:x509` DID. The `X509Credential` ensures strong alignment with the properties of the associated X.509 certificate and defines mechanisms to validate the credential and verify its association with a `did:x509` DID.
 
 ## Status of this document
 
-This document is currently in draft. Feedback is welcome to improve the interoperability and robustness of the
-specification.
+This document is currently in draft status. Feedback is welcome to improve the interoperability and robustness of the specification.
 
 ### Copyright Notice
 
@@ -32,14 +24,11 @@ specification.
 
 ## Introduction
 
-TThe [did:x509](https://trustoverip.github.io/tswg-did-x509-method-specification/) method aims to achieve interoperability between existing X.509 solutions and Decentralized Identifiers (DIDs) to support operational models in which a full transition to DIDs is not achievable or desired yet. It supports X.509-only verifiers as well as DID-based verifiers supporting this DID method.
+The [did:x509](https://trustoverip.github.io/tswg-did-x509-method-specification/) method aims to achieve  interoperability between existing X.509 solutions and Decentralized Identifiers (DIDs). This to  to support operational models in which a full transition to DIDs is not achievable or desired yet.
 
-The `X509Credential` is a W3C Verifiable Credential type designed for use cases where trust anchors are based on X.509
-certificates. It leverages the `did:x509` method, as specified in
-the [Trust Over IP DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/).
+The `X509Credential` is a W3C Verifiable Credential type designed for use cases where trust anchors are based on X.509 certificates. It leverages the `did:x509` method, as specified in the [Trust Over IP DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/).
 
-By aligning credential subject validation with the fields of the associated `did:x509` DID and enforcing
-certificate revocation checks, the `X509Credential` ensures integrity and adherence to the PKI trust model.
+By aligning credential subject validation with the fields of the associated `did:x509` DID and enforcing certificate revocation checks, the `X509Credential` ensures integrity and adherence to the PKI trust model.
 
 
 ## Definitions
@@ -49,9 +38,8 @@ certificate revocation checks, the `X509Credential` ensures integrity and adhere
 - **did:x509**: A Decentralized Identifier (DID) method specified by the Trust Over IP Foundation, where the DID is
   derived from an X.509 certificate.
 - **Issuer Certificate**: The X.509 certificate associated with the `did:x509` DID that issued the credential.
-- **Credential Subject**: The entity described by the credential.
-- **Revocation Check**: The process of verifying the revocation status of the issuer certificate using mechanisms like
-  OCSP or CRL.
+- **Credential Subject**: The entity described by the credential as the subject of the credential.
+- **Revocation Check**: The process of verifying the revocation status of the issuer certificate using mechanisms like CRL.
 
 ## Used standards and technologies
 
@@ -71,7 +59,7 @@ An **X.509 certificate** is a digital certificate that follows the X.509 Public 
     - Trust is anchored in a **Certificate Authority (CA)**, which is a trusted third party.
     - Certificates can form a chain of trust, starting from a **root certificate** (trusted CA) to **intermediate certificates**, down to the **end-user/client certificates** (specific use-case certificates).
 
-Example of the trust chain hierarchy:
+An example of the trust chain hierarchy:
 
 
 ```asciidoc
@@ -101,17 +89,12 @@ of JSON objects with certificates part of a certificate chain. This allows for t
 private key of the certificate and the verification of the signature with the public key of the certificate, and the
 verification of the certificate chain with the public key of the CA. This is done by using the following headers fields:
 
-* x5c, the ordered certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate
-  first and the root certificate last.
-* x5t#S256, the thumbprint of the signing certificate as a SHA256 hash.
+* `x5c`, the ordered certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate first and the root certificate last.
+* `x5t#S256`, the thumbprint of the signing certificate as a SHA256 hash.
 
 ### The `did:x509` DID Method
 
-The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an x509
-certificate chain. Trust in the DID is anchored by specifying the (hash of) one of the chain's intermediate, or the root CA's certificate. The did:x509 method
-is used to specify specific attributes of the signing certificate to specify the holder of the signing
-certificate. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specificying
-attributes that are assigned to the signing certificate. So, for example following did:x509:
+The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an x509 certificate chain. Trust in the DID is anchored by specifying the (hash of) one of the chain's intermediate, or the root CA's certificate. The did:x509 method is used to specify specific attributes of the signing certificate to specify the holder of the signing certificate. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specifying attributes that are assigned to the signing certificate. So, for example following did:x509:
 
 ```
 did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:C:US:ST:California:O:My%20Organisation
@@ -125,7 +108,7 @@ thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk` and then having the fol
   * ST: California
   * O: My Organisation
 
-The did:x509 defines various attribute types that can be used as attributes, such as:
+The did:x509 defines as set of attribute types that can be used as attributes, such as:
 
 * Subject
   * C: Country
@@ -156,8 +139,7 @@ The otherName attribute can be used to specify extra attributes in a x509 certif
 
 ## The X509Credential Structure
 
-An `X509Credential` must conform to the general structure of a W3C Verifiable Credential and conform to the following
-rules:
+An `X509Credential` must conform to the general structure of a W3C Verifiable Credential and conform to the following  rules:
 
 - The credential MUST be in JWT format.
 - `type`: MUST include `VerifiableCredential` and `X509Credential`.
@@ -176,16 +158,12 @@ rules:
 
 The credential subject can be identified by any DID method (e.g. `did:web`) accepted by the credential verifier.
 
-### Allowed signing algoritmns:
+### Allowed signing algorithms:
 * The `alg` value of the JWT header MUST match the `PS256` value. 
 
 ### Example `X509Credential`
 
-Below is an example of an `X509Credential` issued by a `did:x509` DID. The credential subject is identified by a
-`did:web`.
-The first snippet is the JWT header, and the second snippet is the credential payload.
-
-(TODO: check this example)
+Below is an example of an `X509Credential` issued by a `did:x509` DID. The credential subject is identified by a `did:web`.  The first snippet is the JWT header, and the second snippet is the credential payload.
 
 ```json
 {
@@ -196,7 +174,7 @@ The first snippet is the JWT header, and the second snippet is the credential pa
     "<base64 encoded issuer-intermediate-certificate in the DER format>",
     "<base64 encoded issuer-certificate in the DER format>"
   ],
-  "x5t": "<thumbprint>",
+  "x5t#S256": "<sha256 thumbprint>",
   "kid": "did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:O:OLVG%20Oost::subject:L:Amsterdam::san:otherName:23419943234#1"
 }
 ```
@@ -267,8 +245,8 @@ The cryptographic proof of the credential MUST be verified using the public key 
 This involves:
 
 - Resolving the public key from the DID Document.
-- Verifying the signature on the credential.
-- Verify the signing `alg` to be `PS256`.
+- Verify that the header value of `alg` is set to be `PS256`.
+- Verifying the signature on the credential with `PS256` signing algorithm.
 
 ### 5. Check Credential Expiry
 
@@ -364,25 +342,14 @@ The following security considerations need to be addressed:
 
 ## PKI overheid & UZI server certificates
 
-The Dutch government has a Public Key Infrastructure (PKI) that is used to establish trust between parties. The PKI
-framework is currently in place and makes use of PKI Overheid Certificates issued by the root CAs of the Dutch
-government. In healthcare a specific instance of PKI overheid certificates are issued: the UZI certificates. These
-certificates are used to establish trust between parties in the healthcare sector. The UZI certificates are issued by
-the UZI register, which is a trusted party that is capable of verifying the identity of the holder of the certificate.
-The UZI register signs the certificate with its own private key. The holder of the certificate can then use the public
-key of the UZI register to verify the signature of the certificate. This way the holder of the certificate can prove
-that the certificate is valid and that the information in the certificate is correct. The UZI certificates are issued
-to:
+The Dutch government has a Public Key Infrastructure (PKI) that is used to establish trust between parties. The PKI  framework is currently in place and makes use of PKI Overheid Certificates issued by the root CAs of the Dutch  government. In healthcare a specific instance of PKI overheid certificates are issued: the UZI certificates. These  certificates are used to establish trust between parties in the healthcare sector. The UZI certificates are issued by  the UZI register, which is a trusted party that is capable of verifying the identity of the holder of the certificate.  The UZI register signs the certificate with its own private key. The holder of the certificate can then use the public key of the UZI register to verify the signature of the certificate. This way the holder of the certificate can prove that the certificate is valid and that the information in the certificate is correct. The UZI certificates are issued to:
 
 * Individuals that work in healthcare, such as doctors, nurses, etc. They hold this certificate on a UZI card.
-* Organisations that work in healthcare, such as hospitals, pharmacies, etc. They hold this certificate as server
-  certificates.
+* Organisations that work in healthcare, such as hospitals, pharmacies, etc. They hold this certificate as server certificates.
 
 #### UZI certificate structure for organisations
 
-The UZI certificate is used to identify the holder of the certificate. The UZI certificate contains information about
-the holder of the certificate. This information is used to identify the holder of the certificate. The UZI certificate
-contains the following information (of intrest):
+The UZI certificate is used to identify the holder of the certificate. The UZI certificate contains information about  the holder of the certificate. This information is used to identify the holder of the certificate. The UZI certificate contains the following information (of intrest):
 
 * The `subject.CN` The full FQN.
 * The `subject.O` the name of the holder of the certificate.
@@ -407,9 +374,7 @@ The mapping of certificates to x509 is depending
 
 ### The ROOT G3
 
-The `did:x509` specification dictates that the fingerprint of the Root CA is part of the did:x509. For mapping an UZI
-certificate to an X509Credential the ROOT CA MUST match one of the certificates in the UZI ROOT CA register hierarchy.
-For G3 this is:
+The `did:x509` specification dictates that the fingerprint of the Root CA is part of the did:x509. For mapping an UZI  certificate to an X509Credential the ROOT CA MUST match one of the certificates in the UZI ROOT CA register hierarchy. For G3 this is:
 
 ```asciidoc
         ┌────────────────────────────────────┐        
@@ -442,12 +407,7 @@ The following fields are commonly used for mapping UZI certificates to X509Crede
 
 ## The use of UZI server certificate in the Nuts network or identifying organizations
 
-The focus on trust in the NUTS network for organizations lies primarily on the URA number identified as the
-`<Abonnee-nr>` on the UZI certificate. This number is used to identify the subject of the certificate within the Dutch
-healthcare ecosystem . The subject of the certificate can use the UZI certificate in combination with the private
-key to proof the ownership of the URA number. The diagram below shows how the UZI certificate can be used to transfer
-the trust from the UZI register acting as "authentieke bron" into the NUTS ecosystem using the `did:x509` method and the `X509Credential` Verifiable
-Credential.
+The focus on trust in the NUTS network for organizations lies primarily on the URA number identified as the `<Abonnee-nr>` on the UZI certificate. This number is used to identify the subject of the certificate within the Dutch healthcare ecosystem . The subject of the certificate can use the UZI certificate in combination with the private key to proof the ownership of the URA number. The diagram below shows how the UZI certificate can be used to transfer the trust from the UZI register acting as "authentieke bron" into the NUTS ecosystem using the `did:x509` method and the `X509Credential` Verifiable Credential.
 
 ```asciidoc
                             ┌─────────┐       ┌──────────┐                                        
@@ -457,7 +417,7 @@ Credential.
                                  │                 │                                              
 ┌───────────┐            ┌───────┴───────┐         │                                              
 │  ROOT CA  │            │     UZI       │ ┌───────────────────┐            ┌────┐                
-└─────┬─────┘            │  Certificate  │ │ X509Credential┼────────────► VP │                
+└─────┬─────┘            │  Certificate  │ │ X509Credential    ┼────────────► VP │                
       │                  └───────────────┘ └───────────────────┘            └─┬──┘                
       │                          │                 │  │    ┌────────────┐     │     ┌────────────┐
 ┌─────┴─────┐ 1.Request  ┌───────┴───────┐         │  │    │            │     │     │            │
@@ -471,62 +431,47 @@ Credential.
                                               └─────────┘    └─────────┘                          
 ```
 
-This diagram represents the process of establishing trust, based on the use of X.509 certificates, the
-`X509Credential` and `did:x509` within a trust network. Below is a step-by-step explanation of the diagram:
+This diagram represents the process of establishing trust, based on the use of X.509 certificates, the `X509Credential` and `did:x509` within a trust network. Below is a step-by-step explanation of the diagram:
 
 ### **Key Components**
 
 1. **Root CA**:
-  - The starting point for trust. The Root Certificate Authority (CA) is a trusted source that issues and signs
-    certificates to intermediate or end-user entities.
+  - The starting point for trust. The Root Certificate Authority (CA) is a trusted source that issues and signs certificates to intermediate or end-user entities.
 
 2. **UZI Certificate**:
-  - A specific X.509 certificate issued by the Root CA (or its intermediaries) to establish trust for the holder (e.g.,
-    an organization or an individual).
+  - A specific X.509 certificate issued by the Root CA (or its intermediaries) to establish trust for the holder (e.g., an organization or an individual).
 
 3. **Keypair**:
-  - Generated by the certificate holder, this is the private-public key pair required for signing and authentication
-    processes.
+  - Generated by the certificate holder, this is the private-public key pair required for signing and authentication processes.
 
 4. **did:x509**:
-  - A Decentralized Identifier (DID) based on an X.509 certificate. It links decentralized systems with the trust of
-    traditional X.509 certificates.
+  - A Decentralized Identifier (DID) based on an X.509 certificate. It links decentralized systems with the trust of traditional X.509 certificates.
 
 5. **X509Credential**:
-  - A Verifiable Credential (VC), such as a "X509Credential," which is issued by the certificate holder using its
-    `did:x509` identifier and signed with the corresponding keypair. This credential is stored in the holder's wallet.
+  - A Verifiable Credential (VC), such as a "X509Credential," which is issued by the certificate holder using its `did:x509` identifier and signed with the corresponding keypair. This credential is stored in the holder's wallet.
 
 6. **Wallet**:
-  - A secure digital storage system for holding the X509Credential. It manages credentials and is used for
-    presenting them to verifiers.
+  - A secure digital storage system for holding the X509Credential. It manages credentials and is used for presenting them to verifiers.
 
 7. **Verifier**:
-  - An entity that validates the presented credential and establishes the holder's identity based on its associated
-    trust components (e.g., did:x509, certificate chain, etc.).
+  - An entity that validates the presented credential and establishes the holder's identity based on its associated trust components (e.g., did:x509, certificate chain, etc.).
 
 8. **did:web**:
-  - Another Decentralized Identifier (DID) the holder may use to represent their identity and interact within the
-    decentralized trust ecosystem.
+  - Another Decentralized Identifier (DID) the holder may use to represent their identity and interact within the decentralized trust ecosystem.
 
 ### **Process Steps**
 
 #### **Step 1: Keypair Generation and Request**
 
-The  **holder** generates a keypair (private and public key) to represent their identity. They submit the
-public key as part of a **Certificate Signing Request (CSR)** to the Root CA (or intermediate CA). Within the CSR
-terminology, the **holder** is the **subject** of the CSR.
+The  **holder** generates a keypair (private and public key) to represent their identity. They submit the public key as part of a **Certificate Signing Request (CSR)** to the Root CA (or intermediate CA). Within the CSR terminology, the **holder** is the **subject** of the CSR.
 
 #### **Step 2: Certificate Issuance**
 
-The Root CA (or its intermediate CA) verifies the request and issues an **X.509 certificate** (e.g., a UZI certificate)
-to the subject. This certificate includes information about the subject (e.g., subject name and organization) and is
-signed by the CA. This guarantees the authenticity of the certificate. Note that the **holder** and **subject** are the
-same concepts but are named differently between the different terminologies.
+The Root CA (or its intermediate CA) verifies the request and issues an **X.509 certificate** (e.g., a UZI certificate) to the subject. This certificate includes information about the subject (e.g., subject name and organization) and is signed by the CA. This guarantees the authenticity of the certificate. Note that the **holder** and **subject** are the same concepts but are named differently between the different terminologies.
 
 #### **Step 3: X509Credential Issuance**
 
-The **holder** uses their X.509 certificate to create a **X509Credential or Verifiable Credential**. The process
-includes:
+The **holder** uses their X.509 certificate to create a **X509Credential or Verifiable Credential**. The process includes:
 
 1. Using the certificate's `did:x509` identifier as the credential's **issuer**.
 2. Signing this credential with the holder's private key (from the keypair).
@@ -534,8 +479,7 @@ includes:
 
 #### **Step 4: Credential Presentation**
 
-When the holder needs to prove their identity to a verifier (e.g., during authentication), they present the *
-*X509Credential** from their wallet to the **Verifier**. This process includes:
+When the holder needs to prove their identity to a verifier (e.g., during authentication), they present the **X509Credential** from their wallet to the **Verifier**. This process includes:
 
 1. The presentation of the digital credential as a Verifiable Presentation (VP).
 2. Signing the presentation with the holder's private key to ensure it hasn't been tampered with.
@@ -553,8 +497,7 @@ The **Verifier** validates the credential and presentation. This includes:
 
 #### Trust is Established:
 
-If all checks pass, the Verifier trusts the credential presented by the holder. The credential's trustworthiness is
-derived from:
+If all checks pass, the Verifier trusts the credential presented by the holder. The credential's trustworthiness is derived from:
 
 1. The Root CA that anchors trust.
 2. The validity of the X.509 certificate and the associated DID (`did:x509`).
