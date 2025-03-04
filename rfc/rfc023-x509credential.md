@@ -181,14 +181,13 @@ Below is an example of an `X509Credential` issued by a `did:x509` DID. The crede
 }
 ```
 
-(TODO: Add right JSON-LD context)
 Payload:
-
 ```json
 {
   "vc": {
     "@context": [
-      "https://www.w3.org/2018/credentials/v1"
+      "https://www.w3.org/2018/credentials/v1",
+      "https://nuts.nl/credentials/v1"
     ],
     "type": [
       "VerifiableCredential",
