@@ -10,7 +10,7 @@
 
 ## Abstract
 
-Trust is a key element in the Nuts network. This RFC describes how x509 certificates can be used to make use of X509  sourced trust in the NUTS framework. The x509 certification process has been around for a long time and is widely used  in the internet. This RFC describes how x509 certificates can be used in the Nuts network to establish trust between  parties by being able to link the x509 certificate to a Nuts identity by as a Verifiable Credential that is issued by the holder of the x509 identity.
+Trust is a key element in the Nuts network. This RFC describes how x509 certificates can be used to make use of X509 sourced trust in the NUTS framework. The x509 certification process has been around for a long time and is widely used in the internet. This RFC describes how x509 certificates can be used in the Nuts network to establish trust between parties by being able to link the x509 certificate to a Nuts identity by as a Verifiable Credential that is issued by the holder of the x509 identity.
 
 This RFC specifies the requirements and validation process for the `X509Credential`, a W3C Verifiable Credential ( VC) type issued by the subject of a x509 certificate, represented by a `did:x509` DID. The `X509Credential` ensures strong alignment with the properties of the associated X.509 certificate and defines mechanisms to validate the credential and verify its association with a `did:x509` DID.
 
@@ -24,7 +24,7 @@ This document is currently in draft status. Feedback is welcome to improve the i
 
 ## Introduction
 
-The [did:x509](https://trustoverip.github.io/tswg-did-x509-method-specification/) method aims to achieve  interoperability between existing X.509 solutions and Decentralized Identifiers (DIDs). This to  to support operational models in which a full transition to DIDs is not achievable or desired yet.
+The [did:x509](https://trustoverip.github.io/tswg-did-x509-method-specification/) method aims to achieve interoperability between existing X.509 solutions and Decentralized Identifiers (DIDs). This to to support operational models in which a full transition to DIDs is not achievable or desired yet.
 
 The `X509Credential` is a W3C Verifiable Credential type designed for use cases where trust anchors are based on X.509 certificates. It leverages the `did:x509` method, as specified in the [Trust Over IP DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/).
 
@@ -34,9 +34,9 @@ By aligning credential subject validation with the fields of the associated `did
 ## Definitions
 
 - **X509Credential**: A Verifiable Credential whose issuer is a `did:x509` DID and whose structure adheres to the
-  requirements in this document.
+ requirements in this document.
 - **did:x509**: A Decentralized Identifier (DID) method specified by the Trust Over IP Foundation, where the DID is
-  derived from an X.509 certificate.
+ derived from an X.509 certificate.
 - **Issuer Certificate**: The X.509 certificate associated with the `did:x509` DID that issued the credential.
 - **Credential Subject**: The entity described by the credential as the subject of the credential.
 - **Revocation Check**: The process of verifying the revocation status of the issuer certificate using mechanisms like CRL.
@@ -141,7 +141,7 @@ The otherName attribute can be used to specify extra attributes in a x509 certif
 
 ## The X509Credential Structure
 
-An `X509Credential` must conform to the general structure of a W3C Verifiable Credential and conform to the following  rules:
+An `X509Credential` must conform to the general structure of a W3C Verifiable Credential and conform to the following rules:
 
 - The credential MUST be in JWT format.
 - `type`: MUST include `VerifiableCredential` and `X509Credential`.
@@ -356,14 +356,14 @@ The following security considerations need to be addressed:
 
 ## PKI overheid & UZI server certificates
 
-The Dutch government has a Public Key Infrastructure (PKI) that is used to establish trust between parties. The PKI  framework is currently in place and makes use of PKI Overheid Certificates issued by the root CAs of the Dutch  government. In healthcare a specific instance of PKI overheid certificates are issued: the UZI certificates. These  certificates are used to establish trust between parties in the healthcare sector. The UZI certificates are issued by  the UZI register, which is a trusted party that is capable of verifying the identity of the holder of the certificate.  The UZI register signs the certificate with its own private key. The holder of the certificate can then use the public key of the UZI register to verify the signature of the certificate. This way the holder of the certificate can prove that the certificate is valid and that the information in the certificate is correct. The UZI certificates are issued to:
+The Dutch government has a Public Key Infrastructure (PKI) that is used to establish trust between parties. The PKI framework is currently in place and makes use of PKI Overheid Certificates issued by the root CAs of the Dutch government. In healthcare a specific instance of PKI overheid certificates are issued: the UZI certificates. These certificates are used to establish trust between parties in the healthcare sector. The UZI certificates are issued by the UZI register, which is a trusted party that is capable of verifying the identity of the holder of the certificate.  The UZI register signs the certificate with its own private key. The holder of the certificate can then use the public key of the UZI register to verify the signature of the certificate. This way the holder of the certificate can prove that the certificate is valid and that the information in the certificate is correct. The UZI certificates are issued to:
 
 * Individuals that work in healthcare, such as doctors, nurses, etc. They hold this certificate on a UZI card.
 * Organisations that work in healthcare, such as hospitals, pharmacies, etc. They hold this certificate as server certificates.
 
 #### UZI certificate structure for organisations
 
-The UZI certificate is used to identify the holder of the certificate. The UZI certificate contains information about  the holder of the certificate. This information is used to identify the holder of the certificate. The UZI certificate contains the following information (of intrest):
+The UZI certificate is used to identify the holder of the certificate. The UZI certificate contains information about the holder of the certificate. This information is used to identify the holder of the certificate. The UZI certificate contains the following information (of intrest):
 
 * The `subject.CN` The full FQN.
 * The `subject.O` the name of the holder of the certificate.
@@ -388,7 +388,7 @@ The mapping of certificates to x509 is depending
 
 ### The ROOT G3
 
-The `did:x509` specification dictates that the fingerprint of the Root CA is part of the did:x509. For mapping an UZI  certificate to an X509Credential the ROOT CA MUST match one of the certificates in the UZI ROOT CA register hierarchy. For G3 this is:
+The `did:x509` specification dictates that the fingerprint of the Root CA is part of the did:x509. For mapping an UZI certificate to an X509Credential the ROOT CA MUST match one of the certificates in the UZI ROOT CA register hierarchy. For G3 this is:
 
 ```asciidoc
         ┌────────────────────────────────────┐        
