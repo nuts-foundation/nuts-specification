@@ -237,7 +237,19 @@ Failure to validate the issuer certificate invalidates the credential.
 
 The `credentialSubject` MUST be verified against the `did:x509` DID Document. Specifically:
 
-- Every field in the `credentialSubject` MUST be present in the `did:x509` DID Document.
+- Every field in the `credentialSubject` MUST be present in the `did:x509` DID Document. The fields in the `credentialSubject` are nested with their DID policies as keys, so `subject:L:Amsterdam`, becomes: 
+```json
+{
+  "sub" :  "did:x509:subject:O:Amsterdam",
+  ...
+  "credentialSubject" : {
+    "id" : "did:x509:subject:O:Amsterdam",
+    "subject": {
+      "O" : "Amsterdam"
+    }
+  }
+}
+```
 - Fields not present in the `did:x509` DID Document invalidate the credential.
 - For JWT based credentials, the `sub` value(s) must match the `credentialSubject.id` field.
 
