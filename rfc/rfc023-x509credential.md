@@ -94,7 +94,7 @@ verification of the certificate chain with the public key of the CA. This is don
 
 ### The `did:x509` DID Method
 
-The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an x509 certificate chain. Trust in the DID is anchored by specifying the (hash of) one of the chain's intermediate, or the root CA's certificate. The did:x509 method is used to specify specific attributes of the signing certificate to specify the holder of the signing certificate. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specifying attributes that are assigned to the signing certificate. So, for example following did:x509:
+The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an x509 certificate chain. Trust in the DID is anchored by specifying the (hash of) one of the chain's intermediate, or the root CA's certificate. The did:x509 method is used to specify attributes of the signing certificate to specify the holder of the signing certificate. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specifying attributes that are assigned to the signing certificate. So, for example following did:x509:
 
 ```
 did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:C:US:ST:California:O:My%20Organisation
