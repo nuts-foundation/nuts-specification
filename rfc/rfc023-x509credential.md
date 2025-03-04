@@ -94,23 +94,25 @@ verification of the certificate chain with the public key of the CA. This is don
 
 ### The `did:x509` DID Method
 
-The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an x509 certificate chain. Trust in the DID is anchored by specifying the (hash of) one of the chain's intermediate, or the root CA's certificate. The did:x509 method is used to specify attributes of the signing certificate to specify the holder of the signing certificate. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specifying attributes that are assigned to the signing certificate. So, for example following did:x509:
+The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an x509 certificate chain. Trust in the DID is anchored by specifying the (hash of) one of the chain's intermediate, or the root CA's certificate. The did:x509 method is used to bind attributes of the signing certificate the holder of the signing certificate in a did:x509 string. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specifying attributes that are assigned by the signing certificate. The DID method defines different types of attributes by `DID policies`, with their specific validation logic. 
+
+For example following did:x509:
 
 ```
 did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:C:US:ST:California:O:My%20Organisation
 ```
 
 ties down the holder of the signing certificate by, first having a digitally signed certificate by the CA with the
-thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk` and then having the following attributes in the certificate:
+thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk` and then having the following attributes in the certificate of the `subject` DID policy:
 
 * Subject:
   * C: US
   * ST: California
   * O: My Organisation
 
-The did:x509 defines as set of attribute types that can be used as attributes, such as:
+The did:x509 specifies the following set of DID policies (between parenthesis) and their attributes:
 
-* Subject
+* Subject (subject)
   * C: Country
   * CN: Common Name
   * L: Locality
@@ -129,7 +131,7 @@ The did:x509 defines as set of attribute types that can be used as attributes, s
 
 ### Extending the `did:x509` specification
 
-This RFC extends the Subject Other Name (san) policy with the following attribute:
+This RFC extends the Subject Other Name (san) policy with the following attribute of the DID policy `san`:
 
 * Subject Other Name (san)
   * otherName: A free-form attribute that can be used to specify any attribute that is not covered by the other
