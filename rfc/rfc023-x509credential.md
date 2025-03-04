@@ -22,7 +22,7 @@ This document is currently in draft status. Feedback is welcome to improve the i
 
 ![](../.gitbook/assets/license.png)
 
-## Introduction
+## 1. Introduction
 
 The [did:x509](https://trustoverip.github.io/tswg-did-x509-method-specification/) method aims to achieve interoperability between existing  X.509 solutions and Decentralized Identifiers (DIDs). This to to support operational models in which a full transition to DIDs is not achievable or desired yet.
 
@@ -31,7 +31,7 @@ The `X509Credential` is a W3C Verifiable Credential type designed for use cases 
 By aligning credential subject validation with the fields of the associated `did:x509` DID and enforcing certificate revocation checks, the `X509Credential` ensures integrity and adherence to the PKI trust model.
 
 
-## Definitions
+## 2. Definitions
 
 - **X509Credential**: A Verifiable Credential whose issuer is a `did:x509` DID and whose structure adheres to the
  requirements in this document.
@@ -41,7 +41,7 @@ By aligning credential subject validation with the fields of the associated `did
 - **Credential Subject**: The entity described by the credential as the subject of the credential.
 - **Revocation Check**: The process of verifying the revocation status of the issuer certificate using mechanisms like CRL.
 
-## Used standards and technologies
+## 3. Used standards and technologies
 
 This RFC builds on the following standards and technologies:
 
@@ -50,7 +50,7 @@ This RFC builds on the following standards and technologies:
 * [did:x509 method specification](https://trustoverip.github.io/tswg-did-x509-method-specification/), with modifications
 * [Verifiable Credentials Data Model v1.1](https://www.w3.org/TR/vc-data-model/)
 
-### X.509 certificates, a brief introduction
+### 3.1 X.509 certificates, a brief introduction
 
 An **X.509 certificate** is a digital certificate that follows the X.509 Public Key Infrastructure (PKI) standard. It is widely used for secure communication over the internet, such as HTTPS, email encryption, and digital signatures.
 #### Key Features of X.509 Certificates:
@@ -79,10 +79,10 @@ An example of the trust chain hierarchy:
 │Signing Certificate │
 └────────────────────┘
 ```
-### Nuts and X.509:
+### 3.2 Nuts and X.509:
 The Nuts framework extends X.509 certificates into its decentralized identity (DID) ecosystem using the `did:x509` DID method. This method facilitates linking an X.509 certificate to a verifiable credential (`X509Credential`), providing trust while bridging traditional PKI with decentralized trust models. This is especially relevant in systems reliant on existing X.509 implementations, such as healthcare or government frameworks.
 
-### Using X.509 Certificates for signing JWTs
+### 3.4 Using X.509 Certificates for signing JWTs
 
 The JWT is a standard that is used to sign and encrypt JSON objects. Thus, standard allows for the signing and encryption
 of JSON objects with certificates part of a certificate chain. This allows for the signing of JSON objects with the
@@ -92,7 +92,7 @@ verification of the certificate chain with the public key of the CA. This is don
 * `x5c`, the ordered certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate first and the root certificate last.
 * `x5t#S256`, the thumbprint of the signing certificate as a SHA256 hash.
 
-### The `did:x509` DID Method
+### 3.5 The `did:x509` DID Method
 
 The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an X.509 certificate chain. Trust in the DID is anchored by specifying the (hash of) one of the chain's intermediate, or the root CA's certificate. The did:x509 method is used to bind attributes of the signing certificate the holder of the signing certificate in a did:x509 string. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specifying attributes that are assigned by the signing certificate. The DID method defines different types of attributes by `DID policies`, with their specific validation logic. 
 
@@ -129,7 +129,7 @@ The did:x509 specifies the following set of DID policies (between parenthesis) a
 * A Free-to-Use CA For Code Signing (fulcio-issuer)
   * Any issuer hostname
 
-### Extending the `did:x509` specification
+### 3.6 Extending the `did:x509` specification
 
 This RFC extends the Subject Other Name (san) policy with the following attribute of the DID policy `san`:
 
@@ -139,7 +139,7 @@ This RFC extends the Subject Other Name (san) policy with the following attribut
 
 The otherName attribute can be used to specify extra attributes in a X.509 certificate. This attribute is added to the specification of this RFC to cater for the use case where the san.otherName attribute is used in the X.509 certificate and plays a role in the identification of the holder of the certificate.
 
-## The X509Credential Structure
+## 4. The X509Credential Structure
 
 An `X509Credential` must conform to the general structure of a W3C Verifiable Credential and conform to the following rules:
 
@@ -160,10 +160,10 @@ An `X509Credential` must conform to the general structure of a W3C Verifiable Cr
 
 The credential subject can be identified by any DID method (e.g. `did:web`) accepted by the credential verifier.
 
-### Allowed signing algorithms:
+### 4.1 Allowed signing algorithms:
 * The `alg` value of the JWT header MUST match the `PS256` value. 
 
-### Example `X509Credential`
+### 4.2 Example `X509Credential`
 
 Below is an example of an `X509Credential` issued by a `did:x509` DID. The credential subject is identified by a `did:web`.  The first snippet is the JWT header, and the second snippet is the credential payload.
 
@@ -205,9 +205,9 @@ Payload:
 }
 ```
 
-## Validation
+## 5. Validation
 
-### 1. Verify Credential Structure
+### 5.1 Verify Credential Structure
 
 To validate an `X509Credential`, the following steps MUST be performed:
 
@@ -219,7 +219,7 @@ To validate an `X509Credential`, the following steps MUST be performed:
   certificate chain for revocation.
 - Validate that the `credentialSubject` fields match the policies in the `did:x509` DID.
 
-### 2. Validate the Issuer Certificate
+### 5.2 Validate the Issuer Certificate
 
 The certificate associated with the `did:x509` issuer MUST be validated as follows:
 
@@ -232,7 +232,7 @@ The certificate associated with the `did:x509` issuer MUST be validated as follo
 
 Failure to validate the issuer certificate invalidates the credential.
 
-### 3. Validate the Credential Subject
+### 5.3 Validate the Credential Subject
 
 The `credentialSubject` MUST be verified against the `did:x509` DID Document. Specifically:
 
@@ -252,7 +252,7 @@ The `credentialSubject` MUST be verified against the `did:x509` DID Document. Sp
 - Fields not present in the `did:x509` DID Document invalidate the credential.
 - For JWT based credentials, the `sub` value(s) must match the `credentialSubject.id` field.
 
-### 4. Verify the Proof and signing algorithm
+### 5.4 Verify the Proof and signing algorithm
 
 The cryptographic proof of the credential MUST be verified using the public key associated with the `did:x509` DID.
 This involves:
@@ -261,16 +261,16 @@ This involves:
 - Verify that the header value of `alg` is set to be `PS256`.
 - Verifying the signature on the credential with `PS256` signing algorithm.
 
-### 5. Check Credential Expiry
+### 5.5 Check Credential Expiry
 
 If the `issuanceDate` or any other relevant date constraints (e.g., `expirationDate`) are present, they MUST be
 validated to ensure the credential is within its valid timeframe.
 
-## Security Considerations
+## 6. Security Considerations
 
 The following security considerations need to be addressed:
 
-### **1. Broken Trust Chain**
+### 6.1 **Broken Trust Chain**
 
 - If the certificate chain is not validated, attackers could present fake certificates signed by an untrusted or rogue
   Certificate Authority (CA).
@@ -279,7 +279,7 @@ The following security considerations need to be addressed:
     phishing attacks or man-in-the-middle (MitM) attacks).
   - Sensitive data (e.g., credentials, financial data) exchanged with fraudulent sites could be intercepted.
 
-### **2. Revocation Checks Not Performed**
+### 6.2 **Revocation Checks Not Performed**
 
 - If you fail to check the status of certificates for revocation using CRL (Certificate Revocation List), certificates
   that have been compromised or expired could still be considered valid.
@@ -287,7 +287,7 @@ The following security considerations need to be addressed:
   - Attackers could use stolen or revoked certificates to bypass authentication or encryption.
   - Systems may continue to trust certificates issued to malicious actors.
 
-### **3. Expired Certificates**
+### 6.3 **Expired Certificates**
 
 - If credential expiry is ignored, certificates whose validity period has elapsed could still be used and trusted.
 - **Consequences**:
@@ -295,7 +295,7 @@ The following security considerations need to be addressed:
   - Trust in infrastructure degrades because expired certificates no longer reflect proper certificate holder
     responsibility/accountability.
 
-### **4. Weak Keys or Algorithms**
+### 6.4 **Weak Keys or Algorithms**
 
 - If weak cryptographic algorithms (e.g., MD5, SHA-1) or small key sizes (e.g., <2048-bit RSA) are used, the
   certificates or their signatures could be cracked by modern computational power.
@@ -303,7 +303,7 @@ The following security considerations need to be addressed:
   - An attacker could forge or spoof certificates.
   - Sensitive data could be decrypted easily, exposing confidential information such as passwords, personal data, etc.
 
-### **5. Improper Credential Subject Validation**
+### 6.5 **Improper Credential Subject Validation**
 
 - If the `credentialSubject` field in frameworks like `X509Credential` is not properly validated, it may allow
   fields not aligned with the X.509 certificate to be added or accepted.
@@ -312,14 +312,14 @@ The following security considerations need to be addressed:
     by impersonating trusted entities.
   - Loss of trust in the system due to inconsistencies between certificates and credentials.
 
-### **6. Forged Proofs or Tampered Credentials**
+### 6.6 **Forged Proofs or Tampered Credentials**
 
 - Failure to verify cryptographic proofs tied to certificates could allow credentials or data to be tampered with.
 - **Consequences**:
   - Credentials could be modified to grant unauthorized access.
   - The integrity of systems relying on these credentials could be compromised.
 
-### **7. Missing Root CA Verification**
+### 6.7 **Missing Root CA Verification**
 
 - If the source of trust (Root CA) is not explicitly verified and trusted, attackers could use certificates issued by
   unapproved CAs.For instance, in case of UZI certificates the `ca-fingerprint` must match the hash of either the Root
@@ -329,7 +329,7 @@ The following security considerations need to be addressed:
   - Attackers gain the ability to impersonate legitimate entities in scenarios such as encrypted communication or
     identity verification.
 
-### **8. Certificate Misuse**
+### 6.8 **Certificate Misuse**
 
 - Without proper validation of certificate attributes (e.g., URA number in UZI certificates), certificates may be
   misused in unintended contexts.
@@ -337,7 +337,7 @@ The following security considerations need to be addressed:
   - Fraud or impersonation using certificates outside their intended scope.
   - Misrepresentation of organizations or individuals.
 
-### **9. Lack of Reliable Revocation Handling**
+### 6.9 **Lack of Reliable Revocation Handling**
 
 - If revocation checks poorly handle network issues or failures (e.g., OCSP response unavailability), it could result in
   the acceptance of revoked or invalid certificates.
@@ -345,7 +345,7 @@ The following security considerations need to be addressed:
   - Increased risk of improper trust, allowing revoked credentials to function within the system.
   - Security-critical applications become susceptible to breaches.
 
-## References
+## 7. References
 
 - [Verifiable Credentials Data Model v1.1](https://www.w3.org/TR/vc-data-model/)
 - [DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/)
