@@ -106,8 +106,7 @@ For example following did:x509:
 did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:C:US:ST:California:O:My%20Organisation
 ```
 
-ties down the holder of the signing certificate by, first having a digitally signed certificate from the CA with the
-thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk` and then having the following attributes in the certificate of the `subject` DID policy:
+Specifies a certificate subject to an organization based in California, issued by a CA certified identified by thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk`. It expresses the following attributes from the certificate through the `subject` DID policy:
 
 * Subject:
   * C: US
@@ -147,7 +146,7 @@ The otherName attribute can be used to specify extra attributes in a X.509 certi
 
 An `X509Credential` must conform to the general structure of a W3C Verifiable Credential and conform to the following rules:
 
-- The credential MUST be in JWT format.
+- The credential MUST be in JWT proof format.
 - `type`: MUST include `VerifiableCredential` and `X509Credential`.
 - `issuer`: MUST be a valid `did:x509` identifier.
 - `credentialSubject`: MUST only contain fields explicitly present in the `did:x509` DID policies with the fields mapped by each type as a separate map. An example: 
@@ -164,10 +163,8 @@ An `X509Credential` must conform to the general structure of a W3C Verifiable Cr
 
 The credential subject can be identified by any DID method (e.g. `did:web`) accepted by the credential verifier.
 
-### 4.1 Allowed signing algorithms:
-* The `alg` value of the JWT header MUST match the `PS256` value. 
 
-### 4.2 Example `X509Credential`
+### 4.1 Example `X509Credential`
 
 Below is an example of an `X509Credential` issued by a `did:x509` DID. The credential subject is identified by a `did:web`.  The first snippet is the JWT header, and the second snippet is the credential payload.
 
@@ -240,7 +237,7 @@ Failure to validate the issuer certificate invalidates the credential.
 
 The `credentialSubject` MUST be verified against the `did:x509` DID Document. Specifically:
 
-- Every field in the `credentialSubject` MUST be present in the `did:x509` DID Document. The fields in the `credentialSubject` are nested with their DID policies as keys, so `subject:L:Amsterdam`, becomes: 
+- Every field in the `credentialSubject` MUST be present in the `did:x509` policies. The fields in the `credentialSubject` are nested with their DID policies as keys, so `subject:L:Amsterdam`, becomes: 
 ```json
 {
   "sub" :  "did:x509:subject:O:Amsterdam",
@@ -248,7 +245,7 @@ The `credentialSubject` MUST be verified against the `did:x509` DID Document. Sp
   "credentialSubject" : {
     "id" : "did:x509:subject:O:Amsterdam",
     "subject": {
-      "O" : "Amsterdam"
+      "L" : "Amsterdam"
     }
   }
 }
