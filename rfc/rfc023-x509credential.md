@@ -82,7 +82,7 @@ An example of the trust chain hierarchy:
 ### 3.2 Nuts and X.509:
 The Nuts framework extends X.509 certificates into its decentralized identity (DID) ecosystem using the `did:x509` DID method. This method facilitates linking an X.509 certificate to a verifiable credential (`X509Credential`), providing trust while bridging traditional PKI with decentralized trust models. This is especially relevant in systems reliant on existing X.509 implementations, such as healthcare or government frameworks.
 
-### 3.4 Using X.509 Certificates for signing JWTs
+### 3.3 Using X.509 Certificates for signing JWTs
 
 The JWT is a standard that is used to sign and encrypt JSON objects. Thus, standard allows for the signing and encryption
 of JSON objects with certificates part of a certificate chain. This allows for the signing of JSON objects with the
@@ -92,7 +92,7 @@ verification of the certificate chain with the public key of the CA. This is don
 * `x5c`, the ordered certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate first and the root certificate last.
 * `x5t#S256`, the thumbprint of the signing certificate as a SHA256 hash.
 
-### 3.5 The `did:x509` DID Method
+### 3.4 The `did:x509` DID Method
 
 The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an X.509 certificate chain. Trust in the DID is anchored by specifying the (hash of) one of the chain's intermediate, or the root CA's certificate. The did:x509 method is used to bind attributes of the signing certificate the holder of the signing certificate in a did:x509 string. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specifying attributes that are assigned by the signing certificate. The DID method defines different types of attributes by `DID policies`, with their specific validation logic. 
 
@@ -129,7 +129,7 @@ The did:x509 specifies the following set of DID policies (between parenthesis) a
 * A Free-to-Use CA For Code Signing (fulcio-issuer)
   * Any issuer hostname
 
-### 3.6 Extending the `did:x509` specification
+### 3.5 Extending the `did:x509` specification
 
 This RFC extends the Subject Other Name (san) policy with the following attribute of the DID policy `san`:
 
