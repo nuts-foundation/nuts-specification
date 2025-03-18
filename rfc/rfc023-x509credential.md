@@ -10,9 +10,9 @@
 
 ## Abstract
 
-Trust is a key element in the Nuts network. This RFC describes how X.509 certificates can be used to make use of X.509 sourced trust in the NUTS framework. The  X.509 certification process has been around for a long time and is widely used in the internet. This RFC describes how  x.509 certificates can be used in the Nuts network to establish trust between parties by being able to link the  x.509 certificate to a Nuts identity by as a Verifiable Credential that is issued by the holder of the x509 identity.
+Trust is a key element in the Nuts network. This RFC describes how X.509 certificates can be used to make use of X.509 sourced trust in the NUTS framework. The X.509 certification process has been around for a long time and is widely used in the internet. This RFC describes how X.509 certificates can be used in the Nuts network to establish trust between parties. It does so by linking the X.509 certificate to a Nuts identity using a Verifiable Credential that is issued by the holder of the x509 identity.
 
-This RFC specifies the requirements and validation process for the `X509Credential`, a W3C Verifiable Credential ( VC) type issued by the subject of a X.509 certificate, represented by a `did:x509` DID. The `X509Credential` ensures strong alignment with the properties of the associated  X.509 certificate and defines mechanisms to validate the credential and verify its association with a `did:x509` DID.
+This RFC specifies the requirements and validation process for the `X509Credential`, a W3C Verifiable Credential (VC) type issued by the subject of a X.509 certificate, represented by a `did:x509` DID. The `X509Credential` ensures strong alignment with the properties of the associated X.509 certificate and defines mechanisms to validate the credential and verify its association with a `did:x509` DID.
 
 ## Status of this document
 
@@ -24,9 +24,9 @@ This document is currently in draft status. Feedback is welcome to improve the i
 
 ## 1. Introduction
 
-The [did:x509](https://trustoverip.github.io/tswg-did-x509-method-specification/) method aims to achieve interoperability between existing  X.509 solutions and Decentralized Identifiers (DIDs). This to to support operational models in which a full transition to DIDs is not achievable or desired yet.
+The [did:x509](https://trustoverip.github.io/tswg-did-x509-method-specification/) method aims to achieve interoperability between existing X.509 solutions and Decentralized Identifiers (DIDs). This to support operational models in which a full transition to DIDs is not yet achievable or desired.
 
-The `X509Credential` is a W3C Verifiable Credential type designed for use cases where trust anchors are based on  X.509 certificates. It leverages the `did:x509` method, as specified in the [Trust Over IP DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/).
+The `X509Credential` is a W3C Verifiable Credential type designed for use cases where trust anchors are based on X.509 certificates. It leverages the `did:x509` method, as specified in the [Trust Over IP DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/).
 
 By aligning credential subject validation with the fields of the associated `did:x509` DID and enforcing certificate revocation checks, the `X509Credential` ensures integrity and adherence to the PKI trust model.
 
@@ -36,8 +36,8 @@ By aligning credential subject validation with the fields of the associated `did
 - **X509Credential**: A Verifiable Credential whose issuer is a `did:x509` DID and whose structure adheres to the
  requirements in this document.
 - **did:x509**: A Decentralized Identifier (DID) method specified by the Trust Over IP Foundation, where the DID is
- derived from an  X.509 certificate.
-- **Issuer Certificate**: The  X.509 certificate associated with the `did:x509` DID that issued the credential.
+ derived from an X.509 certificate.
+- **Issuer Certificate**: The X.509 certificate associated with the `did:x509` DID that issued the credential.
 - **Credential Subject**: The entity described by the credential as the subject of the credential.
 - **Revocation Check**: The process of verifying the revocation status of the issuer certificate using mechanisms like CRL.
 
@@ -47,17 +47,18 @@ This RFC builds on the following standards and technologies:
 
 * [X.509 Certificate Standard](https://datatracker.ietf.org/doc/html/rfc5280)
 * [JSON Web Signature (JWS)](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.6)
-* [did:x509 method specification](https://trustoverip.github.io/tswg-did-x509-method-specification/), with modifications
+* [did:x509 method](https://trustoverip.github.io/tswg-did-x509-method-specification/), with modifications
 * [Verifiable Credentials Data Model v1.1](https://www.w3.org/TR/vc-data-model/)
 
 ### 3.1 X.509 certificates, a brief introduction
 
 An **X.509 certificate** is a digital certificate that follows the X.509 Public Key Infrastructure (PKI) standard. It is widely used for secure communication over the internet, such as HTTPS, email encryption, and digital signatures.
+
 #### Key Features of X.509 Certificates:
 - **Structure**: It contains information about the certificate owner (e.g., organization, common name, public key) and the issuing Certificate Authority (CA). The certificate is signed by the CA's private key to ensure authenticity.
 - **Trust Hierarchy**:
     - Trust is anchored in a **Certificate Authority (CA)**, which is a trusted third party.
-    - Certificates can form a chain of trust, starting from a **root certificate** (trusted CA) to **intermediate certificates**, down to the **end-user/client certificates** (specific use-case certificates).
+    - Certificates can form a chain of trust, starting from a **root certificate** (trusted CA) to **intermediate certificates**, down to the **end-user/client certificates**.
 
 An example of the trust chain hierarchy:
 
@@ -79,22 +80,25 @@ An example of the trust chain hierarchy:
 │Signing Certificate │
 └────────────────────┘
 ```
+
 ### 3.2 Nuts and X.509:
 The Nuts framework extends X.509 certificates into its decentralized identity (DID) ecosystem using the `did:x509` DID method. This method facilitates linking an X.509 certificate to a verifiable credential (`X509Credential`), providing trust while bridging traditional PKI with decentralized trust models. This is especially relevant in systems reliant on existing X.509 implementations, such as healthcare or government frameworks.
 
 ### 3.3 Using X.509 Certificates for signing JWTs
 
-The JWT is a standard that is used to sign and encrypt JSON objects. Thus, standard allows for the signing and encryption
-of JSON objects with certificates part of a certificate chain. This allows for the signing of JSON objects with the
-private key of the certificate and the verification of the signature with the public key of the certificate, and the
-verification of the certificate chain with the public key of the CA. This is done by using the following headers fields:
+JWT is a standard that is used to sign JSON objects. By signing JSON objects with the
+private key of the certificate, authenticity of the JWT signer can be established. The signature of the JWT can be verified using the public key of the certificate. This is done by using the following headers fields:
 
 * `x5c`, the ordered certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate first and the root certificate last.
 * `x5t#S256`, the thumbprint of the signing certificate as a SHA256 hash.
 
 ### 3.4 The `did:x509` DID Method
 
-The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an X.509 certificate chain. Trust in the DID is anchored by specifying the (hash of) one of the chain's intermediate, or the root CA's certificate. The did:x509 method is used to bind attributes of the signing certificate the holder of the signing certificate in a did:x509 string. By doing this, a did:x509 DID can be used to identify the holder of the signing certificate by specifying attributes that are assigned by the signing certificate. The DID method defines different types of attributes by `DID policies`, with their specific validation logic. 
+The `did:x509` DID method is a method that can be used to create a Decentralized Identifier (DID) based on an X.509 certificate chain.
+
+Trust in the DID is anchored by specifying the one of the chain's intermediate, or the root CA's certificate. This trust anchor is encoded in the `did:x509` as `ca-fingerprint` property, which is the hash of the certificate. Choosing the right trust anchors (or accepted `ca-fingerprint`s) is very important, since it limits which certificates give access, and which doesn't. E.g. PKI trees often have subtrees for different user groups.
+
+The did:x509 method is used to bind attributes of the signing certificate in the did:x509 string. The DID method defines different types of attributes via `DID policies`. 
 
 For example following did:x509:
 
@@ -102,7 +106,7 @@ For example following did:x509:
 did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:C:US:ST:California:O:My%20Organisation
 ```
 
-ties down the holder of the signing certificate by, first having a digitally signed certificate by the CA with the
+ties down the holder of the signing certificate by, first having a digitally signed certificate from the CA with the
 thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk` and then having the following attributes in the certificate of the `subject` DID policy:
 
 * Subject:
@@ -110,7 +114,7 @@ thumbprint `WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk` and then having the fol
   * ST: California
   * O: My Organisation
 
-The did:x509 specifies the following set of DID policies (between parenthesis) and their attributes:
+`did:x509` specifies the following set of DID policies (between parenthesis) and their attributes:
 
 * Subject (subject)
   * C: Country
@@ -131,7 +135,7 @@ The did:x509 specifies the following set of DID policies (between parenthesis) a
 
 ### 3.5 Extending the `did:x509` specification
 
-This RFC extends the Subject Other Name (san) policy with the following attribute of the DID policy `san`:
+This RFC extends the Subject Other Name (san) policy with the following attribute:
 
 * Subject Other Name (san)
   * otherName: A free-form attribute that can be used to specify any attribute that is not covered by the other
