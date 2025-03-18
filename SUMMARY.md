@@ -21,6 +21,7 @@
 * [RFC020 Authorization credential extension](rfc/rfc020-authorization-credential-extension.md)
 * [RFC021 VP Token Grant Type](rfc/rfc021-vp_token-grant-type.md)
 * [RFC022 Discovery Service](rfc/rfc022-discovery-service.md)
+* [RFC022 X509Credential](rfc/rfc023-x509credential.md)
 
 ## templates
 
