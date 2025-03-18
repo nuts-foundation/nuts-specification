@@ -198,7 +198,7 @@ Payload:
     "issuanceDate": "2024-12-01T00:00:00Z",
     "credentialSubject": {
       "id": "did:web:example.com",
-      "subject:O": "OLVG Oost",
+      "subject:O": "Ziekenhuis Oost",
       "subject:L": "Amsterdam",
       "san:otherName": "23419943234"
     }
@@ -213,22 +213,24 @@ Payload:
 To validate an `X509Credential`, the following steps MUST be performed:
 
 - Verify that the credential is in JWT format.
+- Verify the validity of the credential: its signature (see 5.4), revocation status if applicable.
 - Verify that the issuer's DID is a `did:x509` DID.
 - Verify that the DID specifies an accepted trust anchor (CA certificate) for `ca-fingerprint`.
 - Resolve the `did:x509` DID document according to
   the [did:x509 specification](https://trustoverip.github.io/tswg-did-x509-method-specification/) and check the
   certificate chain for revocation.
 - Validate that the `credentialSubject` fields match the policies in the `did:x509` DID.
+- Validate that the credential contains the attributes required by the use case (see 5.3).
 
 ### 5.2 Validate the Issuer Certificate
 
 The certificate associated with the `did:x509` issuer MUST be validated as follows:
 
-- **Certificate Chain Validation**: The certificate must have a valid trust chain. The chain MUST be complete and all
+- **Certificate Chain Validation**: The certificate must have a valid trust chain. The chain MUST be complete (from root to leaf) and all
   signatures need to be checked.
 - **Revocation Check**: Verify the revocation status of the certificate using CRL.
 - The DID MUST specify an accepted trust anchor through its `ca-fingerprint` property and the trust anchor MUST be
-  present in the certificate chain as either the Root CA or on of the Intermediate CAs. What trust anchors are accepted
+  present in the certificate chain as either the Root CA or one of the Intermediate CAs. What trust anchors are accepted
   depends on the use case.
 
 Failure to validate the issuer certificate invalidates the credential.
@@ -251,7 +253,7 @@ The `credentialSubject` MUST be verified against the `did:x509` DID Document. Sp
 }
 ```
 - Fields not present in the `did:x509` DID Document invalidate the credential.
-- For JWT based credentials, the `sub` value(s) must match the `credentialSubject.id` field.
+- The JWT's `sub` claim MUST match the `credentialSubject.id` field.
 
 ### 5.4 Verify the Proof and signing algorithm
 
@@ -259,8 +261,8 @@ The cryptographic proof of the credential MUST be verified using the public key 
 This involves:
 
 - Resolving the public key from the DID Document.
-- Verify that the header value of `alg` is set to be `PS256`.
-- Verifying the signature on the credential with `PS256` signing algorithm.
+- Verify that the header value of `alg` is set allowed/secure.
+- Verifying the signature on the credential against the signing algorithm in the `alg` header.
 
 ### 5.5 Check Credential Expiry
 
@@ -271,7 +273,7 @@ validated to ensure the credential is within its valid timeframe.
 
 The following security considerations need to be addressed:
 
-### 6.1 **Broken Trust Chain**
+### 6.1 Broken Trust Chain
 
 - If the certificate chain is not validated, attackers could present fake certificates signed by an untrusted or rogue
   Certificate Authority (CA).
@@ -280,7 +282,7 @@ The following security considerations need to be addressed:
     phishing attacks or man-in-the-middle (MitM) attacks).
   - Sensitive data (e.g., credentials, financial data) exchanged with fraudulent sites could be intercepted.
 
-### 6.2 **Revocation Checks Not Performed**
+### 6.2 Revocation Checks not Performed
 
 - If you fail to check the status of certificates for revocation using CRL (Certificate Revocation List), certificates
   that have been compromised or expired could still be considered valid.
@@ -288,7 +290,7 @@ The following security considerations need to be addressed:
   - Attackers could use stolen or revoked certificates to bypass authentication or encryption.
   - Systems may continue to trust certificates issued to malicious actors.
 
-### 6.3 **Expired Certificates**
+### 6.3 Expired Certificates
 
 - If credential expiry is ignored, certificates whose validity period has elapsed could still be used and trusted.
 - **Consequences**:
@@ -296,7 +298,7 @@ The following security considerations need to be addressed:
   - Trust in infrastructure degrades because expired certificates no longer reflect proper certificate holder
     responsibility/accountability.
 
-### 6.4 **Weak Keys or Algorithms**
+### 6.4 Weak Keys or Algorithms
 
 - If weak cryptographic algorithms (e.g., MD5, SHA-1) or small key sizes (e.g., <2048-bit RSA) are used, the
   certificates or their signatures could be cracked by modern computational power.
@@ -304,7 +306,7 @@ The following security considerations need to be addressed:
   - An attacker could forge or spoof certificates.
   - Sensitive data could be decrypted easily, exposing confidential information such as passwords, personal data, etc.
 
-### 6.5 **Improper Credential Subject Validation**
+### 6.5 Improper Credential Subject Validation
 
 - If the `credentialSubject` field in frameworks like `X509Credential` is not properly validated, it may allow
   fields not aligned with the X.509 certificate to be added or accepted.
@@ -313,24 +315,24 @@ The following security considerations need to be addressed:
     by impersonating trusted entities.
   - Loss of trust in the system due to inconsistencies between certificates and credentials.
 
-### 6.6 **Forged Proofs or Tampered Credentials**
+### 6.6 Forged Proofs or Tampered Credentials
 
 - Failure to verify cryptographic proofs tied to certificates could allow credentials or data to be tampered with.
 - **Consequences**:
   - Credentials could be modified to grant unauthorized access.
   - The integrity of systems relying on these credentials could be compromised.
 
-### 6.7 **Missing Root CA Verification**
+### 6.7 Missing Trust Anchor Verification
 
-- If the source of trust (Root CA) is not explicitly verified and trusted, attackers could use certificates issued by
-  unapproved CAs.For instance, in case of UZI certificates the `ca-fingerprint` must match the hash of either the Root
+- If the trust anchor (root or any intermediate CA) is not explicitly verified and trusted, attackers could use certificates issued by
+  unapproved CAs. For instance, in case of UZI server certificates, the `ca-fingerprint` must match the hash of either the Root
   CA or one of the Intermediate CAs as published by the [UZI register](https://www.zorgcsp.nl/ca-certificaten).
 - **Consequences**:
   - Fake certificates signed by rogue or unvalidated CAs could be accepted as valid.
   - Attackers gain the ability to impersonate legitimate entities in scenarios such as encrypted communication or
     identity verification.
 
-### 6.8 **Certificate Misuse**
+### 6.8 Certificate Misuse
 
 - Without proper validation of certificate attributes (e.g., URA number in UZI certificates), certificates may be
   misused in unintended contexts.
@@ -338,9 +340,9 @@ The following security considerations need to be addressed:
   - Fraud or impersonation using certificates outside their intended scope.
   - Misrepresentation of organizations or individuals.
 
-### 6.9 **Lack of Reliable Revocation Handling**
+### 6.9 Lack of Reliable Revocation Handling
 
-- If revocation checks poorly handle network issues or failures (e.g., OCSP response unavailability), it could result in
+- If revocation checks poorly handle network issues or failures, it could result in
   the acceptance of revoked or invalid certificates.
 - **Consequences**:
   - Increased risk of improper trust, allowing revoked credentials to function within the system.
