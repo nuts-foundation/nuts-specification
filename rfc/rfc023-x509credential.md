@@ -227,7 +227,7 @@ To validate an `X509Credential`, the following steps MUST be performed:
 The certificate associated with the `did:x509` issuer MUST be validated as follows:
 
 - **Certificate Chain Validation**: The certificate must have a valid trust chain. The chain MUST be complete (from root to leaf) and all
-  signatures need to be checked.
+  signatures need to be checked. The certificate's time-validity period must be checked (`notBefore` and `notAfter`).
 - **Revocation Check**: Verify the revocation status of the certificate using CRL.
 - The DID MUST specify an accepted trust anchor through its `ca-fingerprint` property and the trust anchor MUST be
   present in the certificate chain as either the Root CA or one of the Intermediate CAs. What trust anchors are accepted
@@ -266,8 +266,10 @@ This involves:
 
 ### 5.5 Check Credential Expiry
 
-If the `issuanceDate` or any other relevant date constraints (e.g., `expirationDate`) are present, they MUST be
-validated to ensure the credential is within its valid timeframe.
+The following time-related fields in the credential MUST be validated:
+
+- `issuanceDate` MUST be equal, or later than the certificate's `notBefore` date.
+- `expirationDate` MUST be equal, or earlier than the certificate's `notAfter` date.
 
 ## 6. Security Considerations
 
