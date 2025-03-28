@@ -87,10 +87,8 @@ The Nuts framework extends X.509 certificates into its decentralized identity (D
 ### 3.3 Using X.509 Certificates for signing JWTs
 
 JWT is a standard that is used to sign JSON objects. By signing JSON objects with the
-private key of the certificate, authenticity of the JWT signer can be established. The signature of the JWT can be verified using the public key of the certificate. This is done by using the following headers fields:
-
-* `x5c`, the ordered certificate chain as a list of base64 encoded certificates in the DER format, with the signing certificate first and the root certificate last.
-* `x5t#S256`, the thumbprint of the signing certificate as a SHA256 hash.
+private key of the certificate, authenticity of the JWT signer can be established. The signature of the JWT can be verified using the public key of the certificate.
+The certificate chain is included in the JWT header as `x5c` field, as specified by [JSON Web Signature (JWS)](https://datatracker.ietf.org/doc/html/rfc7515).
 
 ### 3.4 The `did:x509` DID Method
 
@@ -174,10 +172,9 @@ Below is an example of an `X509Credential` issued by a `did:x509` DID. The crede
   "typ": "JWT",
   "x5c": [
     "<base64 encoded leaf-certificate in the DER format>",
-    "<base64 encoded issuer-intermediate-certificate in the DER format>",
-    "<base64 encoded issuer-certificate in the DER format>"
+    "<base64 encoded intermediate CA-certificate in the DER format>",
+    "<base64 encoded root CA-certificate in the DER format>"
   ],
-  "x5t#S256": "<sha256 thumbprint>",
   "kid": "did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:O:OLVG%20Oost::subject:L:Amsterdam::san:otherName:23419943234#1"
 }
 ```
@@ -355,3 +352,4 @@ The following security considerations need to be addressed:
 - [Verifiable Credentials Data Model v1.1](https://www.w3.org/TR/vc-data-model/)
 - [DID:X509 Method Specification](https://trustoverip.github.io/tswg-did-x509-method-specification/)
 - [X.509 Certificate Revocation (OCSP/CRL)](https://datatracker.ietf.org/doc/html/rfc5280)
+- [JSON Web Signature (JWS)](https://datatracker.ietf.org/doc/html/rfc7515)
