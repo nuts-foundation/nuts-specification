@@ -195,9 +195,13 @@ Payload:
     "issuanceDate": "2024-12-01T00:00:00Z",
     "credentialSubject": {
       "id": "did:web:example.com",
-      "subject:O": "Ziekenhuis Oost",
-      "subject:L": "Amsterdam",
-      "san:otherName": "23419943234"
+      "subject": {
+        "O": "Ziekenhuis Oost",
+        "L": "Amsterdam"
+      },
+      "san": {
+        "otherName": "23419943234"
+      }
     }
   }
 }
