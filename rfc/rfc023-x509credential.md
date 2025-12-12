@@ -175,7 +175,8 @@ Below is an example of an `X509Credential` issued by a `did:x509` DID. The crede
     "<base64 encoded intermediate CA-certificate in the DER format>",
     "<base64 encoded root CA-certificate in the DER format>"
   ],
-  "kid": "did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:O:OLVG%20Oost::subject:L:Amsterdam::san:otherName:23419943234#1"
+  "x5t#S256": "WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk",
+  "kid": "did:x509:0:sha256:WE4P5dd8DnLHSkyHaIjhp4udlkF9LqoKwCvu9gl38jk::subject:O:OLVG%20Oost::subject:L:Amsterdam::san:otherName:23419943234#0"
 }
 ```
 
