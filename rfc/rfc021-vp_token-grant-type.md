@@ -78,6 +78,7 @@ The following example demonstrates an access token request with a VP as an autho
      Content-Type: application/x-www-form-urlencoded
 
      grant_type=vp_token-bearer
+     &client_id=did%3Aweb%3Aexample.com
      &assertion=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
      eyJpc3Mi[...omitted for brevity...].
      J9l-ZhwP[...omitted for brevity...]
